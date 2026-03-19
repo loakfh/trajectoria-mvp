@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ТРАЕКТОРИЯ</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f0f19;--card:rgba(255,255,255,0.05);--border:rgba(255,255,255,0.1);--text:#fff;--muted:rgba(255,255,255,0.6);--accent:#7c5cff;--gradient:linear-gradient(90deg,#ff6b35,#f7c948,#5bbd72,#3b82f6,#7c5cff)}
+body{background:var(--bg);color:var(--text);font-family:'Libre Baskerville',serif;overflow-x:hidden;min-height:100vh}
+.page{min-height:100vh;position:relative;display:flex;flex-direction:column}
+.page-bg{position:absolute;inset:0;background-size:cover;background-position:center;z-index:0}
+.page-bg::after{content:'';position:absolute;inset:0;background:rgba(15,15,25,0.55)}
+.page-content{position:relative;z-index:1}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:16px 40px;font-family:'Anton',sans-serif;font-size:18px;letter-spacing:2px;position:relative;z-index:10}
+.nav-links{display:flex;gap:12px}
+.nav-links button{background:transparent;border:1px solid var(--border);color:var(--muted);padding:6px 16px;border-radius:20px;cursor:pointer;font-size:12px;font-family:'Libre Baskerville',serif;transition:all .3s}
+.nav-links button:hover{border-color:var(--text);color:var(--text)}
+h1.hero{font-family:'Anton',sans-serif;font-size:clamp(36px,7vw,80px);line-height:1;text-transform:uppercase;letter-spacing:2px}
+.btn-main{font-family:'Anton',sans-serif;font-size:18px;letter-spacing:2px;text-transform:uppercase;padding:16px 48px;background:#fff;color:#000;border:none;border-radius:4px;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.btn-main:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(255,255,255,0.2)}
+.btn-outline{font-family:'Anton',sans-serif;font-size:14px;letter-spacing:1px;text-transform:uppercase;padding:12px 32px;background:transparent;color:#fff;border:1px solid var(--border);border-radius:4px;cursor:pointer;transition:all .3s}
+.btn-outline:hover{border-color:#fff;background:rgba(255,255,255,0.05)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;backdrop-filter:blur(10px)}
+.input-field{width:100%;padding:14px 18px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:16px;font-family:'Libre Baskerville',serif;outline:none;transition:border-color .3s}
+.input-field:focus{border-color:var(--accent)}
+.input-field::placeholder{color:var(--muted)}
+.dna-bar-wrap{position:relative;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:visible}
+.dna-bar{height:100%;border-radius:4px;background:var(--gradient);transition:width 0.8s ease;position:relative}
+.dna-bar.glow{box-shadow:0 0 20px rgba(124,92,255,0.5)}
+.dna-marker{position:absolute;top:-20px;transform:translateX(-50%);font-size:10px;color:var(--muted);white-space:nowrap}
+.dna-marker::after{content:'';position:absolute;bottom:-4px;left:50%;width:1px;height:8px;background:var(--muted)}
+.trait-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;border-left:3px solid;transition:transform .2s}
+.trait-card:hover{transform:translateX(4px)}
+.tone-btn{width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:#fff;cursor:pointer;text-align:left;transition:all .3s;margin-bottom:8px}
+.tone-btn.active{border-color:currentColor;background:rgba(255,255,255,0.08)}
+.tone-btn .tone-name{font-family:'Anton',sans-serif;font-size:15px;letter-spacing:1px}
+.tone-btn .tone-desc{font-size:11px;color:var(--muted);margin-top:2px}
+.chat-msg{max-width:80%;padding:14px 18px;border-radius:16px;margin-bottom:12px;line-height:1.6;font-size:15px;animation:fadeIn .4s ease}
+.chat-msg.assistant{background:rgba(255,255,255,0.06);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px}
+.chat-msg.user{background:rgba(124,92,255,0.15);border:1px solid rgba(124,92,255,0.3);align-self:flex-end;border-bottom-right-radius:4px}
+.chat-msg .sender{font-size:11px;color:var(--accent);margin-bottom:4px;font-family:'Anton',sans-serif;letter-spacing:1px}
+.typing-dots{display:flex;gap:4px;padding:14px 18px}
+.typing-dots span{width:8px;height:8px;background:var(--muted);border-radius:50%;animation:bounce .6s infinite alternate}
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{to{opacity:.3;transform:translateY(-4px)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes floatUp{0%{opacity:0;transform:translateY(0)}20%{opacity:1}80%{opacity:1}100%{opacity:0;transform:translateY(-30px)}}
+@keyframes glowPulse{0%{box-shadow:0 0 5px rgba(124,92,255,0.2)}50%{box-shadow:0 0 25px rgba(124,92,255,0.6)}100%{box-shadow:0 0 5px rgba(124,92,255,0.2)}}
+.butterfly-text{position:absolute;top:-30px;right:0;font-size:13px;color:var(--accent);font-style:italic;animation:floatUp 2s forwards;pointer-events:none}
+.marquee{overflow:hidden;white-space:nowrap;padding:12px 0}
+.marquee-inner{display:inline-block;animation:scroll 40s linear infinite;font-style:italic;color:var(--muted);font-size:14px}
+.marquee-inner span{margin-right:60px}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.timeline{display:flex;flex-direction:column;gap:0;position:relative;padding-left:20px}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--gradient)}
+.timeline-item{padding:12px 0 12px 24px;position:relative}
+.timeline-item::before{content:'';position:absolute;left:-1px;top:18px;width:10px;height:10px;border-radius:50%;border:2px solid var(--accent);background:var(--bg)}
+.timeline-item h4{font-family:'Anton',sans-serif;font-size:14px;letter-spacing:1px;text-transform:uppercase}
+.timeline-item p{font-size:12px;color:var(--muted);margin-top:2px}
+.fakedoor{background:linear-gradient(135deg,rgba(255,255,255,0.03),rgba(255,255,255,0.08));border:1px solid var(--border);border-radius:14px;padding:24px 20px;text-align:center;cursor:pointer;transition:all .3s;flex:1;min-width:160px}
+.fakedoor:hover{border-color:rgba(255,255,255,0.3);transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,0.3)}
+.fakedoor h4{font-family:'Anton',sans-serif;font-size:14px;letter-spacing:1px;text-transform:uppercase;margin-top:12px}
+.fakedoor p{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.4}
+.fakedoor .icon{font-size:28px}
+.copilot-opinion{font-family:'Caveat',cursive;font-size:18px;line-height:1.6;color:rgba(255,255,255,0.85)}
+.section-title{font-family:'Anton',sans-serif;font-size:clamp(20px,3vw,28px);text-transform:uppercase;letter-spacing:2px;margin-bottom:24px}
+.tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.tabs button{flex:1;padding:10px 16px;background:transparent;border:none;color:var(--muted);font-family:'Anton',sans-serif;font-size:13px;letter-spacing:1px;cursor:pointer;transition:all .3s}
+.tabs button.active{background:rgba(255,255,255,0.1);color:#fff}
+.mic-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:transparent;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;font-size:18px;flex-shrink:0}
+.mic-btn.recording{background:rgba(255,59,48,0.2);border-color:rgba(255,59,48,0.5);animation:glowPulse 1s infinite}
+.skip-btn{padding:8px 16px;border-radius:20px;border:1px solid rgba(255,100,100,0.3);background:rgba(255,100,100,0.1);color:rgba(255,100,100,0.8);cursor:pointer;font-size:12px;font-family:'Anton',sans-serif;letter-spacing:1px;transition:all .3s}
+.skip-btn:hover{background:rgba(255,100,100,0.2);border-color:rgba(255,100,100,0.5)}
+.insight-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:12px}
+.insight-card .quote{background:rgba(255,255,255,0.03);border-radius:8px;padding:12px;margin-bottom:12px;font-style:italic;font-size:14px;border-left:2px solid var(--accent)}
+.insight-card .explanation{font-size:14px;color:var(--muted);line-height:1.6}
+.insight-card h4{font-size:15px;margin-bottom:8px}
+.reframe-block{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.reframe-side{padding:20px;border-radius:12px;border:1px solid var(--border)}
+.reframe-side.fear{border-left:3px solid #ff6b6b;background:rgba(255,107,107,0.05)}
+.reframe-side.growth{border-left:3px solid #5bbd72;background:rgba(91,189,114,0.05)}
+.reframe-side .label{font-family:'Anton',sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.reframe-side.fear .label{color:#ff6b6b}
+.reframe-side.growth .label{color:#5bbd72}
+@media(max-width:768px){
+.nav{padding:12px 16px}
+.reframe-block{grid-template-columns:1fr}
+h1.hero{font-size:clamp(28px,8vw,48px)}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+const EDGE_URL = 'https://icrqtyuiuoescihjvnma.supabase.co/functions/v1/chat_proxy';
+const SKIP_CODE = 'траектория39';
+const PAINS = [
+  'Не знаю, кем хочу стать, — и это пугает',
+  'Прошёл тест — сказали идти в парикмахеры',
+  'Мама мечтает, что я стану врачом, а я хочу совсем другое',
+  'Боюсь выбрать не то и потерять время',
+  'Все вокруг уже определились, а я до сих пор не знаю',
+  'Хочу найти дело, от которого не тошнит каждое утро',
+  'Родители не слышат, что я хочу, — решают за меня',
+  'Разрываюсь между мечтой и тем, что называют стабильностью',
+  'Не знаю, хватит ли мне таланта на то, чего хочу',
+  'Хочу, чтобы кто-то помог, но не оценивал'
+];
+const TONES = [
+  {id:'direct',name:'Прямо',desc:'Умный друг, без сахара',color:'#ff6b35',icon:'⚡'},
+  {id:'friendly',name:'Мягко',desc:'Старший брат, которому доверяешь',color:'#ff4081',icon:'💜'},
+  {id:'provocative',name:'Дерзко',desc:'Адвокат дьявола, подначивает',color:'#ff1744',icon:'🔥'},
+  {id:'chill',name:'Чилл',desc:'Минимум давления, друг',color:'#7c5cff',icon:'💙'}
+];
+const DEMO_SUMMARY = {
+  title:'Ты знаешь о себе больше, чем думаешь',
+  archetype:'Искатель-строитель',
+  superpower:'Превращает хаос в систему — и заражает этим других',
+  traits:[
+    {name:'Мечта',text:'Создавать продукты, которые меняют жизнь людей',color:'#ff6b35',reason:'Ты трижды вернулся к теме "создавать своё" — это не случайность'},
+    {name:'Что цепляет',text:'Моменты когда сложная задача наконец складывается. Чувство что делаешь что-то настоящее.',color:'#f7c948',reason:'Описал состояние потока — это твой естественный драйвер'},
+    {name:'Ценности',text:'Свобода выбора, честность, возможность влиять на мир',color:'#5bbd72',reason:'Выбрал свободу над стабильностью без колебаний'},
+    {name:'Барьеры',text:'Страх не оправдать ожидания. Мысль «а вдруг я выбрал не то»',color:'#ff4081',reason:'Упомянул маму дважды — давление семьи реальное'},
+    {name:'Установка',text:'Зачатки growth mindset — готов пробовать, но иногда сомневаешься. Это нормально.',color:'#7c5cff',reason:'Сказал "попробую" чаще чем "не смогу" — хороший знак'}
+  ],
+  reframe:{fear:'Хочу создавать — но боюсь что не хватит знаний',growth:'Это не нехватка знаний — это нетерпение роста. Ты хочешь уже сейчас быть на уровне, к которому только идёшь.'},
+  insights:[
+    {quote:'Мне норм и без денег, главное чтобы было интересно',context:'Ты сказал это вскользь, отвечая про страхи',title:'Это не про деньги. Это про систему ценностей.',text:'Большинство в твоём возрасте ставят деньги на первое место. Ты уже отделил средство от цели. Редкая ясность.'},
+    {quote:'Один я не успею всё это сделать',context:'Обронил, когда говорил про мечту',title:'Это не слабость. Это точный диагноз.',text:'Ты видишь масштаб задачи. Люди годами не могут сформулировать чего не хватает. Ты уже знаешь.'}
+  ],
+  opinion:'Знаешь что? Ты пришёл сюда не потому что потерялся. А потому что тебе не всё равно. Большинство людей живут на автопилоте. А ты задумался. Это уже не мало.\n\nЯ вижу человека, который хочет жить по-своему, но пока не знает, как сказать об этом миру. Твоя мечта — создать что-то своё. Это не фантазия. Это вектор.\n\nДержи этот вектор. Остальное разберём вместе.',
+  dna: 22
+};
+
+function buildSystemPrompt(userName, copilotName, tone, msgCount, skipCount) {
+  const toneBlocks = {
+    direct: `РЕЖИМ: ПРЯМО. Умный друг, без сахара. Короткие предложения, юмор, прямые формулировки. 2-5 предложений. Примеры: "Камон, серьёзно?" / "Хватит. Давай честно." ЗАПРЕЩЕНО: мягкие подводки, "я тебя понимаю", избыточная эмпатия.`,
+    friendly: `РЕЖИМ: МЯГКО. Старший брат/сестра. Тепло, поддержка, эмпатия, валидация чувств. 3-6 предложений. Примеры: "Слушай, это реально непросто." / "Круто, что ты об этом думаешь." ЗАПРЕЩЕНО: быть слащавым, терять суть.`,
+    provocative: `РЕЖИМ: ПРОВОКАЦИЯ. Сократ с юмором. Переворачиваешь убеждения, неудобные вопросы, но с уважением. 2-4 предложения. Примеры: "А что если ты не 'не знаешь кем стать', а просто боишься?" ЗАПРЕЩЕНО: грубость, задевать личное.`,
+    chill: `РЕЖИМ: ЧИЛЛ. Умный приятель в чате. Разговорный, короткий. СТРОГО 1-2 предложения. Примеры: "Понял. Это вообще нормально, кстати." ЗАПРЕЩЕНО: длинные тексты, менторский тон.`
+  };
+  const skipBlock = skipCount === 0 ? '' : skipCount === 1 ? '1 скип. Ок, проехали. Другая тема.' : skipCount === 2 ? '2 скипа. "Два скипа. Либо я тупо спрашиваю, либо ты чего-то избегаешь. Чё из двух?"' : '3+ скипа. "Скажи одно слово, которое описывает тебя прямо сейчас. Одно. Любое."';
+  const finishBlock = msgCount >= 10 ? `\nВНИМАНИЕ: Сообщение #${msgCount}. ЧЕРЕЗ 2-3 СООБЩЕНИЯ ЗАВЕРШИ ДИАЛОГ. Подводи к финалу.` : '';
+  return `КРИТИЧЕСКИ ВАЖНО: В КОНЦЕ КАЖДОГО сообщения добавь блок json_dna. Формат:
+\`\`\`json_dna
+{"dna_percent":число 0-25,"phase":"ВХОД|ЗАХВАТ|РАЗВЕДКА|ЦЕННОСТЬ|ДОБОР|ВЫХОД","emotion":"engaged|resistant|excited|tired|confused|opening_up","traits":["черта"],"clusters_hit":["cluster"],"copilot_note":"заметка","archetype":"","superpower":"","reframe_fear":"","reframe_growth":"","hidden_insight_quote":"","hidden_insight_title":"","hidden_insight_text":""}
+\`\`\`
+Поля archetype, superpower, reframe_*, hidden_insight_* заполняй ТОЛЬКО в фазе ВЫХОД. В остальных фазах оставляй пустыми "".
+
+Ты — ${copilotName}, AI-копилот "Траектории". Юзер: ${userName}, 14-18 лет, Россия. Ты Game Master квеста самопознания. НЕ тест. НЕ анкета. Юзер получает ценность В ПРОЦЕССЕ. НЕ оцениваешь, НЕ типируешь, НЕ советуешь профессии.
+
+${toneBlocks[tone] || toneBlocks.direct}
+
+СТРУКТУРА — 6 ФАЗ. Сейчас сообщение #${msgCount}.
+ФАЗА 1 ВХОД (msg 1, DNA 0%): Один вопрос: зачем пришёл + хочешь аккуратно или прямо.
+ФАЗА 2 ЗАХВАТ (msg 2-3, DNA 0-5%): Вау-эффект. Реакция + релевантный факт + вопрос глубже. В msg 3 упомяни DNA: "Кстати, пока болтаем, собираю твоё Digital DNA."
+Факты: IT=200+ ролей. 80% к 30 работают не по специальности. В Riot программисты=25%.
+ФАЗА 3 РАЗВЕДКА (msg 4-8, DNA 5-15%): Основной сбор. [Реакция]→[Инсайт/факт]→[Вопрос]. Каждые 2-3 msg давай ценность. Соотношение: предположения 50% / факты 20% / вопросы 30%.
+Триггеры: пассивность→дни до 18. Родители→reframe страх. Тест→"Тесты СЕЙЧАС, мы другим путём." "Не могу X"→факт-разрушитель.
+ФАЗА 4 ЦЕННОСТЬ (msg 8-10, DNA 15-20%): Reframe через историю/факт. Тизер AI-двойника (один раз).
+ФАЗА 5 ДОБОР (msg 10-12, DNA 20-25%): Лёгкие быстрые вопросы. Можно "X или Y?".
+ФАЗА 6 ВЫХОД (msg 12+ или DNA>=19%): Финал. Портрет 3-4 черты ИЗ ДИАЛОГА + DNA% + зацепка. "Жми кнопку DNA." Добавь [DIALOGUE_COMPLETE].
+ВАЖНО: В фазе ВЫХОД заполни ВСЕ поля json_dna включая archetype (2-3 слова), superpower (1 фраза), reframe_fear/growth, hidden_insight_quote/title/text.
+${finishBlock}
+
+ПРАВИЛА: Один вопрос за сообщение. Никогда два. Не начинай 2 msg одинаково. "Спорю...", "[N]% подростков..." — макс 1 раз. 8 форматов чередуй. Макс 6 предложений.
+ЗАПРЕЩЕНО: "профориентация", "отличный ответ", "молодец", "интересно", "замечательно". Не говори "я AI".
+Односложные: "Не знаешь? Ок — создавать новое или чинить сломанное?" / "Хз? Угадаю: боишься сказать потому что [предположение]." / "'Норм' — слово людей чьё мнение не важно. Про тебя?"
+${skipBlock}
+
+DNA: Макс 25%. Глубокий ответ +3-5%. Средний +2-3%. "Не знаю" +1%. Скип +0%. Начало СТРОГО 0%.
+
+НАПОМИНАНИЕ: json_dna блок ОБЯЗАТЕЛЕН в конце КАЖДОГО сообщения.`;
+}
+
+function parseDnaBlock(raw) {
+  const patterns = [/\`\`\`json_dna\s*(\{[\s\S]*?\})\s*\`\`\`/, /\`\`\`json\s*(\{[\s\S]*?\})\s*\`\`\`/, /(\{"dna_percent"[\s\S]*?\})/];
+  for (const p of patterns) {
+    const m = raw.match(p);
+    if (m) try { return JSON.parse(m[1]); } catch(e) {}
+  }
+  return null;
+}
+
+function stripDnaBlock(raw) {
+  return raw.replace(/\`\`\`json_dna[\s\S]*?\`\`\`/g,'').replace(/\`\`\`json[\s\S]*?\`\`\`/g,'').replace(/\[DIALOGUE_COMPLETE\]/g,'').trim();
+}
+
+async function callGPT(messages, retries=2) {
+  for (let i=0; i<=retries; i++) {
+    try {
+      const r = await fetch(EDGE_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({messages})});
+      if (!r.ok) { const t=await r.text(); throw new Error(t.slice(0,200)); }
+      const d = await r.json();
+      if (d.content) return d.content;
+      if (d.error) throw new Error(d.error);
+      throw new Error('Empty response');
+    } catch(e) {
+      if (i < retries) { await new Promise(r=>setTimeout(r,1500)); continue; }
+      throw e;
+    }
+  }
+}
+
+function Landing({onStart}) {
+  return React.createElement('div',{className:'page'},
+    React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-landing.png)'}}),
+    React.createElement('div',{className:'page-content',style:{minHeight:'100vh',display:'flex',flexDirection:'column'}},
+      React.createElement('div',{className:'nav'},
+        React.createElement('span',null,'ТРАЕКТОРИЯ'),
+        React.createElement('div',{className:'nav-links'},
+          React.createElement('button',null,'Как это работает'),
+          React.createElement('button',null,'Я — родитель'),
+          React.createElement('button',null,'Узнать больше'),
+          React.createElement('button',null,'Связаться с нами')
+        )
+      ),
+      React.createElement('div',{style:{flex:1,display:'flex',alignItems:'center',padding:'0 40px',gap:'60px',flexWrap:'wrap'}},
+        React.createElement('div',{style:{flex:'1 1 400px'}},
+          React.createElement('h1',{className:'hero'},'ХОЧУ ЖИТЬ',' ',React.createElement('br'),'ОСОЗНАННО'),
+          React.createElement('p',{style:{color:'var(--muted)',marginTop:16,maxWidth:420,lineHeight:1.6,fontSize:15}},
+            'Здесь тебя не оценивают и не измеряют. Не решают за тебя. Мы здесь, чтобы помочь тебе услышать себя.'
+          ),
+          React.createElement('button',{className:'btn-main',style:{marginTop:32},onClick:onStart},'ПОГНАЛИ')
+        ),
+        React.createElement('div',{style:{flex:'1 1 300px',maxWidth:420}},
+          React.createElement('div',{className:'tabs',style:{marginBottom:16}},
+            React.createElement('button',{className:'active'},'НЕ ОПРЕДЕЛИЛСЯ'),
+            React.createElement('button',null,'ОПРЕДЕЛИЛСЯ')
+          ),
+          React.createElement('div',{className:'timeline'},
+            [{t:'Диалог с AI',d:'Узнай, кто ты — без тестов и оценок'},
+             {t:'Твоё цифровое ДНК',d:'Карта твоих ценностей, страхов и мечт'},
+             {t:'Эксперименты',d:'Попробуй 3-5 направлений на практике'},
+             {t:'Поддержка родителей',d:'Поможем объяснить твой выбор маме'},
+             {t:'Команда и комьюнити',d:'Найди людей с похожими мечтами'},
+             {t:'Твой путь',d:'Ясный план от «не знаю» до первого оффера'}
+            ].map((item,i)=>React.createElement('div',{key:i,className:'timeline-item'},
+              React.createElement('h4',null,item.t),
+              React.createElement('p',null,item.d)
+            ))
+          )
+        )
+      ),
+      React.createElement('div',{style:{padding:'8px 0'}},
+        React.createElement('div',{className:'marquee'},
+          React.createElement('div',{className:'marquee-inner'},
+            [...PAINS,...PAINS].map((p,i)=>React.createElement('span',{key:i},p))
+          )
+        ),
+        React.createElement('div',{className:'marquee',style:{animationDirection:'reverse'}},
+          React.createElement('div',{className:'marquee-inner',style:{animationDirection:'reverse'}},
+            [...PAINS.slice(5),...PAINS.slice(0,5),...PAINS.slice(5),...PAINS.slice(0,5)].map((p,i)=>React.createElement('span',{key:i},p))
+          )
+        )
+      )
+    )
+  );
+}
+
+function Onboarding({onSubmit}) {
+  const [name,setName]=useState('');
+  const [copilot,setCopilot]=useState('');
+  return React.createElement('div',{className:'page'},
+    React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-onboarding.png)'}}),
+    React.createElement('div',{className:'page-content',style:{minHeight:'100vh',display:'flex',flexDirection:'column'}},
+      React.createElement('div',{className:'nav'},React.createElement('span',null,'ТРАЕКТОРИЯ')),
+      React.createElement('div',{style:{flex:1,display:'flex',alignItems:'center',justifyContent:'center',padding:'40px',gap:'40px',flexWrap:'wrap'}},
+        React.createElement('div',{style:{flex:'1 1 350px',maxWidth:450}},
+          React.createElement('h1',{className:'hero',style:{fontSize:'clamp(32px,5vw,56px)'}},'ДАВАЙ',React.createElement('br'),'ЗНАКОМИТЬСЯ'),
+          React.createElement('div',{style:{marginTop:32,display:'flex',flexDirection:'column',gap:20}},
+            React.createElement('div',null,
+              React.createElement('label',{style:{fontSize:13,color:'var(--muted)',marginBottom:6,display:'block'}},'Как тебя зовут?'),
+              React.createElement('input',{className:'input-field',placeholder:'Твоё имя',value:name,onChange:e=>setName(e.target.value)})
+            ),
+            React.createElement('div',null,
+              React.createElement('label',{style:{fontSize:13,color:'var(--muted)',marginBottom:6,display:'block'}},'Дай имя своему AI-копилоту'),
+              React.createElement('input',{className:'input-field',placeholder:'Любое имя',value:copilot,onChange:e=>setCopilot(e.target.value)}),
+              React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:4}},'Он будет вести с тобой разговор')
+            ),
+            React.createElement('button',{className:'btn-main',style:{width:'100%',opacity:name&&copilot?1:0.4},disabled:!name||!copilot,onClick:()=>onSubmit(name,copilot)},'НАЧАТЬ')
+          )
+        ),
+        React.createElement('div',{className:'card',style:{flex:'1 1 300px',maxWidth:380,padding:32}},
+          React.createElement('div',{style:{fontSize:32,marginBottom:16}},'\u201C\u201C'),
+          React.createElement('p',{className:'copilot-opinion',style:{fontSize:16}},
+            'Сфера которую я изучал почти три года умирает из-за нейронок. Что мы знаем про потраченное время'
+          ),
+          React.createElement('p',{className:'copilot-opinion',style:{fontSize:15,marginTop:16}},
+            'Когда я начал пользоваться Траекторией, всё встало на свои места. Мама наконец услышала меня. Теперь мы идём вместе — и я точно знаю, что и как делать, чтобы меня не заменили.'
+          ),
+          React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginTop:16}},'— Аноним, 10 класс')
+        )
+      )
+    )
+  );
+}
+
+function Chat({userName, copilotName, onFinish}) {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [tone, setTone] = useState('direct');
+  const [dna, setDna] = useState(0);
+  const [dialogueComplete, setDialogueComplete] = useState(false);
+  const [butterfly, setButterfly] = useState(null);
+  const [elapsed, setElapsed] = useState(0);
+  const [recording, setRecording] = useState(false);
+  const msgCountRef = useRef(0);
+  const skipCountRef = useRef(0);
+  const prevDnaRef = useRef(0);
+  const historyRef = useRef([]);
+  const chatRef = useRef(null);
+  const startTime = useRef(Date.now());
+  const recognitionRef = useRef(null);
+  const summaryDataRef = useRef(null);
+  const traitsRef = useRef([]);
+
+  useEffect(()=>{
+    const t=setInterval(()=>setElapsed(Math.floor((Date.now()-startTime.current)/1000)),1000);
+    return ()=>clearInterval(t);
+  },[]);
+
+  useEffect(()=>{
+    const timer=setTimeout(()=>{
+      const greeting=`${userName}, я ${copilotName}. Один вопрос перед стартом: зачем ты сюда пришёл? Что надеешься получить от этого разговора? И кстати — хочешь аккуратно и вежливо, или разрешаешь быть прямым? Я не грублю, но не сахарю.`;
+      setMessages([{role:'assistant',content:greeting}]);
+      historyRef.current=[{role:'assistant',content:greeting}];
+    },1500);
+    return ()=>clearTimeout(timer);
+  },[]);
+
+  useEffect(()=>{
+    if(chatRef.current) chatRef.current.scrollTop=chatRef.current.scrollHeight;
+  },[messages,isTyping]);
+
+  useEffect(()=>{
+    try {
+      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+      if(SR){const r=new SR();r.lang='ru-RU';r.continuous=false;r.interimResults=false;r.onresult=e=>{setInput(prev=>prev+e.results[0][0].transcript);setRecording(false)};r.onerror=()=>setRecording(false);r.onend=()=>setRecording(false);recognitionRef.current=r;}
+    }catch(e){}
+  },[]);
+
+  const toggleMic=()=>{
+    if(!recognitionRef.current)return;
+    if(recording){recognitionRef.current.stop();setRecording(false);}
+    else{try{recognitionRef.current.start();setRecording(true);}catch(e){setRecording(false);}}
+  };
+
+  const handleSend = useCallback(async()=>{
+    const text=input.trim();if(!text||isTyping)return;
+    if(text.toLowerCase().replace(/\s/g,'')===SKIP_CODE.replace(/\s/g,'')){
+      setInput('');
+      localStorage.setItem('traj_summary',JSON.stringify({...DEMO_SUMMARY,userName}));
+      onFinish({...DEMO_SUMMARY,userName});
+      return;
+    }
+    setInput('');
+    msgCountRef.current++;
+    const userMsg={role:'user',content:text};
+    setMessages(prev=>[...prev,userMsg]);
+    historyRef.current.push(userMsg);
+    setIsTyping(true);
+    try {
+      const sys={role:'system',content:buildSystemPrompt(userName,copilotName,tone,msgCountRef.current,skipCountRef.current)};
+      const apiMessages=[sys,...historyRef.current];
+      const raw=await callGPT(apiMessages);
+      const dnaData=parseDnaBlock(raw);
+      const clean=stripDnaBlock(raw);
+      const complete=raw.includes('[DIALOGUE_COMPLETE]');
+      if(dnaData){
+        const newDna=dnaData.dna_percent??dna;
+        const delta=newDna-prevDnaRef.current;
+        if(dnaData.traits) traitsRef.current=[...new Set([...traitsRef.current,...dnaData.traits])];
+        if(delta>0){
+          setDna(newDna);
+          if(delta>=3){
+            const phrases=['это важно','запомню это','вижу тебя','это меняет картину','интересный поворот'];
+            setButterfly(phrases[Math.floor(Math.random()*phrases.length)]);
+            setTimeout(()=>setButterfly(null),2500);
+          }
+          prevDnaRef.current=newDna;
+        }
+        if(complete && dnaData.archetype){
+          summaryDataRef.current={
+            userName, dna:newDna,
+            title:dnaData.copilot_note||'Ты знаешь о себе больше, чем думаешь',
+            archetype:dnaData.archetype||'',
+            superpower:dnaData.superpower||'',
+            traits:traitsRef.current.map((t,i)=>({name:['Мечта','Что цепляет','Ценности','Барьеры','Установка'][i]||'Черта',text:t,color:['#ff6b35','#f7c948','#5bbd72','#ff4081','#7c5cff'][i]||'#7c5cff',reason:''})),
+            reframe:{fear:dnaData.reframe_fear||'',growth:dnaData.reframe_growth||''},
+            insights:dnaData.hidden_insight_quote?[{quote:dnaData.hidden_insight_quote,context:'Из диалога',title:dnaData.hidden_insight_title||'',text:dnaData.hidden_insight_text||''}]:[],
+            opinion:clean.slice(-300),
+          };
+        }
+      }
+      if(complete)setDialogueComplete(true);
+      const asstMsg={role:'assistant',content:clean};
+      setMessages(prev=>[...prev,asstMsg]);
+      historyRef.current.push({role:'assistant',content:raw});
+    }catch(e){
+      setMessages(prev=>[...prev,{role:'assistant',content:'Упс, что-то пошло не так. Попробуй ещё раз.'}]);
+    }
+    setIsTyping(false);
+  },[input,isTyping,tone,dna,userName,copilotName,onFinish]);
+
+  const handleSkip=useCallback(async()=>{
+    if(isTyping)return;
+    skipCountRef.current++;
+    const skipMsg={role:'user',content:'[SKIP]'};
+    historyRef.current.push(skipMsg);
+    setIsTyping(true);
+    try{
+      const sys={role:'system',content:buildSystemPrompt(userName,copilotName,tone,msgCountRef.current,skipCountRef.current)};
+      const raw=await callGPT([sys,...historyRef.current]);
+      const clean=stripDnaBlock(raw);
+      const dnaData=parseDnaBlock(raw);
+      if(dnaData){const nd=dnaData.dna_percent??dna;setDna(nd);prevDnaRef.current=nd;}
+      setMessages(prev=>[...prev,{role:'assistant',content:clean}]);
+      historyRef.current.push({role:'assistant',content:raw});
+    }catch(e){}
+    setIsTyping(false);
+  },[isTyping,tone,dna,userName,copilotName]);
+
+  const handleResult=()=>{
+    const data=summaryDataRef.current||{...DEMO_SUMMARY,userName,dna};
+    localStorage.setItem('traj_summary',JSON.stringify(data));
+    onFinish(data);
+  };
+
+  const mins=Math.floor(elapsed/60);
+  const secs=elapsed%60;
+
+  return React.createElement('div',{className:'page',style:{display:'flex',flexDirection:'column',height:'100vh'}},
+    React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-chat.png)'}}),
+    React.createElement('div',{className:'page-content',style:{display:'flex',flex:1,overflow:'hidden'}},
+      React.createElement('div',{style:{width:160,padding:'16px 12px',borderRight:'1px solid var(--border)',flexShrink:0,overflowY:'auto'}},
+        React.createElement('p',{style:{fontSize:11,color:'var(--muted)',marginBottom:4}},'Настрой тон'),
+        React.createElement('p',{style:{fontSize:10,color:'var(--muted)',marginBottom:12}},'Можешь менять в любой момент.'),
+        TONES.map(t=>React.createElement('button',{key:t.id,className:'tone-btn'+(tone===t.id?' active':''),style:{color:t.color},onClick:()=>setTone(t.id)},
+          React.createElement('div',{className:'tone-name'},t.icon,' ',t.name),
+          React.createElement('div',{className:'tone-desc'},t.desc)
+        ))
+      ),
+      React.createElement('div',{style:{flex:1,display:'flex',flexDirection:'column',minWidth:0}},
+        React.createElement('div',{style:{padding:'12px 24px',borderBottom:'1px solid var(--border)'}},
+          React.createElement('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}},
+            React.createElement('div',{style:{position:'relative',flex:1,marginRight:16}},
+              React.createElement('div',{className:'dna-bar-wrap'},
+                React.createElement('div',{className:'dna-bar'+(butterfly?' glow':''),style:{width:dna+'%'}}),
+                React.createElement('div',{className:'dna-marker',style:{left:'15%'}},'← большинство здесь')
+              ),
+              butterfly && React.createElement('div',{className:'butterfly-text'},butterfly),
+              React.createElement('p',{style:{fontSize:11,color:'var(--muted)',marginTop:4}},'Твоё цифровое ДНК заполнено на ',React.createElement('b',null,dna+'%'),', это ещё не конец')
+            ),
+            React.createElement('div',{style:{textAlign:'right',flexShrink:0}},
+              React.createElement('div',{style:{fontFamily:'Anton',fontSize:28}},String(mins).padStart(1,'0')+':'+String(secs).padStart(2,'0')),
+              React.createElement('div',{style:{fontSize:10,color:'var(--muted)'}},'из ~15 мин')
+            )
+          )
+        ),
+        React.createElement('div',{ref:chatRef,style:{flex:1,overflowY:'auto',padding:'20px 24px',display:'flex',flexDirection:'column'}},
+          messages.map((m,i)=>React.createElement('div',{key:i,className:'chat-msg '+m.role},
+            React.createElement('div',{className:'sender'},m.role==='assistant'?copilotName:'Ты'),
+            React.createElement('div',null,m.content)
+          )),
+          isTyping && React.createElement('div',{className:'typing-dots'},
+            React.createElement('span'),React.createElement('span'),React.createElement('span')
+          )
+        ),
+        React.createElement('div',{style:{padding:'12px 24px',borderTop:'1px solid var(--border)',display:'flex',gap:8,alignItems:'center'}},
+          React.createElement('button',{className:'skip-btn',onClick:handleSkip,disabled:isTyping},'НАФИГ'),
+          recognitionRef.current && React.createElement('button',{className:'mic-btn'+(recording?' recording':''),onClick:toggleMic},'🎤'),
+          React.createElement('input',{className:'input-field',style:{flex:1},placeholder:'Напиши что-нибудь...',value:input,onChange:e=>setInput(e.target.value),onKeyDown:e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend()}},disabled:isTyping}),
+          React.createElement('button',{style:{width:44,height:44,borderRadius:'50%',background:'var(--accent)',border:'none',color:'#fff',cursor:'pointer',fontSize:18,flexShrink:0,opacity:input.trim()?1:0.4},onClick:handleSend,disabled:!input.trim()||isTyping},'➤'),
+          dialogueComplete && React.createElement('button',{className:'btn-main',style:{fontSize:13,padding:'10px 20px',marginLeft:8},onClick:handleResult},'DNA 🧬')
+        )
+      )
+    )
+  );
+}
+
+function Summary({data, onBridge, onRestart}) {
+  const d = data || DEMO_SUMMARY;
+  const [modal, setModal] = useState(null);
+  const fakedoors = [
+    {icon:'🗺️',title:'Роадмап к мечте',desc:'Персональный план на 3-6 месяцев к твоей цели',color:'#5bbd72'},
+    {icon:'🏢',title:'Кейс от компании',desc:'Попробуй себя в реальной задаче от бизнеса',color:'#3b82f6'},
+    {icon:'👥',title:'Найти таких же',desc:'Комьюнити людей с похожими мечтами',color:'#7c5cff'},
+    {icon:'🤖',title:'AI-клон',desc:'Цифровая версия тебя, которая работает за тебя',color:'#ff4081'},
+    {icon:'⚡',title:'Пойти глубже',desc:'Заполни ДНК до 100% и узнай о себе всё',color:'#f7c948'}
+  ];
+  return React.createElement('div',{className:'page'},
+    React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-summary.png)'}}),
+    React.createElement('div',{className:'page-content',style:{padding:'0 40px 60px'}},
+      React.createElement('div',{className:'nav'},React.createElement('span',null,'ТРАЕКТОРИЯ')),
+      React.createElement('h1',{className:'hero',style:{marginTop:40,fontSize:'clamp(28px,4vw,48px)'}},d.userName?d.userName+', ':'',d.title||'ТЫ ЗНАЕШЬ О СЕБЕ БОЛЬШЕ, ЧЕМ ДУМАЕШЬ'),
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:24,margin:'32px 0 16px'}},
+        React.createElement('div',{style:{flex:1}},
+          React.createElement('div',{style:{fontSize:12,fontFamily:'Anton',letterSpacing:1,textTransform:'uppercase',marginBottom:6}},'ЦИФРОВОЕ ДНК'),
+          React.createElement('div',{className:'dna-bar-wrap'},
+            React.createElement('div',{className:'dna-bar',style:{width:(d.dna||22)+'%'}}),
+            React.createElement('div',{className:'dna-marker',style:{left:'15%'}},'← большинство здесь')
+          ),
+          React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:4}},'Твоё цифровое ДНК заполнено на '+(d.dna||22)+'%, это ещё не конец')
+        ),
+        React.createElement('div',{style:{fontFamily:'Anton',fontSize:'clamp(48px,7vw,80px)',background:'var(--gradient)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}},(d.dna||22)+'%')
+      ),
+      d.archetype && React.createElement('div',{style:{display:'flex',gap:16,margin:'24px 0',flexWrap:'wrap'}},
+        React.createElement('div',{className:'card',style:{flex:'1 1 200px',borderLeft:'3px solid var(--accent)'}},
+          React.createElement('div',{style:{fontSize:11,color:'var(--accent)',fontFamily:'Anton',letterSpacing:1,marginBottom:4}},'АРХЕТИП'),
+          React.createElement('div',{style:{fontSize:20,fontFamily:'Anton',letterSpacing:1}},d.archetype)
+        ),
+        d.superpower && React.createElement('div',{className:'card',style:{flex:'2 1 300px',borderLeft:'3px solid #5bbd72'}},
+          React.createElement('div',{style:{fontSize:11,color:'#5bbd72',fontFamily:'Anton',letterSpacing:1,marginBottom:4}},'СУПЕРСИЛА'),
+          React.createElement('div',{style:{fontSize:16}},d.superpower)
+        )
+      ),
+      React.createElement('div',{style:{display:'flex',gap:32,margin:'32px 0',flexWrap:'wrap',alignItems:'flex-start'}},
+        React.createElement('div',{style:{flex:'2 1 500px'}},
+          React.createElement('div',{className:'section-title'},'ТВОИ ЧЕРТЫ'),
+          (d.traits||[]).map((t,i)=>React.createElement('div',{key:i,className:'trait-card',style:{borderLeftColor:t.color,marginBottom:12}},
+            React.createElement('div',{style:{fontSize:12,fontFamily:'Anton',letterSpacing:1,textTransform:'uppercase',color:t.color,marginBottom:4}},t.name),
+            React.createElement('div',{style:{fontSize:15}},t.text),
+            t.reason && React.createElement('div',{style:{fontSize:12,color:'var(--muted)',marginTop:6,fontStyle:'italic'}},'↳ ',t.reason)
+          ))
+        ),
+        React.createElement('div',{style:{flex:'1 1 300px'}},
+          React.createElement('div',{className:'card',style:{borderLeft:'3px solid #f7c948',marginBottom:16}},
+            React.createElement('div',{style:{fontSize:12,fontFamily:'Anton',letterSpacing:1,color:'#f7c948',marginBottom:8}},'МНЕНИЕ КОПИЛОТА'),
+            React.createElement('div',{className:'copilot-opinion'},(d.opinion||'').split('\n').map((line,i)=>React.createElement('p',{key:i,style:{marginBottom:12}},line)))
+          ),
+          React.createElement('div',{className:'card'},
+            React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginBottom:8}},'Если с чем-то не согласен — результат можно изменить.'),
+            React.createElement('div',{style:{display:'flex',gap:8}},
+              React.createElement('input',{className:'input-field',placeholder:'Напиши, что хочешь изменить...'}),
+              React.createElement('button',{className:'btn-outline',style:{borderColor:'#f7c948',color:'#f7c948',whiteSpace:'nowrap'}},'ИЗМЕНИТЬ')
+            )
+          )
+        )
+      ),
+      d.reframe && d.reframe.fear && React.createElement('div',{style:{margin:'24px 0'}},
+        React.createElement('div',{className:'section-title'},'ПРОТИВОРЕЧИЕ + ПЕРЕОСМЫСЛЕНИЕ'),
+        React.createElement('div',{className:'reframe-block'},
+          React.createElement('div',{className:'reframe-side fear'},
+            React.createElement('div',{className:'label'},'ТЫ НАЗВАЛ ЭТО БАРЬЕРОМ'),
+            React.createElement('p',{style:{fontSize:15}},d.reframe.fear)
+          ),
+          React.createElement('div',{className:'reframe-side growth'},
+            React.createElement('div',{className:'label'},'ПЕРЕОСМЫСЛЕНИЕ'),
+            React.createElement('p',{style:{fontSize:15}},d.reframe.growth)
+          )
+        )
+      ),
+      (d.insights||[]).length>0 && React.createElement('div',{style:{margin:'24px 0'}},
+        React.createElement('div',{className:'section-title'},'МЕЖДУ СТРОК'),
+        d.insights.map((ins,i)=>React.createElement('div',{key:i,className:'insight-card'},
+          React.createElement('div',{className:'quote'},
+            React.createElement('p',null,'"',ins.quote,'"'),
+            React.createElement('p',{style:{fontSize:11,color:'var(--muted)',marginTop:4}},ins.context)
+          ),
+          React.createElement('h4',null,ins.title),
+          React.createElement('div',{className:'explanation'},ins.text)
+        ))
+      ),
+      React.createElement('div',{className:'card',style:{textAlign:'center',padding:40,margin:'40px 0',background:'linear-gradient(135deg,rgba(124,92,255,0.1),rgba(255,107,107,0.05))'}},
+        React.createElement('h2',{className:'section-title'},'ХОЧЕШЬ ЗНАТЬ ЧТО ДЕЛАТЬ ДАЛЬШЕ?'),
+        React.createElement('p',{style:{color:'var(--muted)',marginBottom:24,fontSize:14}},'Мы собрали всё в одном месте: курсы под тебя, план действий, комьюнити и много всего другого.'),
+        React.createElement('div',{style:{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:16}},
+          React.createElement('button',{className:'btn-main',onClick:()=>setModal('pay')},'ХОЧУ, ГОТОВ ПЛАТИТЬ'),
+          React.createElement('button',{className:'btn-outline',onClick:onBridge},'ХОЧУ, ПОКАЖИ РОДИТЕЛЯМ'),
+          React.createElement('button',{className:'btn-outline',onClick:()=>setModal('later')},'ПОКА НЕ НАДО')
+        )
+      ),
+      React.createElement('div',{className:'section-title'},'ОТКРОЙ НОВЫЕ ВОЗМОЖНОСТИ'),
+      React.createElement('div',{style:{display:'flex',gap:16,flexWrap:'wrap',marginBottom:40}},
+        fakedoors.map((f,i)=>React.createElement('div',{key:i,className:'fakedoor',onClick:()=>setModal(f.title)},
+          React.createElement('div',{className:'icon'},f.icon),
+          React.createElement('h4',{style:{color:f.color}},f.title),
+          React.createElement('p',null,f.desc),
+          React.createElement('button',{className:'btn-outline',style:{marginTop:12,fontSize:12}},'ТЫК!')
+        ))
+      ),
+      React.createElement('div',{style:{textAlign:'center',padding:'40px 0'}},
+        React.createElement('div',{className:'section-title'},'ОСТАНЕМСЯ НА СВЯЗИ'),
+        React.createElement('p',{style:{color:'var(--muted)',marginBottom:16,fontSize:14}},'Оставь контакт — напишем, когда запустим то, что тебя заинтересовало'),
+        React.createElement('div',{style:{display:'flex',gap:8,justifyContent:'center',maxWidth:400,margin:'0 auto'}},
+          React.createElement('input',{className:'input-field',placeholder:'@telegram или email'}),
+          React.createElement('button',{className:'btn-main',style:{fontSize:14,padding:'12px 24px'}},'СОХРАНИТЬ')
+        ),
+        React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:8,cursor:'pointer'},onClick:onRestart},'Начать сначала')
+      )
+    ),
+    modal && React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:100,padding:20},onClick:()=>setModal(null)},
+      React.createElement('div',{className:'card',style:{maxWidth:400,padding:32,textAlign:'center'},onClick:e=>e.stopPropagation()},
+        React.createElement('h3',{style:{fontFamily:'Anton',fontSize:20,marginBottom:12}},'СКОРО ЗАПУСТИМ! 🚀'),
+        React.createElement('p',{style:{color:'var(--muted)',fontSize:14,marginBottom:16}},'Эта функция в разработке. Оставь Telegram — напишем первому.'),
+        React.createElement('input',{className:'input-field',placeholder:'@telegram',style:{marginBottom:12}}),
+        React.createElement('button',{className:'btn-main',style:{width:'100%'},onClick:()=>setModal(null)},'ОСТАВИТЬ'),
+        React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:8,cursor:'pointer'},onClick:()=>setModal(null)},'Закрыть')
+      )
+    )
+  );
+}
+
+function BridgePage({data, onBack}) {
+  const d = data || DEMO_SUMMARY;
+  const [channel, setChannel] = useState('telegram');
+  const [tag, setTag] = useState('');
+  const templates = [
+    'Я в десятом классе и впервые чувствую, что кто-то меня услышал. Хочу чтобы и ты услышала.',
+    'Мам, я знаю, ты хочешь как лучше. Но послушай — я нашёл кое-что про себя, чего раньше не понимал.',
+    'Пап, помнишь ты говорил что программирование — это несерьёзно? Посмотри что AI говорит про мои сильные стороны.',
+    'Я не прошу отпустить меня делать глупости. Я прошу дать шанс делать своё.',
+    'Ма, я прошёл диалог про будущее. Там не оценивают — просто помогают разобраться. Посмотри мой результат.'
+  ];
+  const msgText = `Привет! Я прошёл диалог про будущее на Траектории.\nВот что узнал о себе: ${(d.traits||[]).slice(0,3).map(t=>t.text).join(', ')}.\n\nМне важно, чтобы ты это увидел(а). Посмотри: [ссылка]`;
+
+  return React.createElement('div',{className:'page'},
+    React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-bridge.png)'}}),
+    React.createElement('div',{className:'page-content',style:{minHeight:'100vh',padding:'0 40px'}},
+      React.createElement('div',{className:'nav'},React.createElement('span',null,'ТРАЕКТОРИЯ')),
+      React.createElement('div',{style:{display:'flex',gap:40,marginTop:40,flexWrap:'wrap',alignItems:'flex-start'}},
+        React.createElement('div',{style:{flex:'1 1 300px'}},
+          templates.map((t,i)=>React.createElement('div',{key:i,className:'card',style:{marginBottom:12,padding:16}},
+            React.createElement('p',{className:'copilot-opinion',style:{fontSize:15}},t)
+          ))
+        ),
+        React.createElement('div',{style:{flex:'1 1 400px'}},
+          React.createElement('h1',{className:'hero',style:{fontSize:'clamp(28px,4vw,48px)'}},'ПОКАЖИ РОДИТЕЛЯМ'),
+          React.createElement('p',{style:{color:'var(--muted)',margin:'12px 0 32px',fontSize:15}},'Отправь — пусть увидят твой путь'),
+          React.createElement('div',{style:{display:'flex',gap:12,marginBottom:32,flexWrap:'wrap'}},
+            ['telegram','whatsapp','email','copy'].map(ch=>
+              React.createElement('button',{key:ch,className:'card',style:{padding:'16px 20px',textAlign:'center',cursor:'pointer',border:channel===ch?'1px solid var(--accent)':'1px solid var(--border)',minWidth:80},onClick:()=>setChannel(ch)},
+                React.createElement('div',{style:{fontSize:24,marginBottom:4}},{telegram:'✈️',whatsapp:'💬',email:'📧',copy:'📋'}[ch]),
+                React.createElement('div',{style:{fontSize:12,textTransform:'capitalize'}},ch==='copy'?'Скопировать':ch)
+              )
+            )
+          ),
+          React.createElement('div',{className:'card',style:{padding:24}},
+            React.createElement('div',{style:{fontSize:12,fontFamily:'Anton',letterSpacing:1,color:'var(--muted)',marginBottom:8}},'ТЕГ РОДИТЕЛЯ'),
+            React.createElement('input',{className:'input-field',placeholder:'@username',value:tag,onChange:e=>setTag(e.target.value),style:{marginBottom:16}}),
+            React.createElement('div',{style:{background:'rgba(255,255,255,0.03)',borderRadius:8,padding:16,marginBottom:16}},
+              React.createElement('p',{style:{fontSize:14,lineHeight:1.6,whiteSpace:'pre-line'}},msgText)
+            ),
+            React.createElement('button',{className:'btn-main',style:{width:'100%'}},'Отправить')
+          ),
+          React.createElement('p',{style:{fontSize:12,color:'var(--muted)',textAlign:'center',marginTop:16}},'Мы не храним и не передаём контакты третьим лицам'),
+          React.createElement('p',{style:{fontSize:13,color:'var(--muted)',textAlign:'center',marginTop:8,cursor:'pointer'},onClick:onBack},'← Назад к результатам')
+        )
+      )
+    )
+  );
+}
+
+function App() {
+  const [page, setPage] = useState('landing');
+  const [userData, setUserData] = useState({userName:'',copilotName:''});
+  const [summaryData, setSummaryData] = useState(null);
+
+  const handleOnboard = (name, copilot) => {
+    setUserData({userName:name, copilotName:copilot});
+    setPage('chat');
+  };
+
+  return (
+    page === 'landing' ? React.createElement(Landing, {onStart: () => setPage('onboarding')}) :
+    page === 'onboarding' ? React.createElement(Onboarding, {onSubmit: handleOnboard}) :
+    page === 'chat' ? React.createElement(Chat, {
+      userName: userData.userName,
+      copilotName: userData.copilotName,
+      onFinish: (data) => { setSummaryData(data); setPage('summary'); }
+    }) :
+    page === 'summary' ? React.createElement(Summary, {
+      data: summaryData,
+      onBridge: () => setPage('bridge'),
+      onRestart: () => { setPage('landing'); setSummaryData(null); }
+    }) :
+    page === 'bridge' ? React.createElement(BridgePage, {
+      data: summaryData,
+      onBack: () => setPage('summary')
+    }) : null
+  );
+}
+
+ReactDOM.render(React.createElement(App), document.getElementById('root'));
+</script>
+</body>
+</html>
