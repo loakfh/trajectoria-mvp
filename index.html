@@ -13,8 +13,8 @@
 :root{--bg:#0f0f19;--card:rgba(255,255,255,0.05);--border:rgba(255,255,255,0.1);--text:#fff;--muted:rgba(255,255,255,0.6);--accent:#7c5cff;--gradient:linear-gradient(90deg,#ff6b35,#f7c948,#5bbd72,#3b82f6,#7c5cff)}
 body{background:var(--bg);color:var(--text);font-family:'Libre Baskerville',serif;overflow-x:hidden;min-height:100vh}
 .page{min-height:100vh;position:relative;display:flex;flex-direction:column}
-.page-bg{position:absolute;inset:0;background-size:cover;background-position:center;z-index:0}
-.page-bg::after{content:'';position:absolute;inset:0;background:rgba(15,15,25,0.55)}
+.page-bg{position:fixed;inset:0;background-size:cover;background-position:center;background-attachment:fixed;z-index:0}
+.page-bg::after{content:'';position:absolute;inset:0;background:rgba(15,15,25,0.7)}
 .page-content{position:relative;z-index:1}
 .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 40px;font-family:'Anton',sans-serif;font-size:18px;letter-spacing:2px;position:relative;z-index:10}
 .nav-links{display:flex;gap:12px}
