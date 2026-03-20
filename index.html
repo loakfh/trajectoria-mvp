@@ -22,7 +22,7 @@ body{background:var(--bg);color:var(--text);font-family:'Libre Baskerville',seri
 .nav-links button,.nav-auth button{background:transparent;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);padding:6px 16px;border-radius:20px;cursor:pointer;font-size:12px;font-family:'Libre Baskerville',serif;transition:all .3s}
 .nav-links button:hover,.nav-auth button:hover{border-color:var(--text);color:var(--text);transform:scale(1.05)}
 .nav-auth{display:flex;gap:8px}
-h1.hero{font-family:'Anton',sans-serif;font-size:clamp(36px,7vw,80px);line-height:1;text-transform:uppercase;letter-spacing:2px}
+h1.hero{font-family:'Anton','Impact',sans-serif!important;font-weight:400!important;font-size:clamp(36px,7vw,80px);line-height:1;text-transform:uppercase;letter-spacing:2px}
 .btn-main{font-family:'Anton',sans-serif;font-size:18px;letter-spacing:2px;text-transform:uppercase;padding:16px 48px;background:#fff;color:#000;border:none;border-radius:50px;cursor:pointer;transition:transform .2s,box-shadow .2s;animation:pulseGlow 2s ease-in-out infinite}
 .btn-main:hover{transform:translateY(-3px);box-shadow:0 0 50px rgba(255,255,255,0.7),0 0 100px rgba(124,92,255,0.5)}
 .btn-outline{font-family:'Anton',sans-serif;font-size:14px;letter-spacing:1px;text-transform:uppercase;padding:12px 32px;background:transparent;color:#fff;border:1px solid var(--border);border-radius:4px;cursor:pointer;transition:all .3s}
@@ -335,30 +335,31 @@ function Onboarding({onSubmit}) {
     React.createElement('div',{className:'page-content',style:{minHeight:'100vh',display:'flex',flexDirection:'column'}},
       React.createElement('div',{className:'nav'},React.createElement('span',null,'ТРАЕКТОРИЯ')),
       React.createElement('div',{style:{flex:1,display:'flex',alignItems:'center',justifyContent:'center',padding:'40px',gap:'40px',flexWrap:'wrap'}},
-        React.createElement('div',{style:{flex:'1 1 350px',maxWidth:450}},
+        React.createElement('div',{style:{flex:'1 1 350px',maxWidth:450,backdropFilter:'blur(16px)',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:'48px 40px',minHeight:500}},
           React.createElement('h1',{className:'hero',style:{fontSize:'clamp(32px,5vw,56px)'}},'ДАВАЙ',React.createElement('br'),'ЗНАКОМИТЬСЯ'),
-          React.createElement('div',{style:{marginTop:32,display:'flex',flexDirection:'column',gap:20}},
+          React.createElement('div',{style:{marginTop:32,display:'flex',flexDirection:'column',gap:32}},
             React.createElement('div',null,
-              React.createElement('label',{style:{fontSize:13,color:'var(--muted)',marginBottom:6,display:'block'}},'Как тебя зовут?'),
+              React.createElement('label',{style:{fontSize:13,color:'var(--muted)',marginBottom:10,display:'block'}},'Как тебя зовут?'),
               React.createElement('input',{className:'input-field',placeholder:'Твоё имя',value:name,onChange:e=>setName(e.target.value)})
             ),
             React.createElement('div',null,
               React.createElement('label',{style:{fontSize:13,color:'var(--muted)',marginBottom:6,display:'block'}},'Дай имя своему AI-копилоту'),
               React.createElement('input',{className:'input-field',placeholder:'Любое имя',value:copilot,onChange:e=>setCopilot(e.target.value)}),
-              React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:4}},'Он будет вести с тобой разговор')
+              React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:8}},'Он будет вести с тобой разговор')
             ),
-            React.createElement('button',{className:'btn-main',style:{width:'100%',opacity:name&&copilot?1:0.4},disabled:!name||!copilot,onClick:()=>onSubmit(name,copilot)},'НАЧАТЬ')
+            React.createElement('button',{className:'btn-main',style:{width:'100%',opacity:name&&copilot?1:0.4,borderRadius:50,fontSize:20,padding:'18px 48px',animation:name&&copilot?'pulseGlow 2s ease-in-out infinite':'none'},disabled:!name||!copilot,onClick:()=>onSubmit(name,copilot)},'НАЧАТЬ')
           )
         ),
-        React.createElement('div',{className:'card',style:{flex:'1 1 300px',maxWidth:380,padding:32}},
+        React.createElement('div',{style:{flex:'1 1 300px',maxWidth:380,backdropFilter:'blur(16px)',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:'48px 40px',minHeight:500}},
           React.createElement('div',{style:{fontSize:32,marginBottom:16}},'\u201C\u201C'),
-          React.createElement('p',{className:'copilot-opinion',style:{fontSize:16}},
+          React.createElement('p',{style:{fontFamily:"'Caveat',cursive",fontSize:20,color:'rgba(255,255,255,0.75)',lineHeight:1.5}},
             'Сфера которую я изучал почти три года умирает из-за нейронок. Что мы знаем про потраченное время'
           ),
-          React.createElement('p',{className:'copilot-opinion',style:{fontSize:15,marginTop:16}},
+          React.createElement('div',{style:{height:1,background:'rgba(255,255,255,0.06)',margin:'20px 0'}}),
+          React.createElement('p',{style:{fontFamily:"'Libre Baskerville',serif",fontSize:15,color:'rgba(255,255,255,0.45)',lineHeight:1.6}},
             'Когда я начал пользоваться Траекторией, всё встало на свои места. Мама наконец услышала меня. Теперь мы идём вместе — и я точно знаю, что и как делать, чтобы меня не заменили.'
           ),
-          React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginTop:16}},'— Аноним, 10 класс')
+          React.createElement('p',{style:{fontFamily:"'Libre Baskerville',serif",fontSize:13,color:'rgba(255,255,255,0.3)',marginTop:16}},'— Аноним, 10 класс')
         )
       )
     )
