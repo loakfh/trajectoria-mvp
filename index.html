@@ -15,14 +15,16 @@ body{background:var(--bg);color:var(--text);font-family:'Libre Baskerville',seri
 .page{min-height:100vh;position:relative;display:flex;flex-direction:column}
 .page-bg{position:fixed;inset:0;background-size:cover;background-position:center;background-attachment:fixed;z-index:0}
 .page-bg::after{content:'';position:absolute;inset:0;background:rgba(15,15,25,0.7)}
+.landing-bg::after{background:rgba(15,15,25,0.35)}
 .page-content{position:relative;z-index:1}
-.nav{display:flex;align-items:center;justify-content:space-between;padding:16px 40px;font-family:'Anton',sans-serif;font-size:18px;letter-spacing:2px;position:relative;z-index:10}
-.nav-links{display:flex;gap:12px}
-.nav-links button{background:transparent;border:1px solid var(--border);color:var(--muted);padding:6px 16px;border-radius:20px;cursor:pointer;font-size:12px;font-family:'Libre Baskerville',serif;transition:all .3s}
-.nav-links button:hover{border-color:var(--text);color:var(--text)}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:16px 40px;font-family:'Anton',sans-serif;font-size:18px;letter-spacing:2px;position:sticky;top:0;z-index:100;backdrop-filter:blur(16px);background:rgba(15,15,25,0.4)}
+.nav-links{display:flex;gap:8px;position:absolute;left:50%;transform:translateX(-50%)}
+.nav-links button,.nav-auth button{background:transparent;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);padding:6px 16px;border-radius:20px;cursor:pointer;font-size:12px;font-family:'Libre Baskerville',serif;transition:all .3s}
+.nav-links button:hover,.nav-auth button:hover{border-color:var(--text);color:var(--text)}
+.nav-auth{display:flex;gap:8px}
 h1.hero{font-family:'Anton',sans-serif;font-size:clamp(36px,7vw,80px);line-height:1;text-transform:uppercase;letter-spacing:2px}
-.btn-main{font-family:'Anton',sans-serif;font-size:18px;letter-spacing:2px;text-transform:uppercase;padding:16px 48px;background:#fff;color:#000;border:none;border-radius:4px;cursor:pointer;transition:transform .2s,box-shadow .2s}
-.btn-main:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(255,255,255,0.2)}
+.btn-main{font-family:'Anton',sans-serif;font-size:18px;letter-spacing:2px;text-transform:uppercase;padding:16px 48px;background:#fff;color:#000;border:none;border-radius:50px;cursor:pointer;transition:transform .2s,box-shadow .2s;animation:pulseGlow 2s ease-in-out infinite}
+.btn-main:hover{transform:translateY(-3px);box-shadow:0 0 50px rgba(255,255,255,0.7),0 0 100px rgba(124,92,255,0.5)}
 .btn-outline{font-family:'Anton',sans-serif;font-size:14px;letter-spacing:1px;text-transform:uppercase;padding:12px 32px;background:transparent;color:#fff;border:1px solid var(--border);border-radius:4px;cursor:pointer;transition:all .3s}
 .btn-outline:hover{border-color:#fff;background:rgba(255,255,255,0.05)}
 .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;backdrop-filter:blur(10px)}
@@ -54,15 +56,20 @@ h1.hero{font-family:'Anton',sans-serif;font-size:clamp(36px,7vw,80px);line-heigh
 @keyframes glowPulse{0%{box-shadow:0 0 5px rgba(124,92,255,0.2)}50%{box-shadow:0 0 25px rgba(124,92,255,0.6)}100%{box-shadow:0 0 5px rgba(124,92,255,0.2)}}
 .butterfly-text{position:absolute;top:-30px;right:0;font-size:13px;color:var(--accent);font-style:italic;animation:floatUp 2s forwards;pointer-events:none}
 .marquee{overflow:hidden;white-space:nowrap;padding:12px 0}
-.marquee-inner{display:inline-block;animation:scroll 40s linear infinite;font-style:italic;color:var(--muted);font-size:14px}
-.marquee-inner span{margin-right:60px}
+.marquee-inner{display:inline-block;animation:scroll 40s linear infinite;font-style:italic;color:rgba(255,255,255,0.5);font-size:18px;font-family:'Caveat',cursive}
+.marquee-inner.reverse{animation:scrollReverse 40s linear infinite}
+.marquee-inner span{margin-right:80px}
 @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.timeline{display:flex;flex-direction:column;gap:0;position:relative;padding-left:20px}
-.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--gradient)}
-.timeline-item{padding:12px 0 12px 24px;position:relative}
-.timeline-item::before{content:'';position:absolute;left:-1px;top:18px;width:10px;height:10px;border-radius:50%;border:2px solid var(--accent);background:var(--bg)}
-.timeline-item h4{font-family:'Anton',sans-serif;font-size:14px;letter-spacing:1px;text-transform:uppercase}
-.timeline-item p{font-size:12px;color:var(--muted);margin-top:2px}
+@keyframes scrollReverse{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 20px rgba(255,255,255,0.3)}50%{box-shadow:0 0 40px rgba(255,255,255,0.6),0 0 80px rgba(124,92,255,0.3)}}
+.timeline{display:flex;flex-direction:column;gap:0;position:relative;padding:0}
+.timeline::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--gradient);transform:translateX(-50%)}
+.timeline-item{display:grid;grid-template-columns:1fr 20px 1fr;padding:6px 0;position:relative;min-height:48px}
+.timeline-item::before{content:'';position:absolute;left:50%;top:14px;width:10px;height:10px;border-radius:50%;border:2px solid var(--accent);background:var(--bg);transform:translateX(-50%);z-index:1}
+.tl-left{grid-column:1;text-align:right;padding-right:24px}
+.tl-right{grid-column:3;text-align:left;padding-left:24px}
+.timeline-item h4{font-family:'Anton',sans-serif;font-size:13px;letter-spacing:1px;text-transform:uppercase}
+.timeline-item p{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4}
 .fakedoor{background:linear-gradient(135deg,rgba(255,255,255,0.03),rgba(255,255,255,0.08));border:1px solid var(--border);border-radius:14px;padding:24px 20px;text-align:center;cursor:pointer;transition:all .3s;flex:1;min-width:160px}
 .fakedoor:hover{border-color:rgba(255,255,255,0.3);transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,0.3)}
 .fakedoor h4{font-family:'Anton',sans-serif;font-size:14px;letter-spacing:1px;text-transform:uppercase;margin-top:12px}
@@ -209,9 +216,30 @@ async function callGPT(messages, retries=2) {
   }
 }
 
+const PAINS_R1=['Не знаю, кем хочу стать, — и это пугает','Прошёл тест — сказали идти в парикмахеры','Мама мечтает, что я стану врачом, а я хочу совсем другое','Боюсь выбрать не то и потерять время'];
+const PAINS_R2=['Все вокруг уже определились, а я до сих пор не знаю','Хочу найти дело, от которого не тошнит каждое утро','Родители не слышат, что я хочу, — решают за меня','Куча результатов, кому верить?'];
+const PAINS_R3=['Разрываюсь между мечтой и тем, что называют стабильностью','Не знаю, хватит ли мне таланта на то, чего хочу','Хочу, чтобы кто-то помог, но не оценивал','Боюсь выбрать не то и потерять время'];
+const TL_UNDECIDED=[
+  {t:'Диалог с AI',d:'Узнай, кто ты — без тестов и оценок'},
+  {t:'Твоё цифровое ДНК',d:'Карта твоих ценностей, страхов и мечт'},
+  {t:'Эксперименты',d:'Попробуй 3-5 направлений на практике'},
+  {t:'Поддержка родителей',d:'Поможем объяснить твой выбор маме'},
+  {t:'Команда и комьюнити',d:'Найди людей с похожими мечтами'},
+  {t:'Твой путь',d:'Ясный план от «не знаю» до первого оффера'}
+];
+const TL_DECIDED=[
+  {t:'Диалог с AI',d:'Углуби понимание своего выбора'},
+  {t:'Роадмап',d:'Чёткий план: что делать каждую неделю'},
+  {t:'Кейсы от компаний',d:'Реши реальную задачу, собери портфолио'},
+  {t:'AI-трекер профессии',d:'Убедись, что твоя сфера не умрёт из-за AI'},
+  {t:'Менторы и практики',d:'Связь с людьми из твоей будущей профессии'},
+  {t:'Компании видят тебя',d:'Портфолио → витрина → предложения'}
+];
 function Landing({onStart}) {
+  const [activeTab,setActiveTab]=useState('undecided');
+  const tlItems=activeTab==='undecided'?TL_UNDECIDED:TL_DECIDED;
   return React.createElement('div',{className:'page'},
-    React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-landing.png)'}}),
+    React.createElement('div',{className:'page-bg landing-bg',style:{backgroundImage:'url(assets/bg-landing.png)'}}),
     React.createElement('div',{className:'page-content',style:{minHeight:'100vh',display:'flex',flexDirection:'column'}},
       React.createElement('div',{className:'nav'},
         React.createElement('span',null,'ТРАЕКТОРИЯ'),
@@ -220,6 +248,10 @@ function Landing({onStart}) {
           React.createElement('button',null,'Я — родитель'),
           React.createElement('button',null,'Узнать больше'),
           React.createElement('button',null,'Связаться с нами')
+        ),
+        React.createElement('div',{className:'nav-auth'},
+          React.createElement('button',null,'Log in'),
+          React.createElement('button',null,'Sign up')
         )
       ),
       React.createElement('div',{style:{flex:1,display:'flex',alignItems:'center',padding:'0 40px',gap:'60px',flexWrap:'wrap'}},
@@ -232,19 +264,14 @@ function Landing({onStart}) {
         ),
         React.createElement('div',{style:{flex:'1 1 300px',maxWidth:420}},
           React.createElement('div',{className:'tabs',style:{marginBottom:16}},
-            React.createElement('button',{className:'active'},'НЕ ОПРЕДЕЛИЛСЯ'),
-            React.createElement('button',null,'ОПРЕДЕЛИЛСЯ')
+            React.createElement('button',{className:activeTab==='undecided'?'active':'',onClick:()=>setActiveTab('undecided')},'НЕ ОПРЕДЕЛИЛСЯ'),
+            React.createElement('button',{className:activeTab==='decided'?'active':'',onClick:()=>setActiveTab('decided')},'ОПРЕДЕЛИЛСЯ')
           ),
           React.createElement('div',{className:'timeline'},
-            [{t:'Диалог с AI',d:'Узнай, кто ты — без тестов и оценок'},
-             {t:'Твоё цифровое ДНК',d:'Карта твоих ценностей, страхов и мечт'},
-             {t:'Эксперименты',d:'Попробуй 3-5 направлений на практике'},
-             {t:'Поддержка родителей',d:'Поможем объяснить твой выбор маме'},
-             {t:'Команда и комьюнити',d:'Найди людей с похожими мечтами'},
-             {t:'Твой путь',d:'Ясный план от «не знаю» до первого оффера'}
-            ].map((item,i)=>React.createElement('div',{key:i,className:'timeline-item'},
-              React.createElement('h4',null,item.t),
-              React.createElement('p',null,item.d)
+            tlItems.map((item,i)=>React.createElement('div',{key:i,className:'timeline-item'},
+              i%2===0
+                ?React.createElement('div',{className:'tl-left'},React.createElement('h4',null,item.t),React.createElement('p',null,item.d))
+                :React.createElement('div',{className:'tl-right'},React.createElement('h4',null,item.t),React.createElement('p',null,item.d))
             ))
           )
         )
@@ -252,12 +279,17 @@ function Landing({onStart}) {
       React.createElement('div',{style:{padding:'8px 0'}},
         React.createElement('div',{className:'marquee'},
           React.createElement('div',{className:'marquee-inner'},
-            [...PAINS,...PAINS].map((p,i)=>React.createElement('span',{key:i},p))
+            [...PAINS_R1,...PAINS_R1].map((p,i)=>React.createElement('span',{key:i},p))
           )
         ),
-        React.createElement('div',{className:'marquee',style:{animationDirection:'reverse'}},
-          React.createElement('div',{className:'marquee-inner',style:{animationDirection:'reverse'}},
-            [...PAINS.slice(5),...PAINS.slice(0,5),...PAINS.slice(5),...PAINS.slice(0,5)].map((p,i)=>React.createElement('span',{key:i},p))
+        React.createElement('div',{className:'marquee'},
+          React.createElement('div',{className:'marquee-inner reverse'},
+            [...PAINS_R2,...PAINS_R2].map((p,i)=>React.createElement('span',{key:i},p))
+          )
+        ),
+        React.createElement('div',{className:'marquee'},
+          React.createElement('div',{className:'marquee-inner'},
+            [...PAINS_R3,...PAINS_R3].map((p,i)=>React.createElement('span',{key:i},p))
           )
         )
       )
