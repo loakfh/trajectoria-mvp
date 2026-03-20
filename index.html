@@ -20,14 +20,15 @@ body{background:var(--bg);color:var(--text);font-family:'Libre Baskerville',seri
 .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 40px;font-family:'Anton',sans-serif;font-size:18px;letter-spacing:2px;position:sticky;top:0;z-index:100;backdrop-filter:blur(16px);background:rgba(15,15,25,0.4)}
 .nav-links{display:flex;gap:8px;position:absolute;left:50%;transform:translateX(-50%)}
 .nav-links button,.nav-auth button{background:transparent;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);padding:6px 16px;border-radius:20px;cursor:pointer;font-size:12px;font-family:'Libre Baskerville',serif;transition:all .3s}
-.nav-links button:hover,.nav-auth button:hover{border-color:var(--text);color:var(--text)}
+.nav-links button:hover,.nav-auth button:hover{border-color:var(--text);color:var(--text);transform:scale(1.05)}
 .nav-auth{display:flex;gap:8px}
 h1.hero{font-family:'Anton',sans-serif;font-size:clamp(36px,7vw,80px);line-height:1;text-transform:uppercase;letter-spacing:2px}
 .btn-main{font-family:'Anton',sans-serif;font-size:18px;letter-spacing:2px;text-transform:uppercase;padding:16px 48px;background:#fff;color:#000;border:none;border-radius:50px;cursor:pointer;transition:transform .2s,box-shadow .2s;animation:pulseGlow 2s ease-in-out infinite}
 .btn-main:hover{transform:translateY(-3px);box-shadow:0 0 50px rgba(255,255,255,0.7),0 0 100px rgba(124,92,255,0.5)}
 .btn-outline{font-family:'Anton',sans-serif;font-size:14px;letter-spacing:1px;text-transform:uppercase;padding:12px 32px;background:transparent;color:#fff;border:1px solid var(--border);border-radius:4px;cursor:pointer;transition:all .3s}
 .btn-outline:hover{border-color:#fff;background:rgba(255,255,255,0.05)}
-.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;backdrop-filter:blur(10px)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;backdrop-filter:blur(10px);transition:all .3s}
+.card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,0.2)}
 .input-field{width:100%;padding:14px 18px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:16px;font-family:'Libre Baskerville',serif;outline:none;transition:border-color .3s}
 .input-field:focus{border-color:var(--accent)}
 .input-field::placeholder{color:var(--muted)}
@@ -37,9 +38,10 @@ h1.hero{font-family:'Anton',sans-serif;font-size:clamp(36px,7vw,80px);line-heigh
 .dna-marker{position:absolute;top:-20px;transform:translateX(-50%);font-size:10px;color:var(--muted);white-space:nowrap}
 .dna-marker::after{content:'';position:absolute;bottom:-4px;left:50%;width:1px;height:8px;background:var(--muted)}
 .trait-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;border-left:3px solid;transition:transform .2s}
-.trait-card:hover{transform:translateX(4px)}
+.trait-card:hover{transform:translateX(6px);box-shadow:0 4px 20px rgba(0,0,0,0.3)}
 .tone-btn{width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:#fff;cursor:pointer;text-align:left;transition:all .3s;margin-bottom:8px}
 .tone-btn.active{border-color:currentColor;background:rgba(255,255,255,0.08)}
+.tone-btn:hover{transform:translateX(4px);border-color:currentColor}
 .tone-btn .tone-name{font-family:'Anton',sans-serif;font-size:15px;letter-spacing:1px}
 .tone-btn .tone-desc{font-size:11px;color:var(--muted);margin-top:2px}
 .chat-msg{max-width:80%;padding:14px 18px;border-radius:16px;margin-bottom:12px;line-height:1.6;font-size:15px;animation:fadeIn .4s ease}
@@ -56,7 +58,7 @@ h1.hero{font-family:'Anton',sans-serif;font-size:clamp(36px,7vw,80px);line-heigh
 @keyframes glowPulse{0%{box-shadow:0 0 5px rgba(124,92,255,0.2)}50%{box-shadow:0 0 25px rgba(124,92,255,0.6)}100%{box-shadow:0 0 5px rgba(124,92,255,0.2)}}
 .butterfly-text{position:absolute;top:-30px;right:0;font-size:13px;color:var(--accent);font-style:italic;animation:floatUp 2s forwards;pointer-events:none}
 .marquee{overflow:hidden;white-space:nowrap;padding:12px 0}
-.marquee-inner{display:inline-block;animation:scroll 40s linear infinite;font-style:italic;color:rgba(255,255,255,0.5);font-size:18px;font-family:'Caveat',cursive}
+.marquee-inner{display:inline-block;animation:scroll 40s linear infinite;font-style:italic;color:rgba(255,255,255,0.6);font-size:24px;font-family:'Caveat',cursive}
 .marquee-inner.reverse{animation:scrollReverse 40s linear infinite}
 .marquee-inner span{margin-right:80px}
 @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
@@ -71,7 +73,7 @@ h1.hero{font-family:'Anton',sans-serif;font-size:clamp(36px,7vw,80px);line-heigh
 .timeline-item h4{font-family:'Anton',sans-serif;font-size:13px;letter-spacing:1px;text-transform:uppercase}
 .timeline-item p{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4}
 .fakedoor{background:linear-gradient(135deg,rgba(255,255,255,0.03),rgba(255,255,255,0.08));border:1px solid var(--border);border-radius:14px;padding:24px 20px;text-align:center;cursor:pointer;transition:all .3s;flex:1;min-width:160px}
-.fakedoor:hover{border-color:rgba(255,255,255,0.3);transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,0.3)}
+.fakedoor:hover{border-color:rgba(255,255,255,0.3);transform:translateY(-6px);box-shadow:0 12px 40px rgba(0,0,0,0.4)}
 .fakedoor h4{font-family:'Anton',sans-serif;font-size:14px;letter-spacing:1px;text-transform:uppercase;margin-top:12px}
 .fakedoor p{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.4}
 .fakedoor .icon{font-size:28px}
@@ -95,10 +97,22 @@ h1.hero{font-family:'Anton',sans-serif;font-size:clamp(36px,7vw,80px);line-heigh
 .reframe-side .label{font-family:'Anton',sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
 .reframe-side.fear .label{color:#ff6b6b}
 .reframe-side.growth .label{color:#5bbd72}
+.timeline-item:hover{transform:translateX(4px);transition:all .3s}
+.hamburger{display:none;flex-direction:column;gap:5px;background:transparent;border:none;cursor:pointer;padding:4px}
+.hamburger span{display:block;width:24px;height:2px;background:#fff;border-radius:2px}
+.mobile-menu{position:absolute;top:100%;left:0;right:0;background:rgba(15,15,25,0.95);backdrop-filter:blur(16px);padding:16px;display:flex;flex-direction:column;gap:8px;z-index:200}
+.mobile-menu button{width:100%;text-align:center;background:transparent;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);padding:10px 16px;border-radius:20px;cursor:pointer;font-size:13px;font-family:'Libre Baskerville',serif;transition:all .3s}
+.mobile-menu button:hover{border-color:#fff;color:#fff}
 @media(max-width:768px){
-.nav{padding:12px 16px}
+.nav{padding:12px 16px;position:relative}
+.nav-links,.nav-auth{display:none}
+.hamburger{display:flex}
 .reframe-block{grid-template-columns:1fr}
 h1.hero{font-size:clamp(28px,8vw,48px)}
+}
+@media(min-width:769px){
+.hamburger{display:none}
+.mobile-menu{display:none!important}
 }
 </style>
 </head>
@@ -237,6 +251,7 @@ const TL_DECIDED=[
 ];
 function Landing({onStart}) {
   const [activeTab,setActiveTab]=useState('undecided');
+  const [menuOpen,setMenuOpen]=useState(false);
   const tlItems=activeTab==='undecided'?TL_UNDECIDED:TL_DECIDED;
   return React.createElement('div',{className:'page'},
     React.createElement('div',{className:'page-bg landing-bg',style:{backgroundImage:'url(assets/bg-landing.png)'}}),
@@ -252,27 +267,42 @@ function Landing({onStart}) {
         React.createElement('div',{className:'nav-auth'},
           React.createElement('button',null,'Log in'),
           React.createElement('button',null,'Sign up')
+        ),
+        React.createElement('button',{className:'hamburger',onClick:()=>setMenuOpen(o=>!o),'aria-label':'Menu'},
+          React.createElement('span'),
+          React.createElement('span'),
+          React.createElement('span')
+        ),
+        menuOpen&&React.createElement('div',{className:'mobile-menu'},
+          React.createElement('button',null,'Как это работает'),
+          React.createElement('button',null,'Я — родитель'),
+          React.createElement('button',null,'Узнать больше'),
+          React.createElement('button',null,'Связаться с нами'),
+          React.createElement('button',null,'Log in'),
+          React.createElement('button',null,'Sign up')
         )
       ),
       React.createElement('div',{style:{flex:1,display:'flex',alignItems:'center',padding:'0 40px',gap:'60px',flexWrap:'wrap'}},
         React.createElement('div',{style:{flex:'1 1 400px'}},
-          React.createElement('h1',{className:'hero'},'ХОЧУ ЖИТЬ',' ',React.createElement('br'),'ОСОЗНАННО'),
+          React.createElement('h1',{className:'hero',style:{fontFamily:"'Anton','Impact',sans-serif",fontWeight:400,fontSize:'clamp(48px,9vw,96px)',textTransform:'uppercase',letterSpacing:'2px',textShadow:'0 4px 60px rgba(0,0,0,0.7)'}},'ХОЧУ ЖИТЬ',' ',React.createElement('br'),'ОСОЗНАННО'),
           React.createElement('p',{style:{color:'var(--muted)',marginTop:16,maxWidth:420,lineHeight:1.6,fontSize:15}},
             'Здесь тебя не оценивают и не измеряют. Не решают за тебя. Мы здесь, чтобы помочь тебе услышать себя.'
           ),
-          React.createElement('button',{className:'btn-main',style:{marginTop:32},onClick:onStart},'ПОГНАЛИ')
+          React.createElement('button',{className:'btn-main',style:{marginTop:32},onClick:onStart},'ХОЧУ')
         ),
         React.createElement('div',{style:{flex:'1 1 300px',maxWidth:420}},
-          React.createElement('div',{className:'tabs',style:{marginBottom:16}},
-            React.createElement('button',{className:activeTab==='undecided'?'active':'',onClick:()=>setActiveTab('undecided')},'НЕ ОПРЕДЕЛИЛСЯ'),
-            React.createElement('button',{className:activeTab==='decided'?'active':'',onClick:()=>setActiveTab('decided')},'ОПРЕДЕЛИЛСЯ')
-          ),
-          React.createElement('div',{className:'timeline'},
-            tlItems.map((item,i)=>React.createElement('div',{key:i,className:'timeline-item'},
-              i%2===0
-                ?React.createElement('div',{className:'tl-left'},React.createElement('h4',null,item.t),React.createElement('p',null,item.d))
-                :React.createElement('div',{className:'tl-right'},React.createElement('h4',null,item.t),React.createElement('p',null,item.d))
-            ))
+          React.createElement('div',{style:{backdropFilter:'blur(16px)',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:24}},
+            React.createElement('div',{className:'tabs',style:{marginBottom:16}},
+              React.createElement('button',{className:activeTab==='undecided'?'active':'',onClick:()=>setActiveTab('undecided')},'НЕ ОПРЕДЕЛИЛСЯ'),
+              React.createElement('button',{className:activeTab==='decided'?'active':'',onClick:()=>setActiveTab('decided')},'ОПРЕДЕЛИЛСЯ')
+            ),
+            React.createElement('div',{className:'timeline'},
+              tlItems.map((item,i)=>React.createElement('div',{key:i,className:'timeline-item'},
+                i%2===0
+                  ?React.createElement('div',{className:'tl-left'},React.createElement('h4',null,item.t),React.createElement('p',null,item.d))
+                  :React.createElement('div',{className:'tl-right'},React.createElement('h4',null,item.t),React.createElement('p',null,item.d))
+              ))
+            )
           )
         )
       ),
