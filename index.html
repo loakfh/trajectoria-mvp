@@ -288,7 +288,7 @@ function Landing({onStart}) {
           React.createElement('p',{style:{color:'var(--muted)',marginTop:16,maxWidth:420,lineHeight:1.6,fontSize:15}},
             'Здесь тебя не оценивают и не измеряют. Не решают за тебя. Мы здесь, чтобы помочь тебе услышать себя.'
           ),
-          React.createElement('button',{className:'btn-main',style:{marginTop:32},onClick:onStart},'ХОЧУ')
+          React.createElement('button',{className:'btn-main',style:{marginTop:32,padding:'24px 80px',fontSize:28},onClick:onStart},'ХОЧУ')
         ),
         React.createElement('div',{style:{flex:'1 1 300px',maxWidth:420}},
           React.createElement('div',{style:{backdropFilter:'blur(16px)',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:24}},
@@ -334,23 +334,23 @@ function Onboarding({onSubmit}) {
     React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-onboarding.png)'}}),
     React.createElement('div',{className:'page-content',style:{minHeight:'100vh',display:'flex',flexDirection:'column'}},
       React.createElement('div',{className:'nav'},React.createElement('span',null,'ТРАЕКТОРИЯ')),
-      React.createElement('div',{style:{flex:1,display:'flex',alignItems:'center',justifyContent:'center',padding:'40px',gap:'40px',flexWrap:'wrap'}},
-        React.createElement('div',{style:{flex:'1 1 350px',maxWidth:450,backdropFilter:'blur(16px)',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:'48px 40px',minHeight:500}},
+      React.createElement('div',{style:{flex:1,display:'flex',alignItems:'stretch',justifyContent:'center',padding:'40px',gap:'40px',flexWrap:'wrap'}},
+        React.createElement('div',{style:{flex:'1 1 350px',maxWidth:450,backdropFilter:'blur(16px)',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:'48px 40px',minHeight:520}},
           React.createElement('h1',{className:'hero',style:{fontSize:'clamp(32px,5vw,56px)'}},'ДАВАЙ',React.createElement('br'),'ЗНАКОМИТЬСЯ'),
           React.createElement('div',{style:{marginTop:32,display:'flex',flexDirection:'column',gap:32}},
             React.createElement('div',null,
-              React.createElement('label',{style:{fontSize:13,color:'var(--muted)',marginBottom:10,display:'block'}},'Как тебя зовут?'),
+              React.createElement('label',{style:{fontSize:15,color:'var(--muted)',marginBottom:10,display:'block'}},'Как тебя зовут?'),
               React.createElement('input',{className:'input-field',placeholder:'Твоё имя',value:name,onChange:e=>setName(e.target.value)})
             ),
             React.createElement('div',null,
-              React.createElement('label',{style:{fontSize:13,color:'var(--muted)',marginBottom:6,display:'block'}},'Дай имя своему AI-копилоту'),
+              React.createElement('label',{style:{fontSize:15,color:'var(--muted)',marginBottom:6,display:'block'}},'Дай имя своему AI-копилоту'),
               React.createElement('input',{className:'input-field',placeholder:'Любое имя',value:copilot,onChange:e=>setCopilot(e.target.value)}),
-              React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:8}},'Он будет вести с тобой разговор')
+              React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginTop:8}},'Он будет вести с тобой разговор')
             ),
             React.createElement('button',{className:'btn-main',style:{width:'100%',opacity:name&&copilot?1:0.4,borderRadius:50,fontSize:20,padding:'18px 48px',animation:name&&copilot?'pulseGlow 2s ease-in-out infinite':'none'},disabled:!name||!copilot,onClick:()=>onSubmit(name,copilot)},'НАЧАТЬ')
           )
         ),
-        React.createElement('div',{style:{flex:'1 1 300px',maxWidth:380,backdropFilter:'blur(16px)',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:'48px 40px',minHeight:500}},
+        React.createElement('div',{style:{flex:'1 1 300px',maxWidth:380,backdropFilter:'blur(16px)',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:'48px 40px',minHeight:520}},
           React.createElement('div',{style:{fontSize:32,marginBottom:16}},'\u201C\u201C'),
           React.createElement('p',{style:{fontFamily:"'Caveat',cursive",fontSize:20,color:'rgba(255,255,255,0.75)',lineHeight:1.5}},
             'Сфера которую я изучал почти три года умирает из-за нейронок. Что мы знаем про потраченное время'
