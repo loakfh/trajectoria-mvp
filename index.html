@@ -66,6 +66,7 @@ h1.hero{font-family:'Anton','Impact',sans-serif!important;font-weight:400!import
 @keyframes pulseGlow{0%,100%{box-shadow:0 0 20px rgba(255,255,255,0.3)}50%{box-shadow:0 0 40px rgba(255,255,255,0.6),0 0 80px rgba(124,92,255,0.3)}}
 @keyframes nafigPulse{0%,100%{opacity:1}50%{opacity:0.7}}
 @keyframes sparkle{0%,100%{opacity:0;transform:translateY(0)}50%{opacity:1;transform:translateY(-10px)}}
+@keyframes diceRoll{0%{transform:translate(-50%,-50%) scale(0.5) rotate(0deg);opacity:0}30%{transform:translate(-50%,-50%) scale(1.5) rotate(180deg);opacity:1}60%{transform:translate(-50%,-50%) scale(1.2) rotate(360deg);opacity:1}100%{transform:translate(-50%,-50%) scale(0) rotate(720deg);opacity:0}}
 .nav-logo{font-family:'Anton','Impact',sans-serif!important;font-size:24px;letter-spacing:3px;font-weight:400}
 .chat-bg::after{background:rgba(15,15,25,0.5)}
 .timeline{display:flex;flex-direction:column;gap:0;position:relative;padding:0}
@@ -380,6 +381,7 @@ function Chat({userName, copilotName, onFinish}) {
   const [butterfly, setButterfly] = useState(null);
   const [elapsed, setElapsed] = useState(0);
   const [recording, setRecording] = useState(false);
+  const [diceRolling, setDiceRolling] = useState(false);
   const msgCountRef = useRef(0);
   const skipCountRef = useRef(0);
   const prevDnaRef = useRef(0);
@@ -411,14 +413,33 @@ function Chat({userName, copilotName, onFinish}) {
   useEffect(()=>{
     try {
       const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-      if(SR){const r=new SR();r.lang='ru-RU';r.continuous=false;r.interimResults=false;r.onresult=e=>{setInput(prev=>prev+e.results[0][0].transcript);setRecording(false)};r.onerror=()=>setRecording(false);r.onend=()=>setRecording(false);recognitionRef.current=r;}
-    }catch(e){}
+      if(SR){
+        const r=new SR();
+        r.lang='ru-RU';r.continuous=false;r.interimResults=true;
+        r.onresult=e=>{
+          const transcript=Array.from(e.results).map(res=>res[0].transcript).join('');
+          if(e.results[e.results.length-1].isFinal){setInput(transcript);setRecording(false);}
+        };
+        r.onerror=e=>{console.log('Speech error:',e.error);setRecording(false);};
+        r.onend=()=>setRecording(false);
+        recognitionRef.current=r;
+      }
+    }catch(e){console.log('SpeechRecognition init error:',e);}
   },[]);
 
   const toggleMic=()=>{
-    if(!recognitionRef.current)return;
-    if(recording){recognitionRef.current.stop();setRecording(false);}
-    else{try{recognitionRef.current.start();setRecording(true);}catch(e){setRecording(false);}}
+    if(!recognitionRef.current){console.log('SpeechRecognition not supported in this browser');return;}
+    if(recording){
+      recognitionRef.current.stop();setRecording(false);
+    }else{
+      try{recognitionRef.current.start();setRecording(true);}
+      catch(e){
+        if(e.message&&e.message.includes('already started')){
+          recognitionRef.current.stop();
+          setTimeout(()=>{try{recognitionRef.current.start();setRecording(true);}catch(e2){}},100);
+        }else{setRecording(false);}
+      }
+    }
   };
 
   const handleSend = useCallback(async()=>{
@@ -478,22 +499,26 @@ function Chat({userName, copilotName, onFinish}) {
     setIsTyping(false);
   },[input,isTyping,tone,dna,userName,copilotName,onFinish]);
 
-  const handleSkip=useCallback(async()=>{
+  const handleSkip=useCallback(()=>{
     if(isTyping)return;
-    skipCountRef.current++;
-    const skipMsg={role:'user',content:'[SKIP]'};
-    historyRef.current.push(skipMsg);
-    setIsTyping(true);
-    try{
-      const sys={role:'system',content:buildSystemPrompt(userName,copilotName,tone,msgCountRef.current,skipCountRef.current)};
-      const raw=await callGPT([sys,...historyRef.current]);
-      const clean=stripDnaBlock(raw);
-      const dnaData=parseDnaBlock(raw);
-      if(dnaData){const nd=dnaData.dna_percent??dna;setDna(nd);prevDnaRef.current=nd;}
-      setMessages(prev=>[...prev,{role:'assistant',content:clean}]);
-      historyRef.current.push({role:'assistant',content:raw});
-    }catch(e){}
-    setIsTyping(false);
+    setDiceRolling(true);
+    setTimeout(async()=>{
+      setDiceRolling(false);
+      skipCountRef.current++;
+      const skipMsg={role:'user',content:'[SKIP]'};
+      historyRef.current.push(skipMsg);
+      setIsTyping(true);
+      try{
+        const sys={role:'system',content:buildSystemPrompt(userName,copilotName,tone,msgCountRef.current,skipCountRef.current)};
+        const raw=await callGPT([sys,...historyRef.current]);
+        const clean=stripDnaBlock(raw);
+        const dnaData=parseDnaBlock(raw);
+        if(dnaData){const nd=dnaData.dna_percent??dna;setDna(nd);prevDnaRef.current=nd;}
+        setMessages(prev=>[...prev,{role:'assistant',content:clean}]);
+        historyRef.current.push({role:'assistant',content:raw});
+      }catch(e){}
+      setIsTyping(false);
+    },1500);
   },[isTyping,tone,dna,userName,copilotName]);
 
   const handleResult=()=>{
@@ -545,8 +570,9 @@ function Chat({userName, copilotName, onFinish}) {
               )
             )
           ),
-          React.createElement('div',{ref:chatRef,style:{flex:1,overflowY:'auto',padding:'20px 24px',display:'flex',flexDirection:'column'}},
-            messages.map((m,i)=>React.createElement('div',{key:i,className:'chat-msg '+m.role},
+          React.createElement('div',{ref:chatRef,style:{flex:1,overflowY:'auto',padding:'20px 24px',display:'flex',flexDirection:'column',position:'relative'}},
+            diceRolling && React.createElement('div',{style:{position:'absolute',top:'50%',left:'50%',fontSize:60,animation:'diceRoll 1.5s ease-out forwards',zIndex:10,pointerEvents:'none'}},'🎲'),
+            messages.map((m,i)=>React.createElement('div',{key:i,className:'chat-msg '+m.role,style:m.role==='user'?{fontFamily:"'Caveat',cursive",fontSize:'22px',fontWeight:700}:{}},
               React.createElement('div',{className:'sender',style:{color:m.role==='assistant'?toneColors[tone]:'var(--accent)'}},m.role==='assistant'?copilotName:'Ты'),
               React.createElement('div',null,m.content)
             )),
@@ -556,7 +582,7 @@ function Chat({userName, copilotName, onFinish}) {
           ),
           React.createElement('div',{style:{padding:'12px 24px',borderTop:'1px solid var(--border)',display:'flex',gap:8,alignItems:'center'}},
             React.createElement('button',{className:'skip-btn',onClick:handleSkip,disabled:isTyping},'НАФИГ'),
-            recognitionRef.current && React.createElement('button',{className:'mic-btn'+(recording?' recording':''),onClick:toggleMic},'🎤'),
+            React.createElement('button',{className:'mic-btn'+(recording?' recording':''),onClick:toggleMic},'🎤'),
             React.createElement('input',{className:'input-field',style:{flex:1,fontSize:18,padding:'16px 22px'},placeholder:'Напиши что-нибудь...',value:input,onChange:e=>setInput(e.target.value),onKeyDown:e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend()}},disabled:isTyping}),
             React.createElement('button',{style:{width:44,height:44,borderRadius:'50%',background:'var(--accent)',border:'none',color:'#fff',cursor:'pointer',fontSize:18,flexShrink:0,opacity:input.trim()?1:0.4},onClick:handleSend,disabled:!input.trim()||isTyping},'➤'),
             dialogueComplete && React.createElement('button',{className:'btn-main',style:{fontSize:13,padding:'10px 20px',marginLeft:8},onClick:handleResult},'DNA 🧬')
