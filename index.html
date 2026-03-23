@@ -638,24 +638,24 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome}) {
       React.createElement('div',{className:'nav'},React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ')),
 
       // 2. TITLE
-      React.createElement('h1',{className:'hero',style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:'clamp(28px,4.5vw,56px)',textTransform:'uppercase',marginTop:40,marginBottom:32}},
+      React.createElement('h1',{className:'hero',style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:'clamp(28px,4.5vw,56px)',textTransform:'uppercase',marginTop:40,marginBottom:48}},
         d.userName ? d.userName+', ' : '',
         d.title || 'ТЫ ЗНАЕШЬ О СЕБЕ БОЛЬШЕ, ЧЕМ ДУМАЕШЬ'
       ),
 
       // 3. DNA BAR — full width
-      React.createElement('div',{style:{marginBottom:32}},
+      React.createElement('div',{style:{marginBottom:40}},
         // above bar: label left, percentage right
         React.createElement('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-end',marginBottom:8}},
           React.createElement('div',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:16,letterSpacing:2,textTransform:'uppercase',fontWeight:400}},'ЦИФРОВОЕ ДНК'),
           React.createElement('div',{style:{fontFamily:'Anton',fontSize:52,color:'#fff',textShadow:'0 0 30px rgba(255,255,255,0.5)',lineHeight:1}},pct+'%')
         ),
         // marker + bar wrapper
-        React.createElement('div',{style:{position:'relative',marginTop:36}},
+        React.createElement('div',{style:{position:'relative',marginTop:48}},
           // marker above bar
-          React.createElement('div',{style:{position:'absolute',left:'15%',top:-32,transform:'translateX(-50%)',fontSize:13,color:'rgba(255,255,255,0.7)',whiteSpace:'nowrap',display:'flex',flexDirection:'column',alignItems:'center'}},
+          React.createElement('div',{style:{position:'absolute',left:'15%',top:-38,transform:'translateX(-50%)',fontSize:13,color:'rgba(255,255,255,0.7)',whiteSpace:'nowrap',display:'flex',flexDirection:'column',alignItems:'center',textAlign:'center'}},
             React.createElement('span',null,'← большинство здесь'),
-            React.createElement('div',{style:{width:2,height:16,background:'rgba(255,255,255,0.6)',marginTop:2}})
+            React.createElement('div',{style:{width:2,height:24,background:'rgba(255,255,255,0.7)',marginTop:4}})
           ),
           // bar
           React.createElement('div',{style:{height:18,background:'rgba(255,255,255,0.1)',borderRadius:9,overflow:'hidden'}},
@@ -671,7 +671,7 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome}) {
         onClick:handleImageClick,
         style:{
           width:'100%',height:500,borderRadius:20,overflow:'hidden',position:'relative',cursor:'pointer',
-          transition:'box-shadow 0.4s ease',marginBottom:32,
+          transition:'box-shadow 0.4s ease',marginBottom:48,
           boxShadow:clickGlow?'0 0 60px 20px rgba(100,180,255,0.5), 0 0 120px 40px rgba(100,180,255,0.2)':'none'
         }
       },
@@ -688,15 +688,15 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome}) {
         React.createElement('div',{style:{position:'absolute',bottom:0,left:0,padding:40}},
           // split name
           React.createElement('div',{style:{marginBottom:0}},
-            React.createElement('span',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:120,color:'#fff',lineHeight:1,textTransform:'uppercase',fontWeight:400}},namePart1),
+            React.createElement('span',{style:{fontFamily:"'Libre Baskerville',serif",fontSize:120,color:'#fff',lineHeight:1,textTransform:'uppercase',fontWeight:400}},namePart1),
             React.createElement('span',{style:{fontFamily:"'Caveat',cursive",fontSize:120,color:'#c4b5fd',lineHeight:1}},namePart2)
           ),
           // horizontal line
           React.createElement('div',{style:{width:60,height:3,background:'var(--accent)',marginTop:12,marginBottom:12}}),
           // archetype on one line
           React.createElement('div',{style:{display:'flex',alignItems:'baseline',gap:8}},
-            React.createElement('span',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:18,color:'var(--muted)',letterSpacing:2,textTransform:'uppercase',fontWeight:400}},'АРХЕТИП:'),
-            React.createElement('span',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:28,color:'#fff',letterSpacing:1,fontWeight:400}},d.archetype||'Искатель')
+            React.createElement('span',{style:{fontFamily:"'Libre Baskerville',serif",fontSize:18,color:'var(--muted)',letterSpacing:2,textTransform:'uppercase',fontWeight:400}},'АРХЕТИП:'),
+            React.createElement('span',{style:{fontFamily:"'Libre Baskerville',serif",fontSize:28,color:'#fff',letterSpacing:1,fontWeight:400}},d.archetype||'Искатель')
           )
         )
       ),
@@ -902,7 +902,7 @@ function DnaPage({data, onBack, onStore, goHome}) {
     React.createElement('div',{className:'page-content',style:{padding:'0 40px 60px',maxWidth:'1400px',width:'90%',margin:'0 auto'}},
 
       // NAVBAR
-      React.createElement('div',{style:{padding:'16px 0',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',display:'flex',alignItems:'center',justifyContent:'space-between'}},
+      React.createElement('div',{className:'nav'},
         React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ'),
         React.createElement('span',{style:{fontSize:13,color:'var(--muted)',cursor:'pointer'},onClick:onBack},'← Назад к результатам')
       ),
@@ -950,7 +950,7 @@ function StorePage({data, onBack, onBridge, goHome}) {
     React.createElement('div',{className:'page-content',style:{padding:'0 40px 60px',maxWidth:'1000px',width:'90%',margin:'0 auto'}},
 
       // NAVBAR
-      React.createElement('div',{style:{padding:'16px 0',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',display:'flex',alignItems:'center',justifyContent:'space-between'}},
+      React.createElement('div',{className:'nav'},
         React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ'),
         React.createElement('span',{style:{fontSize:13,color:'var(--muted)',cursor:'pointer'},onClick:onBack},'← Назад')
       ),
