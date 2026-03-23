@@ -413,38 +413,47 @@ function Chat({userName, copilotName, onFinish}) {
   },[messages,isTyping]);
 
   useEffect(()=>{
-    try {
-      const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-      if(SpeechRecognition){
-        const recognition=new SpeechRecognition();
-        recognition.lang='ru-RU';
-        recognition.continuous=false;
-        recognition.interimResults=false;
-        recognition.onresult=function(e){
-          const transcript=e.results[0][0].transcript;
-          setInput(prev=>prev+transcript);
-          setRecording(false);
-        };
-        recognition.onerror=function(){setRecording(false);};
-        recognition.onend=function(){setRecording(false);};
-        recognitionRef.current=recognition;
-      }
-    }catch(e){console.log('Speech not supported');}
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { console.log('No SpeechRecognition'); return; }
+    const r = new SR();
+    r.lang = 'ru-RU';
+    r.continuous = false;
+    r.interimResults = false;
+    r.maxAlternatives = 1;
+    recognitionRef.current = r;
   },[]);
 
-  const toggleMic=()=>{
-    if(!recognitionRef.current)return;
-    if(recording){
-      try{recognitionRef.current.stop();}catch(e){}
+  const toggleMic = useCallback(()=>{
+    const r = recognitionRef.current;
+    if (!r) { alert('Голосовой ввод не поддерживается в этом браузере'); return; }
+    if (recording) {
+      try { r.abort(); } catch(e) {}
       setRecording(false);
-    }else{
-      try{recognitionRef.current.stop();}catch(e){}
-      setTimeout(()=>{
-        try{recognitionRef.current.start();setRecording(true);}
-        catch(e){setRecording(false);}
-      },100);
+      return;
     }
-  };
+    r.onresult = function(event) {
+      const text = event.results[0][0].transcript;
+      setInput(function(prev) { return prev + text; });
+      setRecording(false);
+    };
+    r.onerror = function(event) {
+      console.log('Speech error:', event.error);
+      setRecording(false);
+    };
+    r.onend = function() {
+      setRecording(false);
+    };
+    try { r.abort(); } catch(e) {}
+    setTimeout(function() {
+      try {
+        r.start();
+        setRecording(true);
+      } catch(e) {
+        console.log('Start error:', e);
+        setRecording(false);
+      }
+    }, 150);
+  }, [recording]);
 
   const handleSend = useCallback(async()=>{
     const text=input.trim();if(!text||isTyping)return;
