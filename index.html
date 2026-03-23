@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0f0f19;--card:rgba(255,255,255,0.05);--border:rgba(255,255,255,0.1);--text:#fff;--muted:rgba(255,255,255,0.6);--accent:#7c5cff;--gradient:linear-gradient(90deg,#ff6b35,#f7c948,#5bbd72,#3b82f6,#7c5cff)}
+:root{--bg:#0f0f19;--card:rgba(255,255,255,0.05);--border:rgba(255,255,255,0.1);--text:#fff;--muted:rgba(255,255,255,0.6);--accent:#7c5cff;--gradient:linear-gradient(90deg,#e0e7ff,#a5b4fc,#818cf8,#6366f1,#c4b5fd,#e0e7ff)}
 body{background:var(--bg);color:var(--text);font-family:'Libre Baskerville',serif;overflow-x:hidden;min-height:100vh}
 .page{min-height:100vh;position:relative;display:flex;flex-direction:column}
 .page-bg{position:fixed;inset:0;background-size:cover;background-position:center;background-attachment:fixed;z-index:0}
@@ -68,7 +68,7 @@ h1.hero{font-family:'Anton','Impact',sans-serif!important;font-weight:400!import
 @keyframes sparkle{0%,100%{opacity:0;transform:translateY(0)}50%{opacity:1;transform:translateY(-10px)}}
 @keyframes diceRoll{0%{transform:translate(-50%,-50%) scale(0.5) rotate(0deg);opacity:0}30%{transform:translate(-50%,-50%) scale(1.5) rotate(180deg);opacity:1}60%{transform:translate(-50%,-50%) scale(1.2) rotate(360deg);opacity:1}100%{transform:translate(-50%,-50%) scale(0) rotate(720deg);opacity:0}}
 @keyframes shimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
-.nav-logo{font-family:'Libre Baskerville',serif!important;font-size:22px;letter-spacing:4px;font-weight:400;text-transform:uppercase}
+.nav-logo{font-family:Georgia,'Times New Roman',serif!important;font-size:20px;letter-spacing:5px;font-weight:400;text-transform:uppercase;cursor:pointer}
 .chat-bg::after{background:rgba(15,15,25,0.5)}
 .timeline{display:flex;flex-direction:column;gap:0;position:relative;padding:0}
 .timeline::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--gradient);transform:translateX(-50%)}
@@ -256,7 +256,7 @@ const TL_DECIDED=[
   {t:'Менторы и практики',d:'Связь с людьми из твоей будущей профессии'},
   {t:'Компании видят тебя',d:'Портфолио → витрина → предложения'}
 ];
-function Landing({onStart}) {
+function Landing({onStart, goHome}) {
   const [activeTab,setActiveTab]=useState('undecided');
   const [menuOpen,setMenuOpen]=useState(false);
   const tlItems=activeTab==='undecided'?TL_UNDECIDED:TL_DECIDED;
@@ -264,7 +264,7 @@ function Landing({onStart}) {
     React.createElement('div',{className:'page-bg landing-bg',style:{backgroundImage:'url(assets/bg-landing.png)'}}),
     React.createElement('div',{className:'page-content',style:{minHeight:'100vh',display:'flex',flexDirection:'column'}},
       React.createElement('div',{className:'nav'},
-        React.createElement('span',{className:'nav-logo'},'ТРАЕКТОРИЯ'),
+        React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ'),
         React.createElement('div',{className:'nav-links'},
           React.createElement('button',null,'Как это работает'),
           React.createElement('button',null,'Я — родитель'),
@@ -334,13 +334,13 @@ function Landing({onStart}) {
   );
 }
 
-function Onboarding({onSubmit}) {
+function Onboarding({onSubmit, goHome}) {
   const [name,setName]=useState('');
   const [copilot,setCopilot]=useState('');
   return React.createElement('div',{className:'page'},
     React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-onboarding.png)'}}),
     React.createElement('div',{className:'page-content',style:{minHeight:'100vh',display:'flex',flexDirection:'column'}},
-      React.createElement('div',{className:'nav'},React.createElement('span',{className:'nav-logo'},'ТРАЕКТОРИЯ')),
+      React.createElement('div',{className:'nav'},React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ')),
       React.createElement('div',{style:{flex:1,display:'flex',alignItems:'center',justifyContent:'center',padding:'40px',gap:'40px',flexWrap:'wrap'}},
         React.createElement('div',{style:{flex:'0 1 540px',display:'flex',flexDirection:'column',justifyContent:'center',gap:'20px',backdropFilter:'blur(16px)',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:'48px'}},
           React.createElement('h1',{className:'hero',style:{fontSize:'clamp(37px,5.75vw,64px)',marginBottom:32}},'ДАВАЙ',React.createElement('br'),'ЗНАКОМИТЬСЯ'),
@@ -373,7 +373,7 @@ function Onboarding({onSubmit}) {
   );
 }
 
-function Chat({userName, copilotName, onFinish}) {
+function Chat({userName, copilotName, onFinish, goHome}) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -550,10 +550,10 @@ function Chat({userName, copilotName, onFinish}) {
   return React.createElement('div',{className:'page',style:{display:'flex',flexDirection:'column',height:'100vh'}},
     React.createElement('div',{className:'page-bg chat-bg',style:{backgroundImage:'url(assets/bg-chat.png)',filter:'saturate(1.3) brightness(0.9)'}}),
     React.createElement('div',{className:'page-content',style:{display:'flex',flexDirection:'column',flex:1,overflow:'hidden'}},
-      React.createElement('div',{style:{padding:'16px 32px',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',background:'rgba(15,15,25,0.3)',borderBottom:'1px solid rgba(255,255,255,0.05)',flexShrink:0}},React.createElement('span',{className:'nav-logo'},'ТРАЕКТОРИЯ')),
+      React.createElement('div',{style:{padding:'16px 32px',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',background:'rgba(15,15,25,0.3)',borderBottom:'1px solid rgba(255,255,255,0.05)',flexShrink:0}},React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ')),
       React.createElement('div',{style:{display:'flex',flex:1,overflow:'hidden'}},
-        React.createElement('div',{style:{width:200,padding:'16px 12px',paddingLeft:'16px',borderRight:'1px solid var(--border)',flexShrink:0,overflowY:'auto',display:'flex',flexDirection:'column'}},
-          React.createElement('p',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:'20px',letterSpacing:'2px',textTransform:'uppercase',fontWeight:400,marginBottom:4,marginTop:'auto',color:'#fff'}},'Настрой тон'),
+        React.createElement('div',{style:{width:240,padding:'16px 12px',paddingLeft:'16px',borderRight:'1px solid var(--border)',flexShrink:0,overflowY:'auto',display:'flex',flexDirection:'column'}},
+          React.createElement('p',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:'20px',letterSpacing:'2px',textTransform:'uppercase',fontWeight:400,marginBottom:4,color:'#fff'}},'Настрой тон'),
           React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginBottom:12}},'Выбери, как копилот будет с тобой общаться. Можешь менять в любой момент.'),
           TONES.map(t=>React.createElement('button',{key:t.id,className:'tone-btn'+(tone===t.id?' active':''),style:{color:t.color,background:tone===t.id?toneBgActive[t.id]:toneBg[t.id],borderColor:t.color,transform:tone===t.id?'scale(1.05)':'scale(1)',boxShadow:tone===t.id?'0 0 15px '+t.color+'4d':'none',animation:tone===t.id?'pulseGlow 2s ease-in-out infinite':'none',minHeight:'80px',height:'80px',display:'flex',flexDirection:'column',justifyContent:'center'},onClick:()=>setTone(t.id)},
             React.createElement('div',{className:'tone-name'},t.icon,' ',React.createElement('span',{style:{background:toneGradients[t.id],backgroundClip:'text',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundSize:'200%',animation:'shimmer 3s linear infinite'}},t.name)),
@@ -575,6 +575,7 @@ function Chat({userName, copilotName, onFinish}) {
                 React.createElement('div',{className:'dna-bar-wrap'},
                   React.createElement('div',{className:'dna-bar'+(butterfly?' glow':''),style:{width:dna+'%'}})
                 ),
+                React.createElement('div',{style:{fontFamily:'Anton',fontSize:13,letterSpacing:1,color:'var(--muted)',marginTop:4}},dna+'% DNA'),
                 butterfly && React.createElement('div',{className:'butterfly-text'},butterfly)
               ),
               React.createElement('div',{style:{textAlign:'right',flexShrink:0,marginTop:'-4px'}},
@@ -606,7 +607,7 @@ function Chat({userName, copilotName, onFinish}) {
   );
 }
 
-function Summary({data, onBridge, onRestart, onDna, onStore}) {
+function Summary({data, onBridge, onRestart, onDna, onStore, goHome}) {
   const d = data || DEMO_SUMMARY;
   const insightQuote = (d.insights && d.insights[0]) ? d.insights[0] : {quote:'Мне норм и без денег, главное чтобы было интересно',context:'Ты сказал это вскользь',title:'Это не про деньги.',text:'Ты уже отделил средство от цели. Редкая ясность.'};
   const abstractImages = ['assets/дверь_разлом_цветы.png','assets/парень_комп_разлом.png','assets/дверь_размлом.png','assets/дыра_разломы.png','assets/вода_разломы.png'];
@@ -629,7 +630,7 @@ function Summary({data, onBridge, onRestart, onDna, onStore}) {
     React.createElement('div',{className:'page-content',style:{padding:'0 40px 60px',maxWidth:'1400px',width:'90%',margin:'0 auto'}},
 
       // 1. NAVBAR
-      React.createElement('div',{className:'nav'},React.createElement('span',{className:'nav-logo'},'ТРАЕКТОРИЯ')),
+      React.createElement('div',{className:'nav'},React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ')),
 
       // 2. TITLE
       React.createElement('h1',{className:'hero',style:{fontSize:'clamp(28px,4.5vw,56px)',marginTop:40,marginBottom:32}},
@@ -732,7 +733,7 @@ function Summary({data, onBridge, onRestart, onDna, onStore}) {
   );
 }
 
-function BridgePage({data, onBack}) {
+function BridgePage({data, onBack, goHome}) {
   const d = data || DEMO_SUMMARY;
   const [channel, setChannel] = useState('telegram');
   const [tag, setTag] = useState('');
@@ -748,7 +749,7 @@ function BridgePage({data, onBack}) {
   return React.createElement('div',{className:'page'},
     React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-bridge.png)'}}),
     React.createElement('div',{className:'page-content',style:{minHeight:'100vh',padding:'0 40px'}},
-      React.createElement('div',{className:'nav'},React.createElement('span',{className:'nav-logo'},'ТРАЕКТОРИЯ')),
+      React.createElement('div',{className:'nav'},React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ')),
       React.createElement('div',{style:{display:'flex',gap:40,marginTop:40,flexWrap:'wrap',alignItems:'flex-start'}},
         React.createElement('div',{style:{flex:'1 1 300px'}},
           templates.map((t,i)=>React.createElement('div',{key:i,className:'card',style:{marginBottom:12,padding:16}},
@@ -782,7 +783,7 @@ function BridgePage({data, onBack}) {
   );
 }
 
-function DnaPage({data, onBack, onStore}) {
+function DnaPage({data, onBack, onStore, goHome}) {
   const d = data || DEMO_SUMMARY;
   const clusters = [
     {
@@ -891,7 +892,7 @@ function DnaPage({data, onBack, onStore}) {
 
       // NAVBAR
       React.createElement('div',{style:{padding:'16px 0',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',display:'flex',alignItems:'center',justifyContent:'space-between'}},
-        React.createElement('span',{className:'nav-logo'},'ТРАЕКТОРИЯ'),
+        React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ'),
         React.createElement('span',{style:{fontSize:13,color:'var(--muted)',cursor:'pointer'},onClick:onBack},'← Назад к результатам')
       ),
 
@@ -926,7 +927,7 @@ function DnaPage({data, onBack, onStore}) {
   );
 }
 
-function StorePage({data, onBack, onBridge}) {
+function StorePage({data, onBack, onBridge, goHome}) {
   const d = data || DEMO_SUMMARY;
   const features = [
     {icon:'🧬',title:'Все 15 параметров ДНК',desc:'Барьеры, установка, reframe, скрытые инсайты — полная карта того кто ты'},
@@ -939,7 +940,7 @@ function StorePage({data, onBack, onBridge}) {
 
       // NAVBAR
       React.createElement('div',{style:{padding:'16px 0',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',display:'flex',alignItems:'center',justifyContent:'space-between'}},
-        React.createElement('span',{className:'nav-logo'},'ТРАЕКТОРИЯ'),
+        React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ'),
         React.createElement('span',{style:{fontSize:13,color:'var(--muted)',cursor:'pointer'},onClick:onBack},'← Назад')
       ),
 
@@ -1022,34 +1023,41 @@ function App() {
     setPage('chat');
   };
 
+  const goHome = () => { setPage('landing'); setSummaryData(null); };
+
   return (
-    page === 'landing' ? React.createElement(Landing, {onStart: () => setPage('onboarding')}) :
-    page === 'onboarding' ? React.createElement(Onboarding, {onSubmit: handleOnboard}) :
+    page === 'landing' ? React.createElement(Landing, {onStart: () => setPage('onboarding'), goHome}) :
+    page === 'onboarding' ? React.createElement(Onboarding, {onSubmit: handleOnboard, goHome}) :
     page === 'chat' ? React.createElement(Chat, {
       userName: userData.userName,
       copilotName: userData.copilotName,
-      onFinish: (data) => { setSummaryData(data); setPage('summary'); }
+      onFinish: (data) => { setSummaryData(data); setPage('summary'); },
+      goHome
     }) :
     page === 'summary' ? React.createElement(Summary, {
       data: summaryData,
       onBridge: () => setPage('bridge'),
       onDna: () => setPage('dna'),
       onStore: () => setPage('store'),
-      onRestart: () => { setPage('landing'); setSummaryData(null); }
+      onRestart: () => { setPage('landing'); setSummaryData(null); },
+      goHome
     }) :
     page === 'dna' ? React.createElement(DnaPage, {
       data: summaryData,
       onBack: () => setPage('summary'),
-      onStore: () => setPage('store')
+      onStore: () => setPage('store'),
+      goHome
     }) :
     page === 'store' ? React.createElement(StorePage, {
       data: summaryData,
       onBack: () => setPage('summary'),
-      onBridge: () => setPage('bridge')
+      onBridge: () => setPage('bridge'),
+      goHome
     }) :
     page === 'bridge' ? React.createElement(BridgePage, {
       data: summaryData,
-      onBack: () => setPage('summary')
+      onBack: () => setPage('summary'),
+      goHome
     }) : null
   );
 }
