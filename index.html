@@ -593,124 +593,102 @@ function Chat({userName, copilotName, onFinish}) {
   );
 }
 
-function Summary({data, onBridge, onRestart}) {
+function Summary({data, onBridge, onRestart, onDna, onStore}) {
   const d = data || DEMO_SUMMARY;
-  const [modal, setModal] = useState(null);
-  const fakedoors = [
-    {icon:'🗺️',title:'Роадмап к мечте',desc:'Персональный план на 3-6 месяцев к твоей цели',color:'#5bbd72'},
-    {icon:'🏢',title:'Кейс от компании',desc:'Попробуй себя в реальной задаче от бизнеса',color:'#3b82f6'},
-    {icon:'👥',title:'Найти таких же',desc:'Комьюнити людей с похожими мечтами',color:'#7c5cff'},
-    {icon:'🤖',title:'AI-клон',desc:'Цифровая версия тебя, которая работает за тебя',color:'#ff4081'},
-    {icon:'⚡',title:'Пойти глубже',desc:'Заполни ДНК до 100% и узнай о себе всё',color:'#f7c948'}
-  ];
+  const insightQuote = (d.insights && d.insights[0]) ? d.insights[0] : {quote:'Мне норм и без денег, главное чтобы было интересно',context:'Ты сказал это вскользь',title:'Это не про деньги.',text:'Ты уже отделил средство от цели. Редкая ясность.'};
+  const imgFallbacks = ['assets/дверь_разлом_цветы.png','assets/парень_комп_разлом.png','assets/дверь_размлом.png'];
+  const handleImgError = (e) => {
+    const idx = imgFallbacks.indexOf(e.target.src.replace(window.location.origin+'/',''));
+    if(idx < imgFallbacks.length - 1) e.target.src = imgFallbacks[idx+1];
+  };
   return React.createElement('div',{className:'page'},
     React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-summary.png)'}}),
-    React.createElement('div',{className:'page-content',style:{padding:'0 40px 60px'}},
+    React.createElement('div',{className:'page-content',style:{padding:'0 40px 60px',maxWidth:700,margin:'0 auto'}},
+
+      // 1. NAVBAR
       React.createElement('div',{className:'nav'},React.createElement('span',{className:'nav-logo'},'ТРАЕКТОРИЯ')),
-      React.createElement('h1',{className:'hero',style:{marginTop:40,fontSize:'clamp(28px,4vw,48px)'}},d.userName?d.userName+', ':'',d.title||'ТЫ ЗНАЕШЬ О СЕБЕ БОЛЬШЕ, ЧЕМ ДУМАЕШЬ'),
+
+      // 2. TITLE + DNA BAR
+      React.createElement('h1',{className:'hero',style:{marginTop:40,fontSize:'clamp(28px,4vw,48px)'}},
+        d.userName ? d.userName+', ' : '',
+        d.title || 'Ты знаешь о себе больше, чем думаешь'
+      ),
       React.createElement('div',{style:{display:'flex',alignItems:'center',gap:24,margin:'32px 0 16px'}},
         React.createElement('div',{style:{flex:1}},
-          React.createElement('div',{style:{fontSize:12,fontFamily:'Anton',letterSpacing:1,textTransform:'uppercase',marginBottom:6}},'ЦИФРОВОЕ ДНК'),
           React.createElement('div',{className:'dna-bar-wrap'},
             React.createElement('div',{className:'dna-bar',style:{width:(d.dna||22)+'%'}}),
             React.createElement('div',{className:'dna-marker',style:{left:'15%'}},'← большинство здесь')
-          ),
-          React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:4}},'Твоё цифровое ДНК заполнено на '+(d.dna||22)+'%, это ещё не конец')
+          )
         ),
         React.createElement('div',{style:{fontFamily:'Anton',fontSize:'clamp(48px,7vw,80px)',background:'var(--gradient)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}},(d.dna||22)+'%')
       ),
-      d.archetype && React.createElement('div',{style:{display:'flex',gap:16,margin:'24px 0',flexWrap:'wrap'}},
-        React.createElement('div',{className:'card',style:{flex:'1 1 200px',borderLeft:'3px solid var(--accent)'}},
-          React.createElement('div',{style:{fontSize:11,color:'var(--accent)',fontFamily:'Anton',letterSpacing:1,marginBottom:4}},'АРХЕТИП'),
-          React.createElement('div',{style:{fontSize:20,fontFamily:'Anton',letterSpacing:1}},d.archetype)
-        ),
-        d.superpower && React.createElement('div',{className:'card',style:{flex:'2 1 300px',borderLeft:'3px solid #5bbd72'}},
-          React.createElement('div',{style:{fontSize:11,color:'#5bbd72',fontFamily:'Anton',letterSpacing:1,marginBottom:4}},'СУПЕРСИЛА'),
-          React.createElement('div',{style:{fontSize:16}},d.superpower)
-        )
-      ),
-      React.createElement('div',{style:{display:'flex',gap:32,margin:'32px 0',flexWrap:'wrap',alignItems:'flex-start'}},
-        React.createElement('div',{style:{flex:'2 1 500px'}},
-          React.createElement('div',{className:'section-title'},'ТВОИ ЧЕРТЫ'),
-          (d.traits||[]).map((t,i)=>React.createElement('div',{key:i,className:'trait-card',style:{borderLeftColor:t.color,marginBottom:12}},
-            React.createElement('div',{style:{fontSize:12,fontFamily:'Anton',letterSpacing:1,textTransform:'uppercase',color:t.color,marginBottom:4}},t.name),
-            React.createElement('div',{style:{fontSize:15}},t.text),
-            t.reason && React.createElement('div',{style:{fontSize:12,color:'var(--muted)',marginTop:6,fontStyle:'italic'}},'↳ ',t.reason)
-          ))
-        ),
-        React.createElement('div',{style:{flex:'1 1 300px'}},
-          React.createElement('div',{className:'card',style:{borderLeft:'3px solid #f7c948',marginBottom:16}},
-            React.createElement('div',{style:{fontSize:12,fontFamily:'Anton',letterSpacing:1,color:'#f7c948',marginBottom:8}},'МНЕНИЕ КОПИЛОТА'),
-            React.createElement('div',{className:'copilot-opinion'},(d.opinion||'').split('\n').map((line,i)=>React.createElement('p',{key:i,style:{marginBottom:12}},line)))
-          ),
-          React.createElement('div',{className:'card'},
-            React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginBottom:8}},'Если с чем-то не согласен — результат можно изменить.'),
-            React.createElement('div',{style:{display:'flex',gap:8}},
-              React.createElement('input',{className:'input-field',placeholder:'Напиши, что хочешь изменить...'}),
-              React.createElement('button',{className:'btn-outline',style:{borderColor:'#f7c948',color:'#f7c948',whiteSpace:'nowrap'}},'ИЗМЕНИТЬ')
-            )
+
+      // 3. DNA ABSTRACT IMAGE — clickable card
+      React.createElement('div',{
+        onClick:onDna,
+        style:{borderRadius:20,overflow:'hidden',position:'relative',cursor:'pointer',transition:'transform 0.2s',marginBottom:8},
+        onMouseEnter:e=>e.currentTarget.style.transform='scale(1.02)',
+        onMouseLeave:e=>e.currentTarget.style.transform='scale(1)'
+      },
+        React.createElement('img',{
+          src:imgFallbacks[0],
+          onError:handleImgError,
+          style:{width:'100%',height:300,objectFit:'cover',display:'block'},
+          alt:'DNA abstract'
+        }),
+        // dark gradient overlay
+        React.createElement('div',{style:{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.1) 50%,transparent 100%)'}}),
+        // text on top of image
+        React.createElement('div',{style:{position:'absolute',bottom:0,left:0,padding:24}},
+          React.createElement('div',{style:{fontSize:11,color:'rgba(255,255,255,0.7)',fontFamily:'Anton',letterSpacing:2,textTransform:'uppercase',marginBottom:4}},'АРХЕТИП'),
+          React.createElement('div',{style:{fontSize:24,fontFamily:'Anton',letterSpacing:1,color:'#fff',marginBottom:12}},d.archetype||'Искатель'),
+          d.superpower && React.createElement('div',null,
+            React.createElement('div',{style:{fontSize:11,color:'rgba(255,255,255,0.7)',fontFamily:'Anton',letterSpacing:2,textTransform:'uppercase',marginBottom:4}},'СУПЕРСИЛА'),
+            React.createElement('div',{style:{fontSize:16,color:'#fff'}},d.superpower)
           )
         )
       ),
-      d.reframe && d.reframe.fear && React.createElement('div',{style:{margin:'24px 0'}},
-        React.createElement('div',{className:'section-title'},'ПРОТИВОРЕЧИЕ + ПЕРЕОСМЫСЛЕНИЕ'),
-        React.createElement('div',{className:'reframe-block'},
-          React.createElement('div',{className:'reframe-side fear'},
-            React.createElement('div',{className:'label'},'ТЫ НАЗВАЛ ЭТО БАРЬЕРОМ'),
-            React.createElement('p',{style:{fontSize:15}},d.reframe.fear)
-          ),
-          React.createElement('div',{className:'reframe-side growth'},
-            React.createElement('div',{className:'label'},'ПЕРЕОСМЫСЛЕНИЕ'),
-            React.createElement('p',{style:{fontSize:15}},d.reframe.growth)
-          )
+      React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginBottom:32,cursor:'pointer'},onClick:onDna},'Нажми чтобы открыть свою карту ДНК →'),
+
+      // 4. COPILOT OPINION
+      React.createElement('div',{className:'card',style:{backdropFilter:'blur(16px)',WebkitBackdropFilter:'blur(16px)',border:'1px solid var(--border)',marginBottom:32,padding:24}},
+        React.createElement('div',{style:{fontFamily:'Anton',fontSize:16,letterSpacing:1,marginBottom:16}},'МНЕНИЕ КОПИЛОТА'),
+        React.createElement('div',{style:{fontFamily:'Caveat',fontSize:20,lineHeight:1.5,marginBottom:16}},
+          (d.opinion||'Ты уже знаешь больше, чем думаешь. Осталось только начать делать.').split('\n').map((line,i)=>React.createElement('p',{key:i,style:{marginBottom:8}},line))
+        ),
+        // "между строк" insert
+        React.createElement('div',{style:{borderLeft:'3px solid var(--accent)',paddingLeft:16,margin:'16px 0'}},
+          React.createElement('p',{style:{fontSize:13,color:'var(--accent)',fontFamily:'Anton',letterSpacing:1,marginBottom:4}},'МЕЖДУ СТРОК'),
+          React.createElement('p',{style:{fontSize:15,fontStyle:'italic',color:'rgba(255,255,255,0.8)'}},'"',insightQuote.quote,'"'),
+          React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginTop:4}},insightQuote.text)
         )
       ),
-      (d.insights||[]).length>0 && React.createElement('div',{style:{margin:'24px 0'}},
-        React.createElement('div',{className:'section-title'},'МЕЖДУ СТРОК'),
-        d.insights.map((ins,i)=>React.createElement('div',{key:i,className:'insight-card'},
-          React.createElement('div',{className:'quote'},
-            React.createElement('p',null,'"',ins.quote,'"'),
-            React.createElement('p',{style:{fontSize:11,color:'var(--muted)',marginTop:4}},ins.context)
-          ),
-          React.createElement('h4',null,ins.title),
-          React.createElement('div',{className:'explanation'},ins.text)
-        ))
-      ),
-      React.createElement('div',{className:'card',style:{textAlign:'center',padding:40,margin:'40px 0',background:'linear-gradient(135deg,rgba(124,92,255,0.1),rgba(255,107,107,0.05))'}},
-        React.createElement('h2',{className:'section-title'},'ХОЧЕШЬ ЗНАТЬ ЧТО ДЕЛАТЬ ДАЛЬШЕ?'),
-        React.createElement('p',{style:{color:'var(--muted)',marginBottom:24,fontSize:14}},'Мы собрали всё в одном месте: курсы под тебя, план действий, комьюнити и много всего другого.'),
-        React.createElement('div',{style:{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:16}},
-          React.createElement('button',{className:'btn-main',onClick:()=>setModal('pay')},'ХОЧУ, ГОТОВ ПЛАТИТЬ'),
-          React.createElement('button',{className:'btn-outline',onClick:onBridge},'ХОЧУ, ПОКАЖИ РОДИТЕЛЯМ'),
-          React.createElement('button',{className:'btn-outline',onClick:()=>setModal('later')},'ПОКА НЕ НАДО')
+
+      // 5. TEASER PANEL
+      React.createElement('div',{style:{background:'linear-gradient(135deg,rgba(124,92,255,0.15),rgba(124,92,255,0.05))',borderRadius:16,padding:32,marginBottom:24}},
+        React.createElement('h2',{style:{fontFamily:'Anton',fontSize:22,letterSpacing:1,marginBottom:8}},'Открой полную карту ДНК'),
+        React.createElement('p',{style:{fontSize:14,color:'var(--muted)',marginBottom:24}},'15 параметров • персональный план • подборка мероприятий'),
+        React.createElement('div',{style:{display:'flex',gap:12,flexWrap:'wrap'}},
+          React.createElement('button',{className:'btn-main',style:{background:'#fff',color:'#0f0f19',borderRadius:999,padding:'14px 28px',fontWeight:700,border:'none',cursor:'pointer'},onClick:onStore},'Открыть за 299₽'),
+          React.createElement('button',{className:'btn-outline',style:{borderColor:'#5bbd72',color:'#5bbd72',borderRadius:999,padding:'14px 28px',cursor:'pointer'},onClick:onBridge},'Покажи родителям')
         )
       ),
-      React.createElement('div',{className:'section-title'},'ОТКРОЙ НОВЫЕ ВОЗМОЖНОСТИ'),
-      React.createElement('div',{style:{display:'flex',gap:16,flexWrap:'wrap',marginBottom:40}},
-        fakedoors.map((f,i)=>React.createElement('div',{key:i,className:'fakedoor',onClick:()=>setModal(f.title)},
-          React.createElement('div',{className:'icon'},f.icon),
-          React.createElement('h4',{style:{color:f.color}},f.title),
-          React.createElement('p',null,f.desc),
-          React.createElement('button',{className:'btn-outline',style:{marginTop:12,fontSize:12}},'ТЫК!')
-        ))
+      React.createElement('div',{style:{marginBottom:40}},
+        React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginBottom:8}},'Не согласен? Результат можно изменить'),
+        React.createElement('div',{style:{display:'flex',gap:8}},
+          React.createElement('input',{className:'input-field',placeholder:'Напиши, что хочешь изменить...'}),
+          React.createElement('button',{className:'btn-outline',style:{borderColor:'#f7c948',color:'#f7c948',whiteSpace:'nowrap'}},'ИЗМЕНИТЬ')
+        )
       ),
-      React.createElement('div',{style:{textAlign:'center',padding:'40px 0'}},
-        React.createElement('div',{className:'section-title'},'ОСТАНЕМСЯ НА СВЯЗИ'),
-        React.createElement('p',{style:{color:'var(--muted)',marginBottom:16,fontSize:14}},'Оставь контакт — напишем, когда запустим то, что тебя заинтересовало'),
+
+      // 6. CONTACT
+      React.createElement('div',{style:{textAlign:'center',padding:'32px 0'}},
+        React.createElement('p',{style:{fontFamily:'Anton',fontSize:14,letterSpacing:1,marginBottom:12}},'ОСТАВЬ КОНТАКТ'),
         React.createElement('div',{style:{display:'flex',gap:8,justifyContent:'center',maxWidth:400,margin:'0 auto'}},
-          React.createElement('input',{className:'input-field',placeholder:'@telegram или email'}),
-          React.createElement('button',{className:'btn-main',style:{fontSize:14,padding:'12px 24px'}},'СОХРАНИТЬ')
+          React.createElement('input',{className:'input-field',placeholder:'@telegram'}),
+          React.createElement('button',{className:'btn-main',style:{fontSize:14,padding:'12px 24px'}},'OK')
         ),
-        React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:8,cursor:'pointer'},onClick:onRestart},'Начать сначала')
-      )
-    ),
-    modal && React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:100,padding:20},onClick:()=>setModal(null)},
-      React.createElement('div',{className:'card',style:{maxWidth:400,padding:32,textAlign:'center'},onClick:e=>e.stopPropagation()},
-        React.createElement('h3',{style:{fontFamily:'Anton',fontSize:20,marginBottom:12}},'СКОРО ЗАПУСТИМ! 🚀'),
-        React.createElement('p',{style:{color:'var(--muted)',fontSize:14,marginBottom:16}},'Эта функция в разработке. Оставь Telegram — напишем первому.'),
-        React.createElement('input',{className:'input-field',placeholder:'@telegram',style:{marginBottom:12}}),
-        React.createElement('button',{className:'btn-main',style:{width:'100%'},onClick:()=>setModal(null)},'ОСТАВИТЬ'),
-        React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:8,cursor:'pointer'},onClick:()=>setModal(null)},'Закрыть')
+        React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:12,cursor:'pointer'},onClick:onRestart},'Начать сначала')
       )
     )
   );
@@ -766,6 +744,26 @@ function BridgePage({data, onBack}) {
   );
 }
 
+function DnaPage({data, onBack, onStore}) {
+  return React.createElement('div',{className:'page'},
+    React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-summary.png)'}}),
+    React.createElement('div',{className:'page-content',style:{padding:'40px',textAlign:'center'}},
+      React.createElement('h1',{className:'hero'},'СТРАНИЦА ДНК — В РАЗРАБОТКЕ'),
+      React.createElement('button',{className:'btn-outline',onClick:onBack,style:{marginTop:20}},'← Назад')
+    )
+  );
+}
+
+function StorePage({data, onBack}) {
+  return React.createElement('div',{className:'page'},
+    React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-summary.png)'}}),
+    React.createElement('div',{className:'page-content',style:{padding:'40px',textAlign:'center'}},
+      React.createElement('h1',{className:'hero'},'МАГАЗИН — В РАЗРАБОТКЕ'),
+      React.createElement('button',{className:'btn-outline',onClick:onBack,style:{marginTop:20}},'← Назад')
+    )
+  );
+}
+
 function App() {
   const [page, setPage] = useState('landing');
   const [userData, setUserData] = useState({userName:'',copilotName:''});
@@ -787,7 +785,18 @@ function App() {
     page === 'summary' ? React.createElement(Summary, {
       data: summaryData,
       onBridge: () => setPage('bridge'),
+      onDna: () => setPage('dna'),
+      onStore: () => setPage('store'),
       onRestart: () => { setPage('landing'); setSummaryData(null); }
+    }) :
+    page === 'dna' ? React.createElement(DnaPage, {
+      data: summaryData,
+      onBack: () => setPage('summary'),
+      onStore: () => setPage('store')
+    }) :
+    page === 'store' ? React.createElement(StorePage, {
+      data: summaryData,
+      onBack: () => setPage('summary')
     }) :
     page === 'bridge' ? React.createElement(BridgePage, {
       data: summaryData,
