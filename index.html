@@ -115,6 +115,7 @@ h1.hero{font-family:'Anton','Impact',sans-serif!important;font-weight:400!import
 .reframe-block{grid-template-columns:1fr}
 h1.hero{font-size:clamp(28px,8vw,48px)}
 }
+@media(max-width:768px){.dna-grid{grid-template-columns:1fr!important}}
 @media(min-width:769px){
 .hamburger{display:none}
 .mobile-menu{display:none!important}
@@ -603,7 +604,7 @@ function Summary({data, onBridge, onRestart, onDna, onStore}) {
   };
   return React.createElement('div',{className:'page'},
     React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-summary.png)'}}),
-    React.createElement('div',{className:'page-content',style:{padding:'0 40px 60px',maxWidth:1200,margin:'0 auto'}},
+    React.createElement('div',{className:'page-content',style:{padding:'0 40px 60px',maxWidth:'1400px',width:'90%',margin:'0 auto'}},
 
       // 1. NAVBAR
       React.createElement('div',{className:'nav'},React.createElement('span',{className:'nav-logo'},'ТРАЕКТОРИЯ')),
@@ -853,7 +854,7 @@ function DnaPage({data, onBack, onStore}) {
 
   return React.createElement('div',{className:'page'},
     React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-summary.png)'}}),
-    React.createElement('div',{className:'page-content',style:{padding:'0 40px 60px',maxWidth:1100,margin:'0 auto'}},
+    React.createElement('div',{className:'page-content',style:{padding:'0 40px 60px',maxWidth:'1400px',width:'90%',margin:'0 auto'}},
 
       // NAVBAR
       React.createElement('div',{style:{padding:'16px 0',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',display:'flex',alignItems:'center',justifyContent:'space-between'}},
@@ -877,7 +878,7 @@ function DnaPage({data, onBack, onStore}) {
       ),
 
       // CLUSTERS GRID
-      React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,460px),1fr))',gap:24,marginBottom:48}},
+      React.createElement('div',{className:'dna-grid',style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,marginBottom:48}},
         clusters.map(c=>renderCluster(c))
       ),
 
@@ -892,12 +893,88 @@ function DnaPage({data, onBack, onStore}) {
   );
 }
 
-function StorePage({data, onBack}) {
+function StorePage({data, onBack, onBridge}) {
+  const d = data || DEMO_SUMMARY;
+  const features = [
+    {icon:'🧬',title:'Все 15 параметров ДНК',desc:'Барьеры, установка, reframe, скрытые инсайты — полная карта того кто ты'},
+    {icon:'🗺️',title:'Персональный план на 2 месяца',desc:'Конкретные шаги каждую неделю — не абстракция, а действия'},
+    {icon:'🎯',title:'Подборка мероприятий под тебя',desc:'Хакатоны, курсы, олимпиады — фильтр по твоему ДНК профилю'}
+  ];
   return React.createElement('div',{className:'page'},
     React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-summary.png)'}}),
-    React.createElement('div',{className:'page-content',style:{padding:'40px',textAlign:'center'}},
-      React.createElement('h1',{className:'hero'},'МАГАЗИН — В РАЗРАБОТКЕ'),
-      React.createElement('button',{className:'btn-outline',onClick:onBack,style:{marginTop:20}},'← Назад')
+    React.createElement('div',{className:'page-content',style:{padding:'0 40px 60px',maxWidth:'1000px',width:'90%',margin:'0 auto'}},
+
+      // NAVBAR
+      React.createElement('div',{style:{padding:'16px 0',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',display:'flex',alignItems:'center',justifyContent:'space-between'}},
+        React.createElement('span',{className:'nav-logo'},'ТРАЕКТОРИЯ'),
+        React.createElement('span',{style:{fontSize:13,color:'var(--muted)',cursor:'pointer'},onClick:onBack},'← Назад')
+      ),
+
+      // HERO
+      React.createElement('div',{style:{textAlign:'center',maxWidth:800,margin:'48px auto 48px'}},
+        React.createElement('h1',{style:{fontFamily:'Anton',fontSize:'clamp(28px,5vw,36px)',letterSpacing:2,textTransform:'uppercase',marginBottom:12}},'Твоё полное ДНК ждёт'),
+        React.createElement('p',{style:{fontSize:16,color:'var(--muted)'}},'Один диалог — '+(d.dna||22)+'%. Это только начало.')
+      ),
+
+      // WHAT'S INSIDE — 3 feature cards
+      React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(250px,1fr))',gap:20,marginBottom:48}},
+        features.map((f,i)=>React.createElement('div',{key:i,style:{
+          background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:16,padding:28,textAlign:'center',
+          transition:'transform 0.2s'},
+          onMouseEnter:e=>e.currentTarget.style.transform='translateY(-4px)',
+          onMouseLeave:e=>e.currentTarget.style.transform='translateY(0)'
+        },
+          React.createElement('div',{style:{fontSize:36,marginBottom:12}},f.icon),
+          React.createElement('div',{style:{fontFamily:'Anton',fontSize:16,letterSpacing:1,marginBottom:8}},f.title),
+          React.createElement('p',{style:{fontSize:14,color:'var(--muted)',lineHeight:1.5}},f.desc)
+        ))
+      ),
+
+      // PRICING — two cards
+      React.createElement('div',{style:{display:'flex',gap:24,maxWidth:700,margin:'0 auto 48px',flexWrap:'wrap'}},
+        // Left — recommended
+        React.createElement('div',{style:{flex:1,minWidth:280,background:'rgba(255,255,255,0.03)',border:'2px solid var(--accent)',borderRadius:16,padding:32,textAlign:'center',position:'relative'}},
+          React.createElement('div',{style:{position:'absolute',top:-12,left:'50%',transform:'translateX(-50%)',background:'rgba(124,92,255,0.2)',color:'#a78bfa',fontSize:11,padding:'4px 12px',borderRadius:20,fontFamily:'Anton',letterSpacing:1}},'ПОПУЛЯРНЫЙ'),
+          React.createElement('div',{style:{fontFamily:'Anton',fontSize:48,letterSpacing:1,marginTop:16,marginBottom:4}},'299 ₽'),
+          React.createElement('div',{style:{fontSize:14,color:'var(--muted)',marginBottom:16}},'разовая покупка'),
+          React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginBottom:24,lineHeight:1.5}},'Полный ДНК + план + мероприятия'),
+          React.createElement('button',{className:'btn-main',style:{width:'100%',borderRadius:999,fontSize:16,padding:'16px'}},'Выбрать')
+        ),
+        // Right — subscription
+        React.createElement('div',{style:{flex:1,minWidth:280,background:'rgba(255,255,255,0.03)',border:'1px solid var(--border)',borderRadius:16,padding:32,textAlign:'center'}},
+          React.createElement('div',{style:{marginTop:16}},
+            React.createElement('span',{style:{fontFamily:'Anton',fontSize:48,letterSpacing:1}},'299 ₽'),
+            React.createElement('span',{style:{fontSize:14,color:'var(--muted)'}},'/мес')
+          ),
+          React.createElement('div',{style:{fontSize:14,color:'var(--muted)',marginBottom:16,marginTop:4}},'подписка'),
+          React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginBottom:24,lineHeight:1.5}},'Всё из разовой + копилот без лимитов + трекинг + peer-чат'),
+          React.createElement('button',{className:'btn-outline',style:{width:'100%',borderRadius:999,fontSize:16,padding:'16px'}},'Выбрать')
+        )
+      ),
+
+      // PARENT SECTION
+      React.createElement('div',{style:{height:1,background:'rgba(255,255,255,0.06)',margin:'40px 0'}}),
+      React.createElement('div',{style:{textAlign:'center',marginBottom:48}},
+        React.createElement('h2',{style:{fontFamily:'Anton',fontSize:22,letterSpacing:1,marginBottom:12}},'Или покажи родителям'),
+        React.createElement('p',{style:{fontSize:14,color:'var(--muted)',maxWidth:600,margin:'0 auto 24px',lineHeight:1.6}},'Пусть они решат — и получат свой инструмент: ДНК ребёнка с цитатами + скрипты разговоров + навигатор образования'),
+        React.createElement('button',{className:'btn-outline',style:{borderColor:'#5bbd72',color:'#5bbd72',borderRadius:999,padding:'14px 28px'},onClick:onBridge},'Отправить мост родителю'),
+        React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:12}},'(для родителей: разовая 399₽ или подписка 499₽/мес)')
+      ),
+
+      // TRUST SECTION
+      React.createElement('div',{style:{textAlign:'center',marginBottom:40}},
+        React.createElement('div',{style:{fontFamily:'Anton',fontSize:16,letterSpacing:1,marginBottom:16}},'Мы не берём деньги за воздух'),
+        React.createElement('div',{style:{display:'flex',gap:24,justifyContent:'center',flexWrap:'wrap'}},
+          ['Не понравится — вернём','Данные не передаём','Можно отменить подписку в любой момент'].map((t,i)=>
+            React.createElement('span',{key:i,style:{fontSize:13,color:'var(--muted)'}},'✓ '+t)
+          )
+        )
+      ),
+
+      // BACK LINK
+      React.createElement('div',{style:{textAlign:'center',paddingBottom:32}},
+        React.createElement('p',{style:{fontSize:13,color:'var(--muted)',cursor:'pointer'},onClick:onBack},'← Назад к результатам')
+      )
     )
   );
 }
@@ -934,7 +1011,8 @@ function App() {
     }) :
     page === 'store' ? React.createElement(StorePage, {
       data: summaryData,
-      onBack: () => setPage('summary')
+      onBack: () => setPage('summary'),
+      onBridge: () => setPage('bridge')
     }) :
     page === 'bridge' ? React.createElement(BridgePage, {
       data: summaryData,
