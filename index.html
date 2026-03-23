@@ -68,6 +68,7 @@ h1.hero{font-family:'Anton','Impact',sans-serif!important;font-weight:400!import
 @keyframes sparkle{0%,100%{opacity:0;transform:translateY(0)}50%{opacity:1;transform:translateY(-10px)}}
 @keyframes diceRoll{0%{transform:translate(-50%,-50%) scale(0.5) rotate(0deg);opacity:0}30%{transform:translate(-50%,-50%) scale(1.5) rotate(180deg);opacity:1}60%{transform:translate(-50%,-50%) scale(1.2) rotate(360deg);opacity:1}100%{transform:translate(-50%,-50%) scale(0) rotate(720deg);opacity:0}}
 @keyframes shimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@keyframes dnaShimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
 .nav-logo{font-family:Georgia,'Times New Roman',serif!important;font-size:20px;letter-spacing:5px;font-weight:400;text-transform:uppercase;cursor:pointer}
 .chat-bg::after{background:rgba(15,15,25,0.5)}
 .timeline{display:flex;flex-direction:column;gap:0;position:relative;padding:0}
@@ -636,27 +637,33 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome}) {
       // 1. NAVBAR
       React.createElement('div',{className:'nav'},React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ')),
 
-      // 2. DNA BAR — full width
-      React.createElement('div',{style:{marginBottom:32,marginTop:40}},
+      // 2. TITLE
+      React.createElement('h1',{className:'hero',style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:'clamp(28px,4.5vw,56px)',textTransform:'uppercase',marginTop:40,marginBottom:32}},
+        d.userName ? d.userName+', ' : '',
+        d.title || 'ТЫ ЗНАЕШЬ О СЕБЕ БОЛЬШЕ, ЧЕМ ДУМАЕШЬ'
+      ),
+
+      // 3. DNA BAR — full width
+      React.createElement('div',{style:{marginBottom:32}},
         // above bar: label left, percentage right
         React.createElement('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-end',marginBottom:8}},
-          React.createElement('div',{style:{fontFamily:'Anton',fontSize:16,letterSpacing:2,textTransform:'uppercase',fontWeight:400}},'ЦИФРОВОЕ ДНК'),
+          React.createElement('div',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:16,letterSpacing:2,textTransform:'uppercase',fontWeight:400}},'ЦИФРОВОЕ ДНК'),
           React.createElement('div',{style:{fontFamily:'Anton',fontSize:52,color:'#fff',textShadow:'0 0 30px rgba(255,255,255,0.5)',lineHeight:1}},pct+'%')
         ),
         // marker + bar wrapper
         React.createElement('div',{style:{position:'relative',marginTop:36}},
           // marker above bar
-          React.createElement('div',{style:{position:'absolute',left:'15%',top:-28,transform:'translateX(-50%)',fontSize:12,color:'rgba(255,255,255,0.6)',whiteSpace:'nowrap',display:'flex',flexDirection:'column',alignItems:'center'}},
+          React.createElement('div',{style:{position:'absolute',left:'15%',top:-32,transform:'translateX(-50%)',fontSize:13,color:'rgba(255,255,255,0.7)',whiteSpace:'nowrap',display:'flex',flexDirection:'column',alignItems:'center'}},
             React.createElement('span',null,'← большинство здесь'),
-            React.createElement('div',{style:{width:1,height:12,background:'rgba(255,255,255,0.4)',marginTop:2}})
+            React.createElement('div',{style:{width:2,height:16,background:'rgba(255,255,255,0.6)',marginTop:2}})
           ),
           // bar
           React.createElement('div',{style:{height:18,background:'rgba(255,255,255,0.1)',borderRadius:9,overflow:'hidden'}},
-            React.createElement('div',{style:{height:'100%',borderRadius:9,background:'var(--gradient)',width:pct+'%',transition:'width 0.8s ease'}})
+            React.createElement('div',{style:{height:'100%',borderRadius:9,background:'var(--gradient)',backgroundSize:'200% 100%',animation:'dnaShimmer 3s linear infinite',width:pct+'%',transition:'width 0.8s ease'}})
           )
         ),
         // below bar
-        React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginTop:8}},'Твоё цифровое ДНК заполнено на '+pct+'%, это ещё не конец')
+        React.createElement('p',{style:{fontSize:16,color:'rgba(255,255,255,0.6)',marginTop:8}},'Твоё цифровое ДНК заполнено на '+pct+'%, это ещё не конец')
       ),
 
       // 3. DNA ABSTRACT IMAGE
@@ -676,36 +683,36 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome}) {
         // dark gradient overlay
         React.createElement('div',{style:{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(0,0,0,0.8) 0%,rgba(0,0,0,0.2) 50%,transparent 100%)'}}),
         // top-left hint
-        React.createElement('div',{style:{position:'absolute',top:0,left:0,padding:24,fontFamily:'Anton',fontSize:13,color:'rgba(255,255,255,0.5)',letterSpacing:2,textTransform:'uppercase'}},'НАЖМИ ЧТОБЫ ОТКРЫТЬ ДНК'),
+        React.createElement('div',{style:{position:'absolute',top:0,left:0,padding:24,fontFamily:"'Anton','Impact',sans-serif",fontSize:13,color:'rgba(255,255,255,0.5)',letterSpacing:2,textTransform:'uppercase',fontWeight:400}},'НАЖМИ ЧТОБЫ ОТКРЫТЬ ДНК'),
         // bottom-left: split name + archetype
         React.createElement('div',{style:{position:'absolute',bottom:0,left:0,padding:40}},
           // split name
           React.createElement('div',{style:{marginBottom:0}},
-            React.createElement('span',{style:{fontFamily:'Anton',fontSize:72,color:'#fff',lineHeight:1,textTransform:'uppercase'}},namePart1),
-            React.createElement('span',{style:{fontFamily:'Caveat',fontSize:72,color:'#c4b5fd',lineHeight:1}},namePart2)
+            React.createElement('span',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:120,color:'#fff',lineHeight:1,textTransform:'uppercase',fontWeight:400}},namePart1),
+            React.createElement('span',{style:{fontFamily:"'Caveat',cursive",fontSize:120,color:'#c4b5fd',lineHeight:1}},namePart2)
           ),
           // horizontal line
           React.createElement('div',{style:{width:60,height:3,background:'var(--accent)',marginTop:12,marginBottom:12}}),
           // archetype on one line
           React.createElement('div',{style:{display:'flex',alignItems:'baseline',gap:8}},
-            React.createElement('span',{style:{fontFamily:'Anton',fontSize:14,color:'var(--muted)',letterSpacing:2,textTransform:'uppercase'}},'АРХЕТИП:'),
-            React.createElement('span',{style:{fontFamily:'Anton',fontSize:18,color:'#fff',letterSpacing:1}},d.archetype||'Искатель')
+            React.createElement('span',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:18,color:'var(--muted)',letterSpacing:2,textTransform:'uppercase',fontWeight:400}},'АРХЕТИП:'),
+            React.createElement('span',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:28,color:'#fff',letterSpacing:1,fontWeight:400}},d.archetype||'Искатель')
           )
         )
       ),
 
       // 4. COPILOT OPINION (70%) + CHANGE RESULTS (30%) — side by side
-      React.createElement('div',{style:{display:'flex',gap:24,marginBottom:40,flexWrap:'wrap',alignItems:'flex-start'}},
+      React.createElement('div',{style:{display:'flex',gap:24,marginBottom:40,flexWrap:'wrap',alignItems:'stretch'}},
         // LEFT — opinion card (70%)
         React.createElement('div',{style:{flex:'7 1 0',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:16,padding:32}},
-          React.createElement('div',{style:{fontFamily:'Anton',fontSize:20,letterSpacing:1,textTransform:'uppercase',marginBottom:20,color:toneColor}},'МНЕНИЕ КОПИЛОТА'),
+          React.createElement('div',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:20,letterSpacing:1,textTransform:'uppercase',marginBottom:20,color:toneColor,fontWeight:400}},'МНЕНИЕ КОПИЛОТА'),
           // opinion text before insert
           React.createElement('div',{style:{fontFamily:"'Libre Baskerville',serif",fontSize:18,lineHeight:1.8,color:'rgba(255,255,255,0.8)',marginBottom:20}},
             opinionBefore.map((line,i)=>React.createElement('p',{key:'b'+i,style:{marginBottom:12}},line))
           ),
           // МЕЖДУ СТРОК insert
           React.createElement('div',{style:{borderLeft:'3px solid var(--accent)',paddingLeft:16,margin:'20px 0'}},
-            React.createElement('div',{style:{fontSize:14,color:'var(--accent)',fontFamily:'Anton',letterSpacing:1,textTransform:'uppercase',marginBottom:8}},'МЕЖДУ СТРОК'),
+            React.createElement('div',{style:{fontSize:14,color:'var(--accent)',fontFamily:"'Anton','Impact',sans-serif",letterSpacing:1,textTransform:'uppercase',marginBottom:8,fontWeight:400}},'МЕЖДУ СТРОК'),
             React.createElement('p',{style:{fontFamily:'Caveat',fontSize:20,fontStyle:'italic',color:'rgba(255,255,255,0.8)',margin:'12px 0'}},'"',insightQuote.quote,'"'),
             React.createElement('p',{style:{fontSize:15,color:'var(--muted)',marginBottom:4}},insightQuote.text)
           ),
@@ -715,21 +722,21 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome}) {
           )
         ),
         // RIGHT — change results card (30%)
-        React.createElement('div',{style:{flex:'3 1 0',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:16,padding:24,display:'flex',flexDirection:'column',gap:12}},
-          React.createElement('div',{style:{fontSize:18,fontFamily:'Anton',letterSpacing:1,textTransform:'uppercase'}},'НЕ СОГЛАСЕН?'),
+        React.createElement('div',{style:{flex:'3 1 0',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:16,padding:24,display:'flex',flexDirection:'column',gap:12,justifyContent:'flex-start'}},
+          React.createElement('div',{style:{fontSize:18,fontFamily:"'Anton','Impact',sans-serif",letterSpacing:1,textTransform:'uppercase',fontWeight:400}},'НЕ СОГЛАСЕН?'),
           React.createElement('p',{style:{fontSize:14,color:'var(--muted)',marginBottom:4}},'Результат можно изменить'),
           React.createElement('input',{className:'input-field',placeholder:'Напиши что хочешь изменить...'}),
-          React.createElement('button',{className:'btn-outline',style:{borderColor:'#f7c948',color:'#f7c948',width:'100%',marginTop:8}},'ИЗМЕНИТЬ')
+          React.createElement('button',{className:'btn-outline',style:{borderColor:'#f7c948',color:'#f7c948',width:'100%',marginTop:8,fontFamily:"'Anton','Impact',sans-serif",fontWeight:400}},'ИЗМЕНИТЬ')
         )
       ),
 
       // 5. CONTACT
       React.createElement('div',{style:{textAlign:'center',padding:'48px 0'}},
-        React.createElement('div',{style:{fontFamily:'Anton',fontSize:22,letterSpacing:2,textTransform:'uppercase',marginBottom:12}},'ОСТАЛИСЬ ВОПРОСЫ? ПИШИ НАМ:'),
+        React.createElement('div',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:22,letterSpacing:2,textTransform:'uppercase',marginBottom:12,fontWeight:400}},'ОСТАЛИСЬ ВОПРОСЫ? ПИШИ НАМ:'),
         React.createElement('p',{style:{fontSize:14,color:'var(--muted)',marginBottom:16}},'Оставь контакт, наш менеджер напишет тебе'),
         React.createElement('div',{style:{display:'flex',gap:12,justifyContent:'center',alignItems:'center',flexWrap:'wrap'}},
           React.createElement('input',{style:{width:450,padding:'16px 24px',fontSize:16,borderRadius:50,border:'1px solid rgba(255,255,255,0.2)',background:'transparent',color:'#fff',outline:'none',fontFamily:"'Libre Baskerville',serif"},placeholder:'@telegram или email'}),
-          React.createElement('button',{style:{background:'#fff',color:'#000',borderRadius:50,padding:'16px 32px',border:'none',fontFamily:'Anton',fontSize:16,letterSpacing:1,cursor:'pointer',transition:'transform 0.2s'},onMouseEnter:e=>e.currentTarget.style.transform='translateY(-2px)',onMouseLeave:e=>e.currentTarget.style.transform='translateY(0)'},'ОСТАВИТЬ КОНТАКТ')
+          React.createElement('button',{style:{background:'#fff',color:'#000',borderRadius:50,padding:'16px 32px',border:'none',fontFamily:"'Anton','Impact',sans-serif",fontSize:16,letterSpacing:1,fontWeight:400,cursor:'pointer',transition:'transform 0.2s'},onMouseEnter:e=>e.currentTarget.style.transform='translateY(-2px)',onMouseLeave:e=>e.currentTarget.style.transform='translateY(0)'},'ОСТАВИТЬ КОНТАКТ')
         ),
         React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginTop:16,cursor:'pointer'},onClick:onRestart},'Начать сначала')
       )
