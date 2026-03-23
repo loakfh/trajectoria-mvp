@@ -58,7 +58,7 @@ h1.hero{font-family:'Anton','Impact',sans-serif!important;font-weight:400!import
 @keyframes glowPulse{0%{box-shadow:0 0 5px rgba(124,92,255,0.2)}50%{box-shadow:0 0 25px rgba(124,92,255,0.6)}100%{box-shadow:0 0 5px rgba(124,92,255,0.2)}}
 .butterfly-text{position:absolute;top:-30px;right:0;font-size:13px;color:var(--accent);font-style:italic;animation:floatUp 2s forwards;pointer-events:none}
 .marquee{overflow:hidden;white-space:nowrap;padding:12px 0}
-.marquee-inner{display:inline-block;animation:scroll 40s linear infinite;font-style:italic;color:rgba(255,255,255,0.6);font-size:24px;font-family:'Caveat',cursive}
+.marquee-inner{display:inline-block;animation:scroll 40s linear infinite;font-style:italic;color:rgba(255,255,255,0.6);font-size:22px;font-family:'Caveat',cursive}
 .marquee-inner.reverse{animation:scrollReverse 40s linear infinite}
 .marquee-inner span{margin-right:80px}
 @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
@@ -67,7 +67,8 @@ h1.hero{font-family:'Anton','Impact',sans-serif!important;font-weight:400!import
 @keyframes nafigPulse{0%,100%{opacity:1}50%{opacity:0.7}}
 @keyframes sparkle{0%,100%{opacity:0;transform:translateY(0)}50%{opacity:1;transform:translateY(-10px)}}
 @keyframes diceRoll{0%{transform:translate(-50%,-50%) scale(0.5) rotate(0deg);opacity:0}30%{transform:translate(-50%,-50%) scale(1.5) rotate(180deg);opacity:1}60%{transform:translate(-50%,-50%) scale(1.2) rotate(360deg);opacity:1}100%{transform:translate(-50%,-50%) scale(0) rotate(720deg);opacity:0}}
-.nav-logo{font-family:'Libre Baskerville',serif!important;font-size:22px;letter-spacing:4px;font-weight:700;text-transform:uppercase}
+@keyframes shimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+.nav-logo{font-family:'Libre Baskerville',serif!important;font-size:22px;letter-spacing:4px;font-weight:400;text-transform:uppercase}
 .chat-bg::after{background:rgba(15,15,25,0.5)}
 .timeline{display:flex;flex-direction:column;gap:0;position:relative;padding:0}
 .timeline::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--gradient);transform:translateX(-50%)}
@@ -289,15 +290,15 @@ function Landing({onStart}) {
         )
       ),
       React.createElement('div',{style:{flex:1,display:'flex',alignItems:'center',padding:'0 40px',gap:'60px',flexWrap:'wrap'}},
-        React.createElement('div',{style:{flex:'1 1 400px'}},
+        React.createElement('div',{style:{flex:'1 1 400px',paddingLeft:'8%'}},
           React.createElement('h1',{className:'hero',style:{fontFamily:"'Anton','Impact',sans-serif",fontWeight:400,fontSize:'clamp(48px,9vw,96px)',textTransform:'uppercase',letterSpacing:'2px',textShadow:'0 4px 60px rgba(0,0,0,0.7)'}},'ХОЧУ ЖИТЬ',' ',React.createElement('br'),'ОСОЗНАННО'),
           React.createElement('p',{style:{color:'var(--muted)',marginTop:16,maxWidth:420,lineHeight:1.6,fontSize:15}},
             'Здесь тебя не оценивают и не измеряют. Не решают за тебя. Мы здесь, чтобы помочь тебе услышать себя.'
           ),
           React.createElement('button',{className:'btn-main',style:{marginTop:32,padding:'24px 80px',fontFamily:"'Caveat',cursive",fontSize:'36px',fontWeight:700},onClick:onStart},'ХОЧУ')
         ),
-        React.createElement('div',{style:{flex:'1 1 300px',maxWidth:420}},
-          React.createElement('div',{style:{backdropFilter:'blur(16px)',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:24}},
+        React.createElement('div',{style:{flex:'1 1 300px',maxWidth:420,marginRight:'3%'}},
+          React.createElement('div',{style:{backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',background:'rgba(15,15,25,0.6)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:28}},
             React.createElement('div',{className:'tabs',style:{marginBottom:16}},
               React.createElement('button',{className:activeTab==='undecided'?'active':'',onClick:()=>setActiveTab('undecided')},'НЕ ОПРЕДЕЛИЛСЯ'),
               React.createElement('button',{className:activeTab==='decided'?'active':'',onClick:()=>setActiveTab('decided')},'ОПРЕДЕЛИЛСЯ')
@@ -341,22 +342,22 @@ function Onboarding({onSubmit}) {
     React.createElement('div',{className:'page-content',style:{minHeight:'100vh',display:'flex',flexDirection:'column'}},
       React.createElement('div',{className:'nav'},React.createElement('span',{className:'nav-logo'},'ТРАЕКТОРИЯ')),
       React.createElement('div',{style:{flex:1,display:'flex',alignItems:'center',justifyContent:'center',padding:'40px',gap:'40px',flexWrap:'wrap'}},
-        React.createElement('div',{style:{flex:'0 1 420px',display:'flex',flexDirection:'column',justifyContent:'center',gap:'20px',backdropFilter:'blur(16px)',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:'40px'}},
-          React.createElement('h1',{className:'hero',style:{fontSize:'clamp(32px,5vw,56px)',marginBottom:32}},'ДАВАЙ',React.createElement('br'),'ЗНАКОМИТЬСЯ'),
+        React.createElement('div',{style:{flex:'0 1 540px',display:'flex',flexDirection:'column',justifyContent:'center',gap:'20px',backdropFilter:'blur(16px)',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:'48px'}},
+          React.createElement('h1',{className:'hero',style:{fontSize:'clamp(37px,5.75vw,64px)',marginBottom:32}},'ДАВАЙ',React.createElement('br'),'ЗНАКОМИТЬСЯ'),
           React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:28}},
             React.createElement('div',null,
               React.createElement('label',{style:{fontSize:17,color:'var(--muted)',marginBottom:10,display:'block'}},'Как тебя зовут?'),
-              React.createElement('input',{className:'input-field',style:{fontSize:19,padding:'16px 20px'},placeholder:'Твоё имя',value:name,onChange:e=>setName(e.target.value)})
+              React.createElement('input',{className:'input-field',style:{fontSize:20,padding:'18px 22px'},placeholder:'Твоё имя',value:name,onChange:e=>setName(e.target.value)})
             ),
             React.createElement('div',null,
               React.createElement('label',{style:{fontSize:17,color:'var(--muted)',marginBottom:6,display:'block'}},'Дай имя своему AI-копилоту'),
-              React.createElement('input',{className:'input-field',style:{fontSize:19,padding:'16px 20px'},placeholder:'Любое имя',value:copilot,onChange:e=>setCopilot(e.target.value)}),
+              React.createElement('input',{className:'input-field',style:{fontSize:20,padding:'18px 22px'},placeholder:'Любое имя',value:copilot,onChange:e=>setCopilot(e.target.value)}),
               React.createElement('p',{style:{fontSize:15,color:'var(--muted)',marginTop:8}},'Он будет вести с тобой разговор')
             ),
-            React.createElement('button',{className:'btn-main',style:{width:'100%',opacity:name&&copilot?1:0.4,borderRadius:50,fontSize:22,padding:'18px',animation:name&&copilot?'pulseGlow 2s ease-in-out infinite':'none'},disabled:!name||!copilot,onClick:()=>onSubmit(name,copilot)},'НАЧАТЬ')
+            React.createElement('button',{className:'btn-main',style:{width:'100%',opacity:name&&copilot?1:0.4,borderRadius:50,fontSize:24,padding:'20px',animation:name&&copilot?'pulseGlow 2s ease-in-out infinite':'none'},disabled:!name||!copilot,onClick:()=>onSubmit(name,copilot)},'НАЧАТЬ')
           )
         ),
-        React.createElement('div',{style:{flex:'0 1 420px',display:'flex',flexDirection:'column',justifyContent:'center',backdropFilter:'blur(16px)',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:'40px'}},
+        React.createElement('div',{style:{flex:'0 1 540px',display:'flex',flexDirection:'column',justifyContent:'center',backdropFilter:'blur(16px)',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:'48px'}},
           React.createElement('div',{style:{fontSize:32,marginBottom:16}},'\u201C\u201C'),
           React.createElement('p',{style:{fontFamily:"'Caveat',cursive",fontSize:22,color:'rgba(255,255,255,0.75)',lineHeight:1.5}},
             'Сфера которую я изучал почти три года умирает из-за нейронок. Что мы знаем про потраченное время'
@@ -413,33 +414,35 @@ function Chat({userName, copilotName, onFinish}) {
 
   useEffect(()=>{
     try {
-      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-      if(SR){
-        const r=new SR();
-        r.lang='ru-RU';r.continuous=false;r.interimResults=true;
-        r.onresult=e=>{
-          const transcript=Array.from(e.results).map(res=>res[0].transcript).join('');
-          if(e.results[e.results.length-1].isFinal){setInput(transcript);setRecording(false);}
+      const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+      if(SpeechRecognition){
+        const recognition=new SpeechRecognition();
+        recognition.lang='ru-RU';
+        recognition.continuous=false;
+        recognition.interimResults=false;
+        recognition.onresult=function(e){
+          const transcript=e.results[0][0].transcript;
+          setInput(prev=>prev+transcript);
+          setRecording(false);
         };
-        r.onerror=e=>{console.log('Speech error:',e.error);setRecording(false);};
-        r.onend=()=>setRecording(false);
-        recognitionRef.current=r;
+        recognition.onerror=function(){setRecording(false);};
+        recognition.onend=function(){setRecording(false);};
+        recognitionRef.current=recognition;
       }
-    }catch(e){console.log('SpeechRecognition init error:',e);}
+    }catch(e){console.log('Speech not supported');}
   },[]);
 
   const toggleMic=()=>{
-    if(!recognitionRef.current){console.log('SpeechRecognition not supported in this browser');return;}
+    if(!recognitionRef.current)return;
     if(recording){
-      recognitionRef.current.stop();setRecording(false);
+      try{recognitionRef.current.stop();}catch(e){}
+      setRecording(false);
     }else{
-      try{recognitionRef.current.start();setRecording(true);}
-      catch(e){
-        if(e.message&&e.message.includes('already started')){
-          recognitionRef.current.stop();
-          setTimeout(()=>{try{recognitionRef.current.start();setRecording(true);}catch(e2){}},100);
-        }else{setRecording(false);}
-      }
+      try{recognitionRef.current.stop();}catch(e){}
+      setTimeout(()=>{
+        try{recognitionRef.current.start();setRecording(true);}
+        catch(e){setRecording(false);}
+      },100);
     }
   };
 
@@ -533,6 +536,7 @@ function Chat({userName, copilotName, onFinish}) {
   const toneColors={direct:'#3b82f6',friendly:'#22c55e',provocative:'#f97316',chill:'#a855f7'};
   const toneBg={direct:'rgba(59,130,246,0.2)',friendly:'rgba(34,197,94,0.2)',provocative:'rgba(249,115,22,0.2)',chill:'rgba(168,85,247,0.2)'};
   const toneBgActive={direct:'rgba(59,130,246,0.3)',friendly:'rgba(34,197,94,0.3)',provocative:'rgba(249,115,22,0.3)',chill:'rgba(168,85,247,0.3)'};
+  const toneGradients={direct:'linear-gradient(90deg,#3b82f6,#60a5fa,#3b82f6)',friendly:'linear-gradient(90deg,#22c55e,#166534,#22c55e)',provocative:'linear-gradient(90deg,#ef4444,#f97316,#eab308,#ef4444)',chill:'linear-gradient(90deg,#a855f7,#ec4899,#a855f7)'};
 
   return React.createElement('div',{className:'page',style:{display:'flex',flexDirection:'column',height:'100vh'}},
     React.createElement('div',{className:'page-bg chat-bg',style:{backgroundImage:'url(assets/bg-chat.png)',filter:'saturate(1.3) brightness(0.9)'}}),
@@ -540,10 +544,10 @@ function Chat({userName, copilotName, onFinish}) {
       React.createElement('div',{style:{padding:'16px 32px',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',background:'rgba(15,15,25,0.3)',borderBottom:'1px solid rgba(255,255,255,0.05)',flexShrink:0}},React.createElement('span',{className:'nav-logo'},'ТРАЕКТОРИЯ')),
       React.createElement('div',{style:{display:'flex',flex:1,overflow:'hidden'}},
         React.createElement('div',{style:{width:200,padding:'16px 12px',paddingLeft:'16px',borderRight:'1px solid var(--border)',flexShrink:0,overflowY:'auto',display:'flex',flexDirection:'column'}},
-          React.createElement('p',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:'20px',letterSpacing:'2px',textTransform:'uppercase',fontWeight:400,marginBottom:4,color:'#fff'}},'Настрой тон'),
-          React.createElement('p',{style:{fontSize:11,color:'var(--muted)',marginBottom:12}},'Выбери, как копилот будет с тобой общаться. Можешь менять в любой момент.'),
+          React.createElement('p',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:'20px',letterSpacing:'2px',textTransform:'uppercase',fontWeight:400,marginBottom:4,marginTop:'auto',color:'#fff'}},'Настрой тон'),
+          React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginBottom:12}},'Выбери, как копилот будет с тобой общаться. Можешь менять в любой момент.'),
           TONES.map(t=>React.createElement('button',{key:t.id,className:'tone-btn'+(tone===t.id?' active':''),style:{color:t.color,background:tone===t.id?toneBgActive[t.id]:toneBg[t.id],borderColor:t.color,transform:tone===t.id?'scale(1.05)':'scale(1)',boxShadow:tone===t.id?'0 0 15px '+t.color+'4d':'none',animation:tone===t.id?'pulseGlow 2s ease-in-out infinite':'none',minHeight:'80px',height:'80px',display:'flex',flexDirection:'column',justifyContent:'center'},onClick:()=>setTone(t.id)},
-            React.createElement('div',{className:'tone-name'},t.icon,' ',React.createElement('span',{style:{color:t.color}},t.name)),
+            React.createElement('div',{className:'tone-name'},t.icon,' ',React.createElement('span',{style:{background:toneGradients[t.id],backgroundClip:'text',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundSize:'200%',animation:'shimmer 3s linear infinite'}},t.name)),
             React.createElement('div',{className:'tone-desc'},t.desc)
           )),
           React.createElement('div',{style:{position:'relative',background:'rgba(255,100,100,0.08)',border:'1px solid rgba(255,100,100,0.15)',borderRadius:10,padding:16,marginTop:'auto',overflow:'hidden',minHeight:140}},
@@ -552,7 +556,7 @@ function Chat({userName, copilotName, onFinish}) {
             React.createElement('span',{style:{position:'absolute',top:'40%',left:'60%',width:4,height:4,borderRadius:'50%',background:'rgba(255,200,100,0.6)',animation:'sparkle 3s ease-in-out infinite',animationDelay:'2s'}}),
             React.createElement('div',{style:{fontSize:24,marginBottom:6}},'🎲'),
             React.createElement('p',{style:{marginBottom:4}},React.createElement('span',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:16,color:'rgba(255,150,100,0.9)'}},'НАФИГ')),
-            React.createElement('p',{style:{fontSize:13,color:'rgba(255,180,120,0.85)',lineHeight:1.4}},'Копилот борщит? Тема слишком личная? Или просто скучно? Кинь кубик 🎲 Копилот сам решит что делать — может сменит тему, может задаст секретный вопрос, а может обидится. Не угадаешь. В этом и кайф.')
+            React.createElement('p',{style:{fontSize:14,color:'rgba(255,180,120,0.85)',lineHeight:1.4}},'Копилот борщит? Тема слишком личная? Или просто скучно? Кинь кубик — Копилот сам решит что делать: может сменит тему, может задаст секретный вопрос, а может обидится. Не угадаешь. В этом и кайф.')
           )
         ),
         React.createElement('div',{style:{flex:1,display:'flex',flexDirection:'column',minWidth:0}},
@@ -562,8 +566,7 @@ function Chat({userName, copilotName, onFinish}) {
                 React.createElement('div',{className:'dna-bar-wrap'},
                   React.createElement('div',{className:'dna-bar'+(butterfly?' glow':''),style:{width:dna+'%'}})
                 ),
-                butterfly && React.createElement('div',{className:'butterfly-text'},butterfly),
-                React.createElement('p',{style:{fontSize:14,color:'var(--muted)',marginTop:10}},'Твоё цифровое ДНК заполнено на ',React.createElement('span',{style:{fontFamily:"'Anton',sans-serif",fontSize:22,fontWeight:400}},dna+'%'),', это ещё не конец')
+                butterfly && React.createElement('div',{className:'butterfly-text'},butterfly)
               ),
               React.createElement('div',{style:{textAlign:'right',flexShrink:0,marginTop:'-4px'}},
                 React.createElement('div',{style:{fontFamily:'Anton',fontSize:36}},String(mins).padStart(1,'0')+':'+String(secs).padStart(2,'0')),
