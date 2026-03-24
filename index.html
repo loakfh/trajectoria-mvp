@@ -127,11 +127,22 @@ h1.hero{font-family:'Anton','Impact','Arial Black',sans-serif!important}
 .mobile-menu{display:none!important}
 .sidebar-toggle{display:none!important}
 }
+@media(min-width:1300px) and (max-width:1600px){
+.timeline-item{padding:6px 0 6px 20px!important;min-height:32px!important}
+.timeline-item h4{font-size:12px!important}
+.timeline-item p{font-size:10px!important;margin-top:0!important;line-height:1.2!important}
+.timeline-item::before{width:8px!important;height:8px!important;top:12px!important}
+.timeline{gap:0!important}
+.hero-right>div:first-child{padding:16px!important}
+.hero-right .tabs{margin-bottom:8px!important}
+.tl-left{padding-right:12px!important}
+.tl-right{padding-left:12px!important}
+}
 @media(min-width:1920px){
-html{zoom:1.05}
+#root{zoom:1.15}
 }
 @media(min-width:2560px){
-html{zoom:1.15}
+#root{zoom:1.4}
 }
 @media(max-width:1400px){
 .landing-main{gap:40px!important}
