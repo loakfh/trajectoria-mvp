@@ -176,6 +176,7 @@ h1.hero{font-size:clamp(48px,5vw,80px)!important}
 .hero-right .tabs{margin-bottom:8px!important}
 }
 @media(max-width:768px){
+.dna-header-section{flex-direction:column!important;min-height:auto!important;padding-top:20px!important;padding-bottom:20px!important;gap:32px!important}
 .nav{padding:12px 16px;position:relative}
 .nav-links,.nav-auth{display:none}
 .hamburger{display:flex}
@@ -909,104 +910,88 @@ function BridgePage({data, onBack, goHome}) {
   );
 }
 
-function DnaPage({data, onBack, onStore, goHome}) {
+function DnaPage({data, onBack, onStore, onBridge, goHome}) {
   const d = data || DEMO_SUMMARY;
-  const clusters = [
-    {
-      id:1, name:'Мечта и драйверы', weight:'25%', color:'#ff6b35', icon:'🔥',
-      params:[
-        {label:'Кем мечтаешь стать', value:d.traits?.[0]?.text||'Создавать продукты, которые меняют жизнь людей'},
-        {label:'Моменты потока', value:'Когда сложная задача наконец складывается'},
-        {label:'Какую проблему решать', value:'Помочь поколению подготовиться к AI-будущему'}
-      ], unlocked:true
-    },
-    {
-      id:2, name:'Ценности и философия', weight:'10%', color:'#f7c948', icon:'⚖️',
-      params:[
-        {label:'Главные ценности', value:'Свобода выбора, честность, возможность влиять'},
-        {label:'Баланс или интенсивность', value:'Готов вкалывать, но только если ведёт к мечте'}
-      ], unlocked:true
-    },
-    {
-      id:3, name:'Барьеры и мышление', weight:'25%', color:'#ff4081', icon:'🧠',
-      params:[
-        {label:'Установка на рост', value:'Зачатки growth mindset — готов пробовать, но иногда сомневаешься'},
-        {label:'Конкретные страхи', value:'Страх не оправдать ожидания. Мысль «а вдруг не то»'},
-        {label:'Кто давит', value:'Мама хочет стабильности, друзья не понимают'},
-        {label:'Ограничивающие убеждения', value:'«Я ещё слишком молод чтобы начинать»'}
-      ], unlocked:false
-    },
-    {
-      id:4, name:'Готовность к действию', weight:'15%', color:'#5bbd72', icon:'🚀',
-      params:[
-        {label:'Локус контроля', value:'Верит что может влиять на будущее'},
-        {label:'Готовность пробовать', value:'Высокая — пробует без гарантий'},
-        {label:'Горизонт планирования', value:'Думает на 3-5 лет вперёд'}
-      ], unlocked:true
-    },
-    {
-      id:5, name:'Интересы и стиль', weight:'10%', color:'#3b82f6', icon:'🎯',
-      params:[
-        {label:'Текущие интересы', value:'Технологии, бизнес, психология'},
-        {label:'Как учишься лучше всего', value:'Через практику и проекты, не лекции'}
-      ], unlocked:false
-    },
-    {
-      id:6, name:'Социальный контекст', weight:'5%', color:'#a855f7', icon:'👥',
-      params:[
-        {label:'Влияние окружения', value:'Друзья не определились — давление среды минимальное'},
-        {label:'Потребность в комьюнити', value:'Хочет найти единомышленников'}
-      ], unlocked:false
-    },
-    {
-      id:7, name:'Материальные ориентиры', weight:'5%', color:'#f97316', icon:'💰',
-      params:[
-        {label:'Образ жизни мечты', value:'Свобода перемещения, удалённая работа'},
-        {label:'Отношение к деньгам', value:'Деньги — средство, не цель'}
-      ], unlocked:false
-    },
-    {
-      id:8, name:'AI-грамотность', weight:'5%', color:'#06b6d4', icon:'🤖',
-      params:[
-        {label:'Использование AI', value:'Активно использует ChatGPT, пишет промпты'},
-        {label:'Отношение к AI', value:'Видит AI как возможность, не угрозу'}
-      ], unlocked:false
-    }
+  const userName = d.userName || 'Имя';
+  const nameHalf = Math.ceil(userName.length / 2);
+  const namePart1 = userName.slice(0, nameHalf);
+  const namePart2 = userName.slice(nameHalf);
+
+  const cav = (text) => React.createElement('span',{style:{fontFamily:"'Caveat',cursive",color:'#c4b5fd',fontStyle:'italic'}},text);
+
+  const headerTraits = [
+    {label:'СУПЕРСИЛА', value:d.superpower||'Быстро учится — и понимает мышление людей изнутри', highlights:['Быстро учится','мышление людей']},
+    {label:'МЕЧТА', value:d.traits?.[0]?.text||'Создать продукт, который изменит жизнь поколения', highlights:['изменит жизнь','поколения']},
+    {label:'БАРЬЕР', value:'Страх не оправдать ожидания — но это нетерпение роста', highlights:['нетерпение роста']},
+    {label:'ТОПЛИВО', value:'Каждое действие — только если ведёт к мечте. Иначе незачем.', highlights:['ведёт к мечте']},
+    {label:'ЧУЙКА', value:'Подростки 12-16 лет — последнее поколение, которое можно подготовить', highlights:['последнее поколение']}
   ];
 
-  const renderCluster = (c) => {
+  const highlightText = (text, highlights) => {
+    if(!highlights||!highlights.length) return text;
+    let parts = [text];
+    highlights.forEach(h => {
+      const newParts = [];
+      parts.forEach(p => {
+        if(typeof p !== 'string') { newParts.push(p); return; }
+        const idx = p.indexOf(h);
+        if(idx === -1) { newParts.push(p); return; }
+        if(idx > 0) newParts.push(p.slice(0, idx));
+        newParts.push(cav(h));
+        if(idx + h.length < p.length) newParts.push(p.slice(idx + h.length));
+      });
+      parts = newParts;
+    });
+    return parts;
+  };
+
+  const clusters = [
+    {id:1, name:'МЕЧТА И ДРАЙВЕРЫ', weight:'25%', color:'#ff6b35', full:true,
+      quote:'Хочу создавать то, что реально меняет жизнь людей моего возраста.',
+      body:'Главный драйвер — не статус и не деньги. Это потребность строить. Видит дальше ровесников и чувствует ответственность за поколение, которое пока не осознало масштаб перемен.'},
+    {id:2, name:'ЦЕННОСТИ И ФИЛОСОФИЯ', weight:'10%', color:'#f7c948', full:false,
+      quote:'Свобода выбора важнее стабильности. Честность — даже когда неудобно.',
+      body:'Ценностный каркас уже сформирован. Приоритет — возможность влиять. Баланс между интенсивностью и свободой: готов вкалывать, но только если путь ведёт к мечте.'},
+    {id:3, name:'БАРЬЕРЫ И МЫШЛЕНИЕ', weight:'25%', color:'#ff4081', full:false,
+      quote:'Иногда кажется что я ещё слишком молод чтобы начинать.',
+      body:'Growth mindset в зачатке — готовность пробовать есть, но сомнения тормозят. Страх не оправдать ожидания. Давление среды: мама хочет стабильности, друзья не понимают.'},
+    {id:4, name:'ГОТОВНОСТЬ К ДЕЙСТВИЮ', weight:'15%', color:'#5bbd72', full:true,
+      quote:'Я верю что могу влиять на будущее. И готов пробовать без гарантий.',
+      body:'Внутренний локус контроля. Высокая готовность к эксперименту. Горизонт планирования — 3-5 лет вперёд. Редкое сочетание для возраста: видение + готовность действовать.'},
+    {id:5, name:'ИНТЕРЕСЫ И СТИЛЬ', weight:'10%', color:'#3b82f6', full:false,
+      quote:'Лекции — мимо. Мне нужны проекты и реальные задачи.',
+      body:'Технологии, бизнес, психология — треугольник интересов. Учится через практику и проекты. Теория работает только в связке с действием.'},
+    {id:6, name:'СОЦИАЛЬНЫЙ КОНТЕКСТ', weight:'5%', color:'#a855f7', full:false,
+      quote:'Друзья пока не определились. Мне не хватает единомышленников.',
+      body:'Давление среды минимальное — но и поддержки мало. Острая потребность в комьюнити людей с похожими амбициями. Одиночество визионера в обычной школе.'},
+    {id:7, name:'МАТЕРИАЛЬНЫЕ ОРИЕНТИРЫ', weight:'5%', color:'#f97316', full:false,
+      quote:'Деньги — средство. Свобода перемещения — вот что важно.',
+      body:'Образ жизни мечты: удалённая работа, свобода перемещения. Деньги не цель, а инструмент. Материальные амбиции подчинены ценностным.'},
+    {id:8, name:'AI-ГРАМОТНОСТЬ', weight:'5%', color:'#06b6d4', full:false,
+      quote:'AI — это возможность. Не угроза, а суперсила для тех кто поймёт.',
+      body:'Активно использует ChatGPT, пишет промпты. Видит AI как рычаг, не замену. Понимание AI-ландшафта выше среднего для возраста.'}
+  ];
+
+  const renderBlock = (c) => {
     const cardStyle = {
       background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.08)',
-      borderRadius:16, padding:28, borderLeft:'3px solid '+c.color, position:'relative',
-      transition:'transform 0.2s, box-shadow 0.2s', overflow:'hidden'
+      borderRadius:16, padding:'36px 32px', position:'relative', overflow:'hidden',
+      gridColumn: c.full ? '1 / -1' : 'auto'
     };
-    const content = React.createElement('div',null,
-      // top row: icon + name + weight
-      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:20}},
-        React.createElement('span',{style:{fontSize:28}},c.icon),
-        React.createElement('span',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:18,letterSpacing:1,flex:1}},c.name),
-        React.createElement('span',{style:{background:c.color+'26',color:c.color,fontSize:11,padding:'4px 12px',borderRadius:20,fontFamily:"'Anton','Impact','Arial Black',sans-serif",letterSpacing:1}},c.weight)
+    const content = React.createElement('div',{style:{filter:'blur(8px)',opacity:0.3,pointerEvents:'none'}},
+      React.createElement('div',{style:{position:'absolute',top:16,right:24,fontSize:80,fontFamily:"'Anton','Impact',sans-serif",color:'rgba(255,255,255,0.03)',lineHeight:1,pointerEvents:'none'}},String(c.id).padStart(2,'0')),
+      React.createElement('div',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:24,letterSpacing:2,textTransform:'uppercase',marginBottom:20,color:'#fff'}},c.name),
+      React.createElement('div',{style:{borderLeft:'3px solid '+c.color,paddingLeft:16,marginBottom:20}},
+        React.createElement('p',{style:{fontFamily:"'Caveat',cursive",fontSize:18,fontStyle:'italic',color:'rgba(255,255,255,0.7)',lineHeight:1.5}},c.quote)
       ),
-      // params
-      c.params.map((p,i)=>React.createElement('div',{key:i},
-        i>0 && React.createElement('div',{style:{height:1,background:'rgba(255,255,255,0.05)',margin:'16px 0'}}),
-        React.createElement('div',{style:{fontSize:12,textTransform:'uppercase',letterSpacing:1,color:c.color,marginBottom:6}},p.label),
-        React.createElement('div',{style:{fontSize:16,lineHeight:1.6,color:'#fff'}},p.value)
-      ))
+      React.createElement('p',{style:{fontFamily:"'Libre Baskerville',serif",fontSize:15,lineHeight:1.8,color:'rgba(255,255,255,0.75)',maxWidth:c.full?'80%':'100%'}},c.body),
+      React.createElement('div',{style:{marginTop:20,fontSize:11,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.3)'}},'КЛАСТЕР \u00B7 ВЕС '+c.weight)
     );
-
-    if(c.unlocked) {
-      return React.createElement('div',{key:c.id,style:cardStyle,
-        onMouseEnter:e=>{e.currentTarget.style.transform='translateY(-4px)';e.currentTarget.style.boxShadow='0 12px 40px rgba(0,0,0,0.3)';},
-        onMouseLeave:e=>{e.currentTarget.style.transform='translateY(0)';e.currentTarget.style.boxShadow='none';}
-      },content);
-    }
-    // locked
     return React.createElement('div',{key:c.id,style:{...cardStyle,cursor:'pointer'},onClick:onStore},
-      React.createElement('div',{style:{filter:'blur(6px)',opacity:0.4,pointerEvents:'none'}},content),
+      content,
       React.createElement('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',zIndex:2}},
-        React.createElement('div',{style:{background:'rgba(124,92,255,0.2)',border:'1px solid rgba(124,92,255,0.4)',borderRadius:20,padding:'8px 24px',cursor:'pointer'}},
-          React.createElement('span',{style:{color:'#a78bfa',fontSize:14,fontFamily:"'Anton','Impact','Arial Black',sans-serif",letterSpacing:1}},'PRO — Открыть')
+        React.createElement('div',{onClick:e=>{e.stopPropagation();onStore();},style:{background:'rgba(124,92,255,0.2)',border:'1px solid rgba(124,92,255,0.4)',borderRadius:24,padding:'10px 28px',cursor:'pointer'}},
+          React.createElement('span',{style:{color:'#a78bfa',fontSize:15,fontFamily:"'Anton','Impact','Arial Black',sans-serif",letterSpacing:1}},'PRO')
         )
       )
     );
@@ -1014,38 +999,54 @@ function DnaPage({data, onBack, onStore, goHome}) {
 
   return React.createElement('div',{className:'page'},
     React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-summary.png)'}}),
-    React.createElement('div',{className:'nav'},
+    // NAV
+    React.createElement('div',{className:'nav',style:{display:'flex',justifyContent:'space-between',alignItems:'center'}},
       React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ'),
-      React.createElement('span',{style:{fontSize:13,color:'var(--muted)',cursor:'pointer'},onClick:onBack},'← Назад к результатам')
+      React.createElement('span',{style:{fontSize:13,color:'var(--muted)',cursor:'pointer',fontFamily:"'Anton','Impact',sans-serif",letterSpacing:2,textTransform:'uppercase'},onClick:onBack},'\u2190 НАЗАД')
     ),
-    React.createElement('div',{className:'page-content resp-pad zoomable',style:{padding:'0 40px 60px',maxWidth:'1400px',width:'90%',margin:'0 auto'}},
+    React.createElement('div',{className:'page-content resp-pad zoomable',style:{padding:'0 40px 0',maxWidth:'1400px',width:'92%',margin:'0 auto'}},
 
-      // HEADER
-      React.createElement('div',{style:{textAlign:'center',marginTop:48,marginBottom:48}},
-        React.createElement('div',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:'clamp(48px,8vw,80px)',letterSpacing:2,lineHeight:1}},d.userName||'Имя'),
-        React.createElement('div',{style:{fontSize:18,color:'var(--accent)',fontFamily:"'Anton','Impact','Arial Black',sans-serif",letterSpacing:1,marginTop:16}},d.archetype||'Искатель-строитель'),
-        React.createElement('div',{style:{fontSize:16,color:'var(--muted)',fontStyle:'italic',fontFamily:"'Libre Baskerville',serif",marginTop:8}},d.superpower||''),
-        React.createElement('div',{style:{display:'flex',alignItems:'center',gap:24,maxWidth:500,margin:'32px auto 0'}},
-          React.createElement('div',{style:{flex:1}},
-            React.createElement('div',{className:'dna-bar-wrap'},
-              React.createElement('div',{className:'dna-bar',style:{width:(d.dna||22)+'%'}})
-            )
+      // === SECTION 1: EDITORIAL HEADER ===
+      React.createElement('div',{className:'dna-header-section',style:{display:'flex',gap:60,minHeight:'85vh',alignItems:'center',paddingTop:40,paddingBottom:40,flexWrap:'wrap'}},
+        // LEFT COLUMN (name + description)
+        React.createElement('div',{style:{flex:'2 1 320px',minWidth:280}},
+          React.createElement('div',{style:{fontSize:11,textTransform:'uppercase',letterSpacing:4,color:'var(--muted)',marginBottom:32}},'ДНК УЧАСТНИКА \u00B7 ТРАЕКТОРИЯ \u00B7 2026'),
+          React.createElement('div',{style:{fontSize:'clamp(60px,12vw,140px)',lineHeight:0.9,marginBottom:32}},
+            React.createElement('span',{style:{fontFamily:"'Libre Baskerville',serif",fontWeight:300,display:'block'}},namePart1),
+            React.createElement('span',{style:{fontFamily:"'Caveat',cursive",color:'#c4b5fd',display:'block'}},namePart2)
           ),
-          React.createElement('div',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:'clamp(36px,5vw,56px)',background:'var(--gradient)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}},(d.dna||22)+'%')
+          React.createElement('p',{style:{fontFamily:"'Libre Baskerville',serif",fontSize:16,color:'var(--muted)',lineHeight:1.7,maxWidth:440,marginBottom:32}},'Видит дальше ровесников. Понимает людей изнутри. Строит экосистему для поколения, которое ещё не знает что ему предстоит.'),
+          React.createElement('div',{style:{width:50,height:3,background:'var(--accent)',marginBottom:16}}),
+          React.createElement('div',{style:{fontSize:13,textTransform:'uppercase',letterSpacing:3,color:'var(--accent)'}},'АРХЕТИП: '+(d.archetype||'Искатель-строитель'))
+        ),
+        // RIGHT COLUMN (5 key traits)
+        React.createElement('div',{style:{flex:'3 1 400px',minWidth:300}},
+          headerTraits.map((t,i)=>React.createElement('div',{key:i,style:{borderBottom:i<4?'1px solid rgba(255,255,255,0.08)':'none',padding:'24px 0'}},
+            React.createElement('div',{style:{fontSize:11,textTransform:'uppercase',letterSpacing:3,color:'var(--muted)',marginBottom:8}},t.label),
+            React.createElement('div',{style:{fontSize:18,fontFamily:"'Libre Baskerville',serif",color:'#fff',lineHeight:1.5}},highlightText(t.value,t.highlights))
+          ))
         )
       ),
 
-      // CLUSTERS GRID
-      React.createElement('div',{className:'dna-grid',style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,marginBottom:48}},
-        clusters.map(c=>renderCluster(c))
+      // === SECTION 2: DRAMATIC QUOTE ===
+      React.createElement('div',{style:{textAlign:'center',padding:'80px 0',position:'relative'}},
+        React.createElement('div',{style:{fontSize:80,color:'rgba(255,255,255,0.08)',lineHeight:1,marginBottom:-20,userSelect:'none'}},'\u275D'),
+        React.createElement('p',{style:{fontFamily:"'Caveat',cursive",fontSize:'clamp(20px,3vw,32px)',color:'rgba(255,255,255,0.85)',lineHeight:1.5,maxWidth:800,margin:'0 auto',padding:'0 20px'}},'\u00ABЕсли помочь подросткам прокачать навыки будущего \u2014 наш мир сможет не только адаптироваться к эре AI, но и занять крутые позиции в этом будущем.\u00BB'),
+        React.createElement('div',{style:{fontSize:12,textTransform:'uppercase',letterSpacing:3,color:'var(--muted)',marginTop:24}},'\u2014 '+userName+' \u00B7 ДИАЛОГ С КОПИЛОТОМ')
       ),
 
-      // BOTTOM CTA
-      React.createElement('div',{style:{textAlign:'center',padding:'48px 0'}},
-        React.createElement('h2',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:24,letterSpacing:1,marginBottom:12}},'Открой все 8 кластеров'),
-        React.createElement('p',{style:{color:'var(--muted)',fontSize:15,marginBottom:24}},'5 из 8 кластеров заблокированы. Полная карта ДНК — от 299₽'),
-        React.createElement('button',{className:'btn-main',style:{borderRadius:999,padding:'16px 40px',fontSize:16},onClick:onStore},'Открыть полное ДНК'),
-        React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginTop:16,cursor:'pointer'},onClick:onBack},'← Назад к результатам')
+      // === SECTION 3: DNA BLOCKS (irregular grid, all blurred) ===
+      React.createElement('div',{className:'dna-grid',style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,marginBottom:60}},
+        clusters.map(c=>renderBlock(c))
+      ),
+
+      // === SECTION 4: BOTTOM CTA BAR ===
+      React.createElement('div',{style:{backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',background:'rgba(15,15,25,0.6)',padding:40,borderRadius:20,marginBottom:60,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:24}},
+        React.createElement('div',null,
+          React.createElement('div',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:20,textTransform:'uppercase',letterSpacing:1,marginBottom:8}},'ЧТОБЫ ОТКРЫТЬ ВСЕ БЛОКИ \u2014 НЕ ОБЯЗАТЕЛЬНО ПЛАТИТЬ.'),
+          React.createElement('div',{style:{fontFamily:"'Libre Baskerville',serif",fontSize:16,color:'var(--muted)'}},'Просто пригласи друга или родителя!')
+        ),
+        React.createElement('button',{onClick:onBridge,style:{background:'#fff',color:'#000',fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:18,padding:'16px 48px',borderRadius:999,border:'none',cursor:'pointer',letterSpacing:1,flexShrink:0}},'ПОДЕЛИТЬСЯ')
       )
     )
   );
@@ -1168,6 +1169,7 @@ function App() {
       data: summaryData,
       onBack: () => setPage('summary'),
       onStore: () => setPage('store'),
+      onBridge: () => setPage('bridge'),
       goHome
     }) :
     page === 'store' ? React.createElement(StorePage, {
