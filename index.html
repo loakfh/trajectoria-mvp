@@ -180,6 +180,8 @@ h1.hero{font-size:clamp(48px,5vw,80px)!important}
 .dna-header-section>div:first-child{flex:1 1 auto!important;padding-right:0!important}
 .dna-header-section>div:nth-child(2){display:none!important}
 .dna-header-section>div:last-child{padding-left:0!important}
+.dna-row-stagger,.dna-row-triple{flex-direction:column!important}
+.dna-row-stagger>div,.dna-row-triple>div{flex:1 1 auto!important;margin-top:0!important}
 .nav{padding:12px 16px;position:relative}
 .nav-links,.nav-auth{display:none}
 .hamburger{display:flex}
@@ -952,118 +954,162 @@ function DnaPage({data, onBack, onStore, onBridge, goHome}) {
     {label:'ЧУЙКА', value:'Подростки 12-16 лет — последнее поколение, которое можно подготовить', highlights:['последнее поколение']}
   ];
 
-  // --- block data ---
-  const blocks = [
-    {id:1, num:'03', name:'БАРЬЕРЫ И МЫШЛЕНИЕ', weight:'25%', color:'#ff4081', img:'assets/афиша_1.png', open:true,
-      meta:'КЛАСТЕР 3 \u00B7 ВЕС 25% \u00B7 САМЫЙ КРИТИЧНЫЙ',
-      quote:'\u00ABБоюсь не оправдать ожидания. А вдруг выбрал не то?\u00BB',
-      body:'Самый критичный кластер. Здесь \u2014 причина почему школьники не двигаются. Growth vs Fixed Mindset \u2014 не бинарно, а шкала. Ты ближе к growth: готов пробовать, но тормозишь когда результат не виден сразу. Страх ошибки у тебя \u2014 не про саму ошибку. Это про разочарование. Маму. Себя. Ты боишься не провала \u2014 а того, что провал подтвердит сомнения.'},
-    {id:2, num:'01', name:'МЕЧТА И ДРАЙВЕРЫ', weight:'25%', color:'#ff6b35', img:'assets/афиша_2.png', open:false,
-      quote:'Хочу создавать то, что реально меняет жизнь людей моего возраста.',
-      body:'Главный драйвер \u2014 не статус и не деньги. Это потребность строить. Видит дальше ровесников и чувствует ответственность за поколение.'},
-    {id:3, num:'02', name:'ЦЕННОСТИ И ФИЛОСОФИЯ', weight:'10%', color:'#f7c948', img:null, open:false,
-      quote:'Свобода выбора важнее стабильности.',
-      body:'Ценностный каркас уже сформирован. Приоритет \u2014 возможность влиять. Готов вкалывать, но только если путь ведёт к мечте.'},
-    {id:4, num:'04', name:'ГОТОВНОСТЬ К ДЕЙСТВИЮ', weight:'15%', color:'#5bbd72', img:'assets/афиша_3.png', open:false,
-      quote:'Я верю что могу влиять на будущее.',
-      body:'Внутренний локус контроля. Высокая готовность к эксперименту. Горизонт планирования \u2014 3-5 лет вперёд.'},
-    {id:5, num:'05', name:'ИНТЕРЕСЫ И СТИЛЬ', weight:'10%', color:'#3b82f6', img:'assets/афиша_5.png', open:false,
-      quote:'Лекции \u2014 мимо. Мне нужны проекты.',
-      body:'Технологии, бизнес, психология \u2014 треугольник интересов. Учится через практику и проекты.'},
-    {id:6, num:'06', name:'СОЦИАЛЬНЫЙ КОНТЕКСТ', weight:'5%', color:'#a855f7', img:null, open:false,
-      quote:'Друзья пока не определились.',
-      body:'Давление среды минимальное \u2014 но и поддержки мало. Острая потребность в комьюнити.'},
-    {id:7, num:'07', name:'МАТЕРИАЛЬНЫЕ ОРИЕНТИРЫ', weight:'5%', color:'#f97316', img:null, open:false,
-      quote:'Деньги \u2014 средство. Свобода \u2014 цель.',
-      body:'Образ жизни мечты: удалённая работа, свобода перемещения. Деньги не цель, а инструмент.'},
-    {id:8, num:'08', name:'AI-ГРАМОТНОСТЬ', weight:'5%', color:'#06b6d4', img:'assets/афиша_8.png', open:false,
-      quote:'AI \u2014 это возможность, не угроза.',
-      body:'Активно использует ChatGPT, пишет промпты. Видит AI как рычаг, не замену.'}
-  ];
-
-  // layout map: which grid area each block occupies
-  const gridAreas = [
-    {gridColumn:'1 / -1', minHeight:500},                // block 1 — full width, tall
-    {gridColumn:'1 / 2', gridRow:'auto', minHeight:420},  // block 2 — left, taller
-    {gridColumn:'2 / 3', gridRow:'auto', minHeight:320},  // block 3 — right, shorter
-    {gridColumn:'1 / -1', minHeight:320},                 // block 4 — full width
-    {gridColumn:'1 / 2', minHeight:340},                  // block 5 — third-ish left
-    {gridColumn:'2 / 3', minHeight:300},                  // block 6 — third-ish right (row a)
-    {gridColumn:'1 / 2', minHeight:300},                  // block 7 — third-ish left (row b)
-    {gridColumn:'2 / 3', minHeight:340}                   // block 8 — right
-  ];
+  // --- image helper with onerror fallback ---
+  const bgImg = (src, opacity, extra) => React.createElement('img',{
+    src:encodeURI(src), alt:'',
+    onError:e=>{e.target.style.display='none'},
+    style:{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:opacity||0.3,...(extra||{})}
+  });
 
   const proBadge = React.createElement('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',zIndex:3}},
-    React.createElement('div',{onClick:e=>{e.stopPropagation();onStore();},style:{background:'rgba(124,92,255,0.2)',border:'1px solid rgba(124,92,255,0.4)',borderRadius:24,padding:'10px 28px',cursor:'pointer'}},
+    React.createElement('div',{onClick:e=>{e.stopPropagation();onStore();},style:{background:'rgba(124,92,255,0.2)',border:'1px solid rgba(124,92,255,0.4)',borderRadius:24,padding:'10px 28px',cursor:'pointer',backdropFilter:'blur(4px)'}},
       React.createElement('span',{style:{color:'#a78bfa',fontSize:15,fontFamily:"'Anton','Impact','Arial Black',sans-serif",letterSpacing:1}},'PRO')
     )
   );
 
-  const renderBlock = (b, idx) => {
-    const layout = gridAreas[idx];
-    const hasImg = !!b.img;
-    const baseCard = {
-      position:'relative', overflow:'hidden', borderRadius:16,
-      border:'1px solid rgba(255,255,255,0.08)',
-      gridColumn:layout.gridColumn, gridRow:layout.gridRow||'auto',
-      minHeight:layout.minHeight,
-      cursor: b.open ? 'default' : 'pointer',
-      background: hasImg ? '#000' : 'rgba(255,255,255,0.03)'
-    };
+  const anton = "'Anton','Impact','Arial Black',sans-serif";
+  const libre = "'Libre Baskerville',serif";
+  const caveat = "'Caveat',cursive";
 
-    // --- BLOCK 1: OPEN БАРЬЕРЫ ---
-    if(b.open) {
-      return React.createElement('div',{key:b.id,style:baseCard},
-        // bg image
-        hasImg && React.createElement('img',{src:b.img,alt:'',style:{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.25}}),
-        React.createElement('div',{style:{position:'absolute',inset:0,background:'linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 100%)'}}),
-        // rotated heading on left edge
-        React.createElement('div',{style:{position:'absolute',left:0,top:0,bottom:0,width:64,display:'flex',alignItems:'center',justifyContent:'center',zIndex:2}},
-          React.createElement('div',{style:{writingMode:'vertical-rl',transform:'rotate(180deg)',fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:48,letterSpacing:6,textTransform:'uppercase',color:'rgba(255,255,255,0.12)',whiteSpace:'nowrap'}},b.name)
-        ),
-        // giant faded number
-        React.createElement('div',{style:{position:'absolute',top:20,right:32,fontSize:120,fontFamily:"'Anton','Impact',sans-serif",color:'rgba(255,255,255,0.04)',lineHeight:1,zIndex:1}},b.num),
-        // main content area
-        React.createElement('div',{style:{position:'relative',zIndex:2,marginLeft:80,padding:'40px 40px 40px 0',display:'flex',flexDirection:'column',gap:24,minHeight:layout.minHeight-80}},
-          // pull quote
-          React.createElement('div',{style:{borderLeft:'3px solid '+b.color,paddingLeft:20,maxWidth:600}},
-            React.createElement('p',{style:{fontFamily:"'Caveat',cursive",fontSize:22,fontStyle:'italic',color:'rgba(255,255,255,0.85)',lineHeight:1.4}},b.quote)
-          ),
-          // body text in 2 columns
-          React.createElement('div',{style:{columnCount:2,columnGap:32,maxWidth:900}},
-            React.createElement('p',{style:{fontFamily:"'Libre Baskerville',serif",fontSize:16,lineHeight:1.7,color:'rgba(255,255,255,0.75)'}},b.body)
-          ),
-          // metadata
-          React.createElement('div',{style:{marginTop:'auto',fontSize:11,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.3)'}},b.meta)
-        )
-      );
-    }
-
-    // --- BLOCKS 2-8: BLURRED ---
-    const colorGradient = !hasImg ? 'linear-gradient(135deg, '+b.color+'0D 0%, rgba(255,255,255,0.02) 100%)' : 'none';
-    return React.createElement('div',{key:b.id,style:{...baseCard},onClick:onStore},
-      // bg image if exists
-      hasImg && React.createElement('img',{src:b.img,alt:'',style:{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.3}}),
-      hasImg && React.createElement('div',{style:{position:'absolute',inset:0,background:'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 100%)'}}),
-      !hasImg && React.createElement('div',{style:{position:'absolute',inset:0,background:colorGradient}}),
-      // blurred content wrapper
-      React.createElement('div',{style:{position:'relative',zIndex:1,padding:'36px 32px',filter:'blur(8px)',opacity:0.35,pointerEvents:'none',minHeight:layout.minHeight-20}},
-        React.createElement('div',{style:{position:'absolute',top:16,right:24,fontSize:80,fontFamily:"'Anton','Impact',sans-serif",color:'rgba(255,255,255,0.05)',lineHeight:1}},b.num),
-        React.createElement('div',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:idx%3===0?36:28,letterSpacing:2,textTransform:'uppercase',marginBottom:20,color:'#fff'}},b.name),
-        React.createElement('div',{style:{borderLeft:'3px solid '+b.color,paddingLeft:16,marginBottom:20}},
-          React.createElement('p',{style:{fontFamily:"'Caveat',cursive",fontSize:18,fontStyle:'italic',color:'rgba(255,255,255,0.7)',lineHeight:1.5}},b.quote)
-        ),
-        React.createElement('p',{style:{fontFamily:"'Libre Baskerville',serif",fontSize:15,lineHeight:1.8,color:'rgba(255,255,255,0.6)',maxWidth:'90%'}},b.body),
-        React.createElement('div',{style:{marginTop:24,fontSize:11,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.25)'}},'КЛАСТЕР '+b.num.replace(/^0/,'')+' \u00B7 ВЕС '+b.weight)
+  // ===== BLOCK 1: БАРЬЕРЫ — OPEN =====
+  const block1 = React.createElement('div',{key:'b1',style:{position:'relative',overflow:'hidden',borderRadius:16,border:'1px solid rgba(255,255,255,0.08)',minHeight:600,background:'#000'}},
+    bgImg('assets/афиша_1.png',0.25),
+    React.createElement('div',{style:{position:'absolute',inset:0,background:'linear-gradient(135deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 100%)'}}),
+    // rotated heading — left edge
+    React.createElement('div',{style:{position:'absolute',left:0,top:0,bottom:0,width:80,display:'flex',alignItems:'center',justifyContent:'center',zIndex:2}},
+      React.createElement('div',{style:{writingMode:'vertical-rl',transform:'rotate(180deg)',fontFamily:anton,fontSize:80,letterSpacing:8,textTransform:'uppercase',color:'rgba(255,255,255,0.1)',whiteSpace:'nowrap'}},'БАРЬЕРЫ И МЫШЛЕНИЕ')
+    ),
+    // giant faded number
+    React.createElement('div',{style:{position:'absolute',top:24,right:40,fontSize:200,fontFamily:anton,color:'rgba(255,255,255,0.035)',lineHeight:1,zIndex:1}},'03'),
+    // main content
+    React.createElement('div',{style:{position:'relative',zIndex:2,marginLeft:100,padding:'48px 48px 48px 0',display:'flex',flexDirection:'column',gap:28}},
+      React.createElement('div',{style:{fontSize:12,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.4)'}},'ВЕС 25% \u00B7 САМЫЙ КРИТИЧНЫЙ КЛАСТЕР'),
+      // pull quote
+      React.createElement('div',{style:{borderLeft:'4px solid #ff4081',paddingLeft:24,maxWidth:650}},
+        React.createElement('p',{style:{fontFamily:caveat,fontSize:28,fontStyle:'italic',color:'rgba(255,255,255,0.9)',lineHeight:1.4}},'\u00ABБоюсь не оправдать ожидания. А вдруг выбрал не то?\u00BB')
       ),
-      // PRO badge overlay
+      // body text — 2 columns
+      React.createElement('div',{style:{columnCount:2,columnGap:36,maxWidth:950}},
+        React.createElement('p',{style:{fontFamily:libre,fontSize:16,lineHeight:1.8,color:'rgba(255,255,255,0.8)',marginBottom:16}},'Самый критичный кластер. Здесь \u2014 причина почему школьники не двигаются.'),
+        React.createElement('p',{style:{fontFamily:libre,fontSize:16,lineHeight:1.8,color:'rgba(255,255,255,0.8)',marginBottom:16}},'Growth vs Fixed Mindset \u2014 не бинарно, а шкала. Ты ближе к growth: готов пробовать, но тормозишь когда результат не виден сразу.'),
+        React.createElement('p',{style:{fontFamily:libre,fontSize:16,lineHeight:1.8,color:'rgba(255,255,255,0.8)',marginBottom:16}},'Страх ошибки у тебя \u2014 не про саму ошибку. Это про разочарование. Маму. Себя. Ты боишься не провала \u2014 а того, что провал подтвердит сомнения.'),
+        React.createElement('p',{style:{fontFamily:libre,fontSize:16,lineHeight:1.8,color:'rgba(255,255,255,0.8)',marginBottom:16}},'External Pressures: мама хочет стабильности, друзья не понимают выбор, учителя говорят \u00ABрано ещё\u00BB. Карта давления \u2014 вот что мы фиксируем.'),
+        React.createElement('p',{style:{fontFamily:libre,fontSize:16,lineHeight:1.8,color:'rgba(255,255,255,0.8)'}},'Limiting Beliefs: \u00ABЯ ещё слишком молод\u00BB. \u00ABНужен диплом чтобы начинать\u00BB. \u00ABВсе уже впереди\u00BB. Каждое убеждение \u2014 стена. AI помогает увидеть дверь в этой стене.')
+      ),
+      React.createElement('div',{style:{marginTop:'auto',paddingTop:16,fontSize:11,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.25)'}},'КЛАСТЕР 3 \u00B7 4 ПАРАМЕТРА \u00B7 GROWTH MINDSET \u00B7 FEAR PROFILE \u00B7 EXTERNAL PRESSURES \u00B7 LIMITING BELIEFS')
+    )
+  );
+
+  // helper: blurred block
+  const blurBlock = (key, imgSrc, color, num, name, headingSize, rotated, contentEls, meta, extraStyle) => {
+    const hasImg = !!imgSrc;
+    return React.createElement('div',{key,style:{position:'relative',overflow:'hidden',borderRadius:16,border:'1px solid rgba(255,255,255,0.08)',background:hasImg?'#000':'rgba(255,255,255,0.03)',cursor:'pointer',...(extraStyle||{})},onClick:onStore},
+      hasImg && bgImg(imgSrc,0.3),
+      hasImg && React.createElement('div',{style:{position:'absolute',inset:0,background:'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 100%)'}}),
+      !hasImg && React.createElement('div',{style:{position:'absolute',inset:0,background:'linear-gradient(135deg, '+color+'12 0%, rgba(255,255,255,0.02) 100%)'}}),
+      // blurred content
+      React.createElement('div',{style:{position:'relative',zIndex:1,padding:'40px 36px',filter:'blur(8px)',opacity:0.3,pointerEvents:'none',height:'100%',boxSizing:'border-box'}},
+        React.createElement('div',{style:{position:'absolute',top:16,right:28,fontSize:100,fontFamily:anton,color:'rgba(255,255,255,0.04)',lineHeight:1}},num),
+        rotated ?
+          React.createElement('div',{style:{position:'absolute',left:20,top:0,bottom:0,display:'flex',alignItems:'center'}},
+            React.createElement('div',{style:{writingMode:'vertical-rl',transform:'rotate(180deg)',fontFamily:anton,fontSize:headingSize,letterSpacing:4,textTransform:'uppercase',color:'rgba(255,255,255,0.8)',whiteSpace:'nowrap'}},name)
+          ) :
+          React.createElement('div',{style:{fontFamily:anton,fontSize:headingSize,letterSpacing:3,textTransform:'uppercase',marginBottom:20,color:'#fff'}},name),
+        React.createElement('div',{style:{marginLeft:rotated?60:0,marginTop:rotated?24:0}},
+          ...contentEls
+        ),
+        React.createElement('div',{style:{position:'absolute',bottom:20,left:36,fontSize:11,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.25)'}},meta)
+      ),
       proBadge
     );
   };
 
+  const p_ = (text, extra) => React.createElement('p',{style:{fontFamily:libre,fontSize:15,lineHeight:1.8,color:'rgba(255,255,255,0.7)',marginBottom:14,...(extra||{})}},text);
+  const q_ = (text, color) => React.createElement('div',{style:{borderLeft:'3px solid '+color,paddingLeft:16,marginBottom:16,marginTop:8}},
+    React.createElement('p',{style:{fontFamily:caveat,fontSize:20,fontStyle:'italic',color:'rgba(255,255,255,0.7)',lineHeight:1.4}},text)
+  );
+
+  // ===== BLOCK 2: МЕЧТА — left, tall =====
+  const block2 = blurBlock('b2','assets/афиша_2.png','#ff6b35','01','МЕЧТА И ДРАЙВЕРЫ',60,false,[
+    q_('\u00ABХочу создавать то, что реально меняет жизнь людей моего возраста.\u00BB','#ff6b35'),
+    p_('Aspirational Identity: не просто \u00ABхочу быть предпринимателем\u00BB. Это глубже. Потребность строить что-то, что переживёт тебя. Ощущение миссии, которое редко встречается в 16 лет.'),
+    p_('Intrinsic Drivers: главный мотор \u2014 не деньги и не статус. Это потребность влиять. Видеть результат. Знать что твоя работа реально что-то изменила для реальных людей.'),
+    p_('Impact Vision: масштаб амбиций \u2014 поколение. Не один продукт, а экосистема. Не один человек, а миллионы подростков, которые пока не знают, что мир уже изменился.'),
+    p_('Temporal Orientation: думает на 5-10 лет вперёд. Видит тренды, которые ровесники ещё не замечают. Это и суперсила, и источник одиночества.')
+  ],'КЛАСТЕР 1 \u00B7 ВЕС 25% \u00B7 3 ПАРАМЕТРА',{minHeight:500});
+
+  // ===== BLOCK 3: ЦЕННОСТИ — right, short, rotated heading =====
+  const block3 = blurBlock('b3',null,'#f7c948','02','ЦЕННОСТИ',48,true,[
+    q_('\u00ABСвобода выбора важнее стабильности. Честность \u2014 даже когда неудобно.\u00BB','#f7c948'),
+    p_('Core Values: свобода, честность, возможность влиять. Ценностный каркас уже сформирован \u2014 и он крепче, чем у большинства взрослых.'),
+    p_('Work-Life Philosophy: готов вкалывать, но только если путь ведёт к мечте. Иначе незачем. Баланс между интенсивностью и свободой.'),
+    p_('Ethical Framework: справедливость важнее лояльности. Готов спорить с авторитетами, если они неправы.')
+  ],'КЛАСТЕР 2 \u00B7 ВЕС 10% \u00B7 3 ПАРАМЕТРА',{minHeight:300,marginTop:200});
+
+  // ===== BLOCK 4: ГОТОВНОСТЬ — full width thin strip =====
+  const block4 = blurBlock('b4','assets/афиша_3.png','#5bbd72','04','ГОТОВНОСТЬ К ДЕЙСТВИЮ',56,false,[
+    React.createElement('div',{style:{display:'flex',gap:32,flexWrap:'wrap',marginTop:8}},
+      React.createElement('div',{style:{flex:'1 1 200px'}},
+        React.createElement('div',{style:{fontFamily:anton,fontSize:14,letterSpacing:2,color:'#5bbd72',marginBottom:8}},'AGENCY LEVEL'),
+        p_('Внутренний локус контроля. Верит что может влиять на будущее. Не ждёт разрешения \u2014 действует.'),
+        p_('Высокая автономия: принимает решения сам, не оглядываясь на большинство.')
+      ),
+      React.createElement('div',{style:{flex:'1 1 200px'}},
+        React.createElement('div',{style:{fontFamily:anton,fontSize:14,letterSpacing:2,color:'#5bbd72',marginBottom:8}},'EXPERIMENTATION'),
+        p_('Готовность пробовать без гарантий. Толерантность к неопределённости выше среднего.'),
+        p_('Быстро тестирует гипотезы. Не боится ошибок \u2014 боится бездействия.')
+      ),
+      React.createElement('div',{style:{flex:'1 1 200px'}},
+        React.createElement('div',{style:{fontFamily:anton,fontSize:14,letterSpacing:2,color:'#5bbd72',marginBottom:8}},'TIME HORIZON'),
+        p_('Горизонт планирования 3-5 лет. Редкость для возраста. Видение + готовность действовать.'),
+        p_('Стратегическое мышление: каждый шаг \u2014 часть большей картины.')
+      )
+    )
+  ],'КЛАСТЕР 4 \u00B7 ВЕС 15% \u00B7 3 ПАРАМЕТРА',{minHeight:260});
+
+  // ===== BLOCK 5: ИНТЕРЕСЫ — narrow tall =====
+  const block5 = blurBlock('b5','assets/афиша_5.png','#3b82f6','05','ИНТЕРЕСЫ И СТИЛЬ',44,false,[
+    q_('\u00ABЛекции \u2014 мимо. Мне нужны проекты и реальные задачи.\u00BB','#3b82f6'),
+    p_('Interest Triangle: технологии \u00D7 бизнес \u00D7 психология. Три вершины, между которыми рождаются лучшие продукты.'),
+    p_('Learning Style: практик. Теория работает только в связке с действием. Проекты > лекции. Менторы > учебники.'),
+    p_('Cognitive Profile: быстро видит паттерны. Переключается между деталями и big picture. Думает системами, не линейно.'),
+    p_('Creative Mode: генератор идей. 10 идей в неделю, из которых 2-3 стоит проверить. Не хватает фокуса \u2014 это и сила, и слабость.')
+  ],'КЛАСТЕР 5 \u00B7 ВЕС 10% \u00B7 4 ПАРАМЕТРА',{minHeight:450});
+
+  // ===== BLOCK 6: СОЦИАЛЬНЫЙ — rotated =====
+  const block6 = blurBlock('b6',null,'#a855f7','06','СОЦИАЛЬНЫЙ КОНТЕКСТ',42,true,[
+    q_('\u00ABДрузья пока не определились. Мне не хватает единомышленников.\u00BB','#a855f7'),
+    p_('Peer Environment: давление среды минимальное, но и поддержки мало. Одиночество визионера в обычной школе.'),
+    p_('Community Need: острая потребность в людях с похожими амбициями. Ищет трайб \u2014 пока не нашёл.'),
+    p_('Family Dynamic: поддержка есть, но с оговорками. \u00ABМы за тебя, но выбери что-нибудь стабильное.\u00BB'),
+    p_('Influence Map: 70% решений принимает сам. 20% \u2014 влияние контента (YouTube, подкасты). 10% \u2014 семья.')
+  ],'КЛАСТЕР 6 \u00B7 ВЕС 5% \u00B7 4 ПАРАМЕТРА',{minHeight:450});
+
+  // ===== BLOCK 7: МАТЕРИАЛЬНЫЕ — short =====
+  const block7 = blurBlock('b7',null,'#f97316','07','МАТЕРИАЛЬНЫЕ ОРИЕНТИРЫ',36,false,[
+    q_('\u00ABДеньги \u2014 средство. Свобода перемещения \u2014 вот что важно.\u00BB','#f97316'),
+    p_('Lifestyle Vision: удалённая работа, свобода перемещения, минимум обязательств перед системой.'),
+    p_('Money Mindset: деньги \u2014 инструмент, не цель. Материальные амбиции подчинены ценностным. Готов зарабатывать меньше, если работа даёт свободу.')
+  ],'КЛАСТЕР 7 \u00B7 ВЕС 5% \u00B7 2 ПАРАМЕТРА',{minHeight:220});
+
+  // ===== BLOCK 8: AI — full width finale =====
+  const block8 = blurBlock('b8','assets/афиша_8.png','#06b6d4','08','AI-ГРАМОТНОСТЬ',72,false,[
+    q_('\u00ABAI \u2014 это возможность. Не угроза, а суперсила для тех кто поймёт.\u00BB','#06b6d4'),
+    React.createElement('div',{style:{display:'flex',gap:32,flexWrap:'wrap'}},
+      React.createElement('div',{style:{flex:'1 1 280px'}},
+        p_('AI Usage: активно использует ChatGPT, пишет промпты, экспериментирует с генерацией. Не просто пользователь \u2014 исследователь.'),
+        p_('AI Worldview: видит AI как рычаг, не замену. Понимает что выигрывает тот, кто научится работать С искусственным интеллектом, а не ПРОТИВ него.')
+      ),
+      React.createElement('div',{style:{flex:'1 1 280px'}},
+        p_('AI Literacy Score: выше среднего для возраста. Понимает разницу между GPT и Claude. Знает про промпт-инжиниринг. Следит за новостями.'),
+        p_('Future Readiness: готов к миру, где AI \u2014 базовый навык. Уже строит на нём, пока сверстники только начинают пробовать.')
+      )
+    )
+  ],'КЛАСТЕР 8 \u00B7 ВЕС 5% \u00B7 4 ПАРАМЕТРА \u00B7 AI USAGE \u00B7 AI WORLDVIEW \u00B7 LITERACY SCORE \u00B7 FUTURE READINESS',{minHeight:500});
+
   return React.createElement('div',{className:'page'},
     // blurred dimmed bg
-    React.createElement('div',{className:'page-bg',style:{backgroundImage:'url('+bgRef.current+')',filter:'blur(30px) brightness(0.4)'}}),
+    React.createElement('div',{className:'page-bg',style:{backgroundImage:'url('+encodeURI(bgRef.current)+')',filter:'blur(30px) brightness(0.4)'}}),
     // NAV
     React.createElement('div',{className:'nav',style:{display:'flex',justifyContent:'space-between',alignItems:'center'}},
       React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ'),
@@ -1102,9 +1148,25 @@ function DnaPage({data, onBack, onStore, onBridge, goHome}) {
         React.createElement('div',{style:{fontSize:12,textTransform:'uppercase',letterSpacing:3,color:'var(--muted)',marginTop:28}},'\u2014 '+userName.toUpperCase()+' \u00B7 ДИАЛОГ С КОПИЛОТОМ')
       ),
 
-      // ========== SECTION 3: DNA ARTICLE BLOCKS ==========
-      React.createElement('div',{className:'dna-grid',style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,marginTop:60,marginBottom:60}},
-        blocks.map((b,i)=>renderBlock(b,i))
+      // ========== SECTION 3: DNA ARTICLE BLOCKS — COLLAGE ==========
+      React.createElement('div',{className:'dna-blocks-section',style:{marginTop:60,marginBottom:60,display:'flex',flexDirection:'column',gap:24}},
+        // ROW 1: Block 1 full width 600px
+        block1,
+        // ROW 2: Block 2 (65%) + Block 3 (35%, offset down)
+        React.createElement('div',{className:'dna-row-stagger',style:{display:'flex',gap:24,alignItems:'flex-end'}},
+          React.createElement('div',{style:{flex:'0 0 63%',minWidth:0}},block2),
+          React.createElement('div',{style:{flex:1,minWidth:0}},block3)
+        ),
+        // ROW 3: Block 4 full width thin strip
+        block4,
+        // ROW 4: Block 5 (30% tall) + Block 6 (40% tall) + Block 7 (30% short, top-aligned)
+        React.createElement('div',{className:'dna-row-triple',style:{display:'flex',gap:24,alignItems:'flex-start'}},
+          React.createElement('div',{style:{flex:'0 0 28%',minWidth:0}},block5),
+          React.createElement('div',{style:{flex:'0 0 40%',minWidth:0}},block6),
+          React.createElement('div',{style:{flex:1,minWidth:0}},block7)
+        ),
+        // ROW 5: Block 8 full width finale
+        block8
       ),
 
       // ========== SECTION 4: BOTTOM CTA BAR ==========
