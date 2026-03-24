@@ -128,10 +128,10 @@ h1.hero{font-family:'Anton','Impact','Arial Black',sans-serif!important}
 .sidebar-toggle{display:none!important}
 }
 @media(min-width:1920px){
-html{zoom:1.2}
+html{zoom:1.05}
 }
 @media(min-width:2560px){
-html{zoom:1.5}
+html{zoom:1.15}
 }
 @media(max-width:1400px){
 .landing-main{gap:40px!important}
@@ -298,8 +298,11 @@ function parseDnaBlock(raw) {
   const patterns = [/\`\`\`json_dna\s*(\{[\s\S]*?\})\s*\`\`\`/, /\`\`\`json\s*(\{[\s\S]*?\})\s*\`\`\`/, /(\{"dna_percent"[\s\S]*?\})/];
   for (const p of patterns) {
     const m = raw.match(p);
-    if (m) try { return JSON.parse(m[1]); } catch(e) {}
+    if (m) try { const parsed=JSON.parse(m[1]); console.log('DNA parsed OK:', parsed.dna_percent); return parsed; } catch(e) { console.log('DNA JSON parse error:', e.message); }
   }
+  const fb=raw.match(/"dna_percent"\s*:\s*(\d+)/);
+  if(fb){console.log('DNA fallback extract:', fb[1]); return {dna_percent:parseInt(fb[1],10)};}
+  console.log('No DNA block found in response');
   return null;
 }
 
@@ -560,6 +563,7 @@ function Chat({userName, copilotName, onFinish, goHome}) {
       const sys={role:'system',content:buildSystemPrompt(userName,copilotName,tone,msgCountRef.current,skipCountRef.current)};
       const apiMessages=[sys,...historyRef.current];
       const raw=await callGPT(apiMessages);
+      console.log('GPT raw (last 500):', raw ? raw.slice(-500) : 'EMPTY');
       const dnaData=parseDnaBlock(raw);
       const clean=stripDnaBlock(raw);
       const complete=raw.includes('[DIALOGUE_COMPLETE]');
@@ -611,6 +615,7 @@ function Chat({userName, copilotName, onFinish, goHome}) {
       try{
         const sys={role:'system',content:buildSystemPrompt(userName,copilotName,tone,msgCountRef.current,skipCountRef.current)};
         const raw=await callGPT([sys,...historyRef.current]);
+        console.log('GPT skip raw (last 500):', raw ? raw.slice(-500) : 'EMPTY');
         const clean=stripDnaBlock(raw);
         const dnaData=parseDnaBlock(raw);
         if(dnaData){const nd=dnaData.dna_percent??dna;setDna(nd);prevDnaRef.current=nd;}
@@ -748,9 +753,9 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome}) {
         // marker + bar wrapper
         React.createElement('div',{style:{position:'relative',marginTop:48}},
           // marker above bar
-          React.createElement('div',{style:{position:'absolute',left:'15%',top:-38,transform:'translateX(-50%)',fontSize:13,color:'rgba(255,255,255,0.7)',whiteSpace:'nowrap',display:'flex',flexDirection:'column',alignItems:'center',textAlign:'center'}},
+          React.createElement('div',{style:{position:'absolute',left:'18%',top:-36,transform:'translateX(-50%)',fontSize:13,color:'rgba(255,255,255,0.7)',whiteSpace:'nowrap',display:'flex',flexDirection:'column',alignItems:'center',textAlign:'center'}},
             React.createElement('span',null,'← большинство здесь'),
-            React.createElement('div',{style:{width:2,height:24,background:'rgba(255,255,255,0.7)',marginTop:4}})
+            React.createElement('div',{style:{width:2,height:30,background:'rgba(255,255,255,0.7)',marginTop:4}})
           ),
           // bar
           React.createElement('div',{style:{height:18,background:'rgba(255,255,255,0.1)',borderRadius:9,overflow:'hidden'}},
