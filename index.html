@@ -7,7 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton:wght@400&family=Caveat:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#0f0f19;--card:rgba(255,255,255,0.05);--border:rgba(255,255,255,0.1);--text:#fff;--muted:rgba(255,255,255,0.6);--accent:#7c5cff;--gradient:linear-gradient(90deg,#e0e7ff,#a5b4fc,#818cf8,#6366f1,#c4b5fd,#e0e7ff)}
@@ -110,21 +110,49 @@ h1.hero{font-family:'Anton','Impact',sans-serif!important;font-weight:400!import
 .mobile-menu{position:absolute;top:100%;left:0;right:0;background:rgba(15,15,25,0.95);backdrop-filter:blur(16px);padding:16px;display:flex;flex-direction:column;gap:8px;z-index:200}
 .mobile-menu button{width:100%;text-align:center;background:transparent;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);padding:10px 16px;border-radius:20px;cursor:pointer;font-size:13px;font-family:'Libre Baskerville',serif;transition:all .3s}
 .mobile-menu button:hover{border-color:#fff;color:#fff}
+@keyframes cardGlow{0%,100%{box-shadow:0 0 15px rgba(100,180,255,0.1)}50%{box-shadow:0 0 30px rgba(100,180,255,0.25)}}
+@keyframes slideIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+.summary-hero-img{animation:cardGlow 2s ease-in-out infinite}
+.summary-hero-img:hover{transform:scale(1.02);box-shadow:0 0 40px rgba(100,180,255,0.4)!important;animation:none}
+.sidebar-toggle{display:none;position:fixed;bottom:80px;left:12px;width:44px;height:44px;border-radius:50%;background:rgba(15,15,25,0.85);border:1px solid var(--border);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font-size:20px;cursor:pointer;z-index:50;align-items:center;justify-content:center;transition:transform .2s}
+.sidebar-toggle:hover{transform:scale(1.1)}
+.sidebar-scrim{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99}
+.sidebar-overlay{position:fixed;left:0;top:0;bottom:0;width:260px;background:rgba(15,15,25,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:100;padding:20px 16px;overflow-y:auto;animation:slideIn .2s ease-out;border-right:1px solid var(--border)}
+.sidebar-close{position:absolute;top:12px;right:12px;background:transparent;border:none;color:rgba(255,255,255,0.6);font-size:20px;cursor:pointer;padding:4px}
+.sidebar-close:hover{color:#fff}
+h1.hero{font-family:'Anton','Impact','Arial Black',sans-serif!important}
+.timeline-item h4,.fakedoor h4,.section-title,.tabs button,.skip-btn,.tone-btn .tone-name{font-family:'Anton','Impact','Arial Black',sans-serif}
 @media(min-width:769px){
 .hamburger{display:none}
 .mobile-menu{display:none!important}
+.sidebar-toggle{display:none!important}
+}
+@media(min-width:1920px){
+h1.hero{font-size:clamp(48px,5vw,72px)!important}
+body{font-size:18px}
+.card{padding:36px!important}
+.dna-bar-wrap{height:22px!important}
+.summary-hero-img{height:600px!important}
 }
 @media(max-width:1400px){
 .landing-main{gap:40px!important}
 .summary-hero-img{height:400px!important}
+.timeline-item{padding:3px 0!important;min-height:36px!important}
+.timeline-item h4{font-size:12px!important}
+.timeline-item p{font-size:10px!important;margin-top:1px!important}
 }
 @media(max-width:1080px){
 .landing-main{gap:30px!important;padding:0 24px!important}
 .hero-left{padding-left:3%!important}
 .chat-sidebar{width:190px!important}
+.nafig-card{padding:12px!important;min-height:auto!important}
+.nafig-card p:last-child{font-size:11px!important;line-height:1.3!important}
 .tone-btn{min-height:60px!important;height:auto!important}
 .summary-hero-img{height:340px!important}
 .resp-pad{padding-left:24px!important;padding-right:24px!important}
+.timeline-item{padding:2px 0!important;min-height:32px!important}
+.timeline-item h4{font-size:11px!important}
+.timeline-item p{font-size:9px!important;margin-top:0!important}
 }
 @media(max-width:768px){
 .nav{padding:12px 16px;position:relative}
@@ -134,14 +162,17 @@ h1.hero{font-family:'Anton','Impact',sans-serif!important;font-weight:400!import
 h1.hero{font-size:clamp(24px,7vw,48px)}
 .dna-grid{grid-template-columns:1fr!important}
 .landing-main{flex-direction:column!important;padding:0 16px!important;gap:24px!important;justify-content:flex-start!important;padding-top:20px!important}
-.hero-left{padding-left:0!important;text-align:center!important;display:flex!important;flex-direction:column!important;align-items:center!important}
+.hero-left{padding-left:0!important;text-align:left!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important}
 .hero-right{max-width:100%!important;margin-right:0!important;width:100%!important}
 .onboarding-main{padding:20px!important;gap:24px!important}
 .onboarding-card{padding:28px!important}
 .chat-sidebar{display:none!important}
+.sidebar-toggle{display:flex}
 .chat-msg{max-width:90%!important;font-size:16px!important}
-.summary-hero-img{height:260px!important}
+.summary-hero-img{height:250px!important}
 .summary-name-overlay{padding:20px!important}
+.summary-name-overlay span{font-size:clamp(28px,8vw,60px)!important}
+.summary-name-overlay>div:last-child,.summary-name-overlay>div:last-child span{font-size:14px!important}
 .summary-opinion-row>div{flex:1 1 100%!important}
 .bridge-layout{gap:24px!important}
 .resp-pad{padding-left:16px!important;padding-right:16px!important}
@@ -426,6 +457,7 @@ function Chat({userName, copilotName, onFinish, goHome}) {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [tone, setTone] = useState('direct');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dna, setDna] = useState(0);
   const [dialogueComplete, setDialogueComplete] = useState(false);
   const [butterfly, setButterfly] = useState(null);
@@ -607,7 +639,7 @@ function Chat({userName, copilotName, onFinish, goHome}) {
             React.createElement('div',{className:'tone-name'},t.icon,' ',React.createElement('span',{style:{background:toneGradients[t.id],backgroundClip:'text',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundSize:'200%',animation:'shimmer 3s linear infinite'}},t.name)),
             React.createElement('div',{className:'tone-desc'},t.desc)
           )),
-          React.createElement('div',{style:{position:'relative',background:'rgba(255,100,100,0.08)',border:'1px solid rgba(255,100,100,0.15)',borderRadius:10,padding:16,marginTop:'auto',overflow:'hidden',minHeight:140}},
+          React.createElement('div',{className:'nafig-card',style:{position:'relative',background:'rgba(255,100,100,0.08)',border:'1px solid rgba(255,100,100,0.15)',borderRadius:10,padding:16,marginTop:'auto',overflow:'hidden',minHeight:140}},
             React.createElement('span',{style:{position:'absolute',top:'20%',left:'80%',width:4,height:4,borderRadius:'50%',background:'rgba(255,200,100,0.6)',animation:'sparkle 3s ease-in-out infinite',animationDelay:'0s'}}),
             React.createElement('span',{style:{position:'absolute',top:'60%',left:'20%',width:4,height:4,borderRadius:'50%',background:'rgba(255,200,100,0.6)',animation:'sparkle 3s ease-in-out infinite',animationDelay:'1s'}}),
             React.createElement('span',{style:{position:'absolute',top:'40%',left:'60%',width:4,height:4,borderRadius:'50%',background:'rgba(255,200,100,0.6)',animation:'sparkle 3s ease-in-out infinite',animationDelay:'2s'}}),
@@ -623,11 +655,11 @@ function Chat({userName, copilotName, onFinish, goHome}) {
                 React.createElement('div',{className:'dna-bar-wrap'},
                   React.createElement('div',{className:'dna-bar'+(butterfly?' glow':''),style:{width:dna+'%'}})
                 ),
-                React.createElement('div',{style:{fontFamily:'Anton',fontSize:13,letterSpacing:1,color:'var(--muted)',marginTop:4}},dna+'% DNA'),
+                React.createElement('div',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:13,letterSpacing:1,color:'var(--muted)',marginTop:4}},dna+'% DNA'),
                 butterfly && React.createElement('div',{className:'butterfly-text'},butterfly)
               ),
               React.createElement('div',{style:{textAlign:'right',flexShrink:0,marginTop:'-4px'}},
-                React.createElement('div',{style:{fontFamily:'Anton',fontSize:36}},String(mins).padStart(1,'0')+':'+String(secs).padStart(2,'0')),
+                React.createElement('div',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:36}},String(mins).padStart(1,'0')+':'+String(secs).padStart(2,'0')),
                 React.createElement('div',{style:{fontSize:13,color:'var(--muted)'}},'из ~15 мин')
               )
             )
@@ -650,7 +682,18 @@ function Chat({userName, copilotName, onFinish, goHome}) {
             dialogueComplete && React.createElement('button',{className:'btn-main',style:{fontSize:13,padding:'10px 20px',marginLeft:8},onClick:handleResult},'DNA 🧬')
           )
         )
-      )
+      ),
+      sidebarOpen&&React.createElement('div',{className:'sidebar-scrim',onClick:()=>setSidebarOpen(false)}),
+      sidebarOpen&&React.createElement('div',{className:'sidebar-overlay'},
+        React.createElement('button',{className:'sidebar-close',onClick:()=>setSidebarOpen(false)},'\u2715'),
+        React.createElement('p',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:20,letterSpacing:2,textTransform:'uppercase',fontWeight:400,marginBottom:4,marginTop:8,color:'#fff'}},'Настрой тон'),
+        React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginBottom:12}},'Выбери стиль общения:'),
+        TONES.map(t=>React.createElement('button',{key:'m'+t.id,className:'tone-btn'+(tone===t.id?' active':''),style:{color:t.color,background:tone===t.id?toneBgActive[t.id]:toneBg[t.id],borderColor:t.color,transform:tone===t.id?'scale(1.05)':'scale(1)',boxShadow:tone===t.id?'0 0 15px '+t.color+'4d':'none',minHeight:72,display:'flex',flexDirection:'column',justifyContent:'center'},onClick:()=>{setTone(t.id);setSidebarOpen(false);}},
+          React.createElement('div',{className:'tone-name'},t.icon,' ',React.createElement('span',{style:{background:toneGradients[t.id],backgroundClip:'text',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundSize:'200%',animation:'shimmer 3s linear infinite'}},t.name)),
+          React.createElement('div',{className:'tone-desc'},t.desc)
+        ))
+      ),
+      React.createElement('button',{className:'sidebar-toggle',onClick:()=>setSidebarOpen(o=>!o)},TONES.find(t=>t.id===tone)?.icon||'\u26A1')
     )
   );
 }
@@ -679,10 +722,8 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome}) {
 
   return React.createElement('div',{className:'page'},
     React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-summary.png)'}}),
+    React.createElement('div',{className:'nav'},React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ')),
     React.createElement('div',{className:'page-content resp-pad',style:{padding:'0 40px 60px',maxWidth:'1500px',width:'95%',margin:'0 auto'}},
-
-      // 1. NAVBAR
-      React.createElement('div',{className:'nav'},React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ')),
 
       // 2. TITLE
       React.createElement('h1',{className:'hero',style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:'clamp(28px,4.5vw,56px)',textTransform:'uppercase',marginTop:40,marginBottom:48}},
@@ -695,7 +736,7 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome}) {
         // above bar: label left, percentage right
         React.createElement('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-end',marginBottom:8}},
           React.createElement('div',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:16,letterSpacing:2,textTransform:'uppercase',fontWeight:400}},'ЦИФРОВОЕ ДНК'),
-          React.createElement('div',{style:{fontFamily:'Anton',fontSize:52,color:'#fff',textShadow:'0 0 30px rgba(255,255,255,0.5)',lineHeight:1}},pct+'%')
+          React.createElement('div',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:52,color:'#fff',textShadow:'0 0 30px rgba(255,255,255,0.5)',lineHeight:1}},pct+'%')
         ),
         // marker + bar wrapper
         React.createElement('div',{style:{position:'relative',marginTop:48}},
@@ -714,13 +755,15 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome}) {
       ),
 
       // 3. DNA ABSTRACT IMAGE
+      React.createElement('div',{style:{textAlign:'center',fontSize:14,color:'rgba(255,255,255,0.5)',fontFamily:"'Anton','Impact','Arial Black',sans-serif",letterSpacing:2,textTransform:'uppercase',fontWeight:400,marginBottom:12}},'НАЖМИ ЧТОБЫ ОТКРЫТЬ ДНК'),
       React.createElement('div',{
         className:'summary-hero-img',
         onClick:handleImageClick,
         style:{
           width:'100%',height:500,borderRadius:20,overflow:'hidden',position:'relative',cursor:'pointer',
-          transition:'box-shadow 0.4s ease',marginBottom:48,
-          boxShadow:clickGlow?'0 0 60px 20px rgba(100,180,255,0.5), 0 0 120px 40px rgba(100,180,255,0.2)':'none'
+          transition:'transform 0.3s ease, box-shadow 0.4s ease',marginBottom:48,
+          boxShadow:clickGlow?'0 0 80px 20px rgba(100,180,255,0.6)':undefined,
+          animation:clickGlow?'none':undefined
         }
       },
         React.createElement('img',{
@@ -730,8 +773,6 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome}) {
         }),
         // dark gradient overlay
         React.createElement('div',{style:{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(0,0,0,0.8) 0%,rgba(0,0,0,0.2) 50%,transparent 100%)'}}),
-        // top-left hint
-        React.createElement('div',{style:{position:'absolute',top:0,left:0,padding:24,fontFamily:"'Anton','Impact',sans-serif",fontSize:13,color:'rgba(255,255,255,0.5)',letterSpacing:2,textTransform:'uppercase',fontWeight:400}},'НАЖМИ ЧТОБЫ ОТКРЫТЬ ДНК'),
         // bottom-left: split name + archetype
         React.createElement('div',{className:'summary-name-overlay',style:{position:'absolute',bottom:0,left:0,padding:40}},
           // split name
@@ -773,7 +814,7 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome}) {
         React.createElement('div',{style:{flex:'3 1 0',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:16,padding:24,display:'flex',flexDirection:'column',gap:12,justifyContent:'flex-start'}},
           React.createElement('div',{style:{fontSize:18,fontFamily:"'Anton','Impact',sans-serif",letterSpacing:1,textTransform:'uppercase',fontWeight:400}},'НЕ СОГЛАСЕН?'),
           React.createElement('p',{style:{fontSize:14,color:'var(--muted)',marginBottom:4}},'Результат можно изменить'),
-          React.createElement('input',{className:'input-field',placeholder:'Напиши что хочешь изменить...'}),
+          React.createElement('textarea',{className:'input-field',placeholder:'Напиши что хочешь изменить...',style:{minHeight:120,resize:'vertical'}}),
           React.createElement('button',{className:'btn-outline',style:{borderColor:'#f7c948',color:'#f7c948',width:'100%',marginTop:8,fontFamily:"'Anton','Impact',sans-serif",fontWeight:400}},'ИЗМЕНИТЬ')
         )
       ),
@@ -807,8 +848,8 @@ function BridgePage({data, onBack, goHome}) {
 
   return React.createElement('div',{className:'page'},
     React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-bridge.png)'}}),
+    React.createElement('div',{className:'nav'},React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ')),
     React.createElement('div',{className:'page-content resp-pad',style:{minHeight:'100vh',padding:'0 40px'}},
-      React.createElement('div',{className:'nav'},React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ')),
       React.createElement('div',{className:'bridge-layout',style:{display:'flex',gap:40,marginTop:40,flexWrap:'wrap',alignItems:'flex-start'}},
         React.createElement('div',{style:{flex:'1 1 300px'}},
           templates.map((t,i)=>React.createElement('div',{key:i,className:'card',style:{marginBottom:12,padding:16}},
@@ -827,7 +868,7 @@ function BridgePage({data, onBack, goHome}) {
             )
           ),
           React.createElement('div',{className:'card',style:{padding:24}},
-            React.createElement('div',{style:{fontSize:12,fontFamily:'Anton',letterSpacing:1,color:'var(--muted)',marginBottom:8}},'ТЕГ РОДИТЕЛЯ'),
+            React.createElement('div',{style:{fontSize:12,fontFamily:"'Anton','Impact','Arial Black',sans-serif",letterSpacing:1,color:'var(--muted)',marginBottom:8}},'ТЕГ РОДИТЕЛЯ'),
             React.createElement('input',{className:'input-field',placeholder:'@username',value:tag,onChange:e=>setTag(e.target.value),style:{marginBottom:16}}),
             React.createElement('div',{style:{background:'rgba(255,255,255,0.03)',borderRadius:8,padding:16,marginBottom:16}},
               React.createElement('p',{style:{fontSize:14,lineHeight:1.6,whiteSpace:'pre-line'}},msgText)
@@ -917,8 +958,8 @@ function DnaPage({data, onBack, onStore, goHome}) {
       // top row: icon + name + weight
       React.createElement('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:20}},
         React.createElement('span',{style:{fontSize:28}},c.icon),
-        React.createElement('span',{style:{fontFamily:'Anton',fontSize:18,letterSpacing:1,flex:1}},c.name),
-        React.createElement('span',{style:{background:c.color+'26',color:c.color,fontSize:11,padding:'4px 12px',borderRadius:20,fontFamily:'Anton',letterSpacing:1}},c.weight)
+        React.createElement('span',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:18,letterSpacing:1,flex:1}},c.name),
+        React.createElement('span',{style:{background:c.color+'26',color:c.color,fontSize:11,padding:'4px 12px',borderRadius:20,fontFamily:"'Anton','Impact','Arial Black',sans-serif",letterSpacing:1}},c.weight)
       ),
       // params
       c.params.map((p,i)=>React.createElement('div',{key:i},
@@ -939,7 +980,7 @@ function DnaPage({data, onBack, onStore, goHome}) {
       React.createElement('div',{style:{filter:'blur(6px)',opacity:0.4,pointerEvents:'none'}},content),
       React.createElement('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',zIndex:2}},
         React.createElement('div',{style:{background:'rgba(124,92,255,0.2)',border:'1px solid rgba(124,92,255,0.4)',borderRadius:20,padding:'8px 24px',cursor:'pointer'}},
-          React.createElement('span',{style:{color:'#a78bfa',fontSize:14,fontFamily:'Anton',letterSpacing:1}},'PRO — Открыть')
+          React.createElement('span',{style:{color:'#a78bfa',fontSize:14,fontFamily:"'Anton','Impact','Arial Black',sans-serif",letterSpacing:1}},'PRO — Открыть')
         )
       )
     );
@@ -947,18 +988,16 @@ function DnaPage({data, onBack, onStore, goHome}) {
 
   return React.createElement('div',{className:'page'},
     React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-summary.png)'}}),
+    React.createElement('div',{className:'nav'},
+      React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ'),
+      React.createElement('span',{style:{fontSize:13,color:'var(--muted)',cursor:'pointer'},onClick:onBack},'← Назад к результатам')
+    ),
     React.createElement('div',{className:'page-content resp-pad',style:{padding:'0 40px 60px',maxWidth:'1400px',width:'90%',margin:'0 auto'}},
-
-      // NAVBAR
-      React.createElement('div',{className:'nav'},
-        React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ'),
-        React.createElement('span',{style:{fontSize:13,color:'var(--muted)',cursor:'pointer'},onClick:onBack},'← Назад к результатам')
-      ),
 
       // HEADER
       React.createElement('div',{style:{textAlign:'center',marginTop:48,marginBottom:48}},
-        React.createElement('div',{style:{fontFamily:'Anton',fontSize:'clamp(48px,8vw,80px)',letterSpacing:2,lineHeight:1}},d.userName||'Имя'),
-        React.createElement('div',{style:{fontSize:18,color:'var(--accent)',fontFamily:'Anton',letterSpacing:1,marginTop:16}},d.archetype||'Искатель-строитель'),
+        React.createElement('div',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:'clamp(48px,8vw,80px)',letterSpacing:2,lineHeight:1}},d.userName||'Имя'),
+        React.createElement('div',{style:{fontSize:18,color:'var(--accent)',fontFamily:"'Anton','Impact','Arial Black',sans-serif",letterSpacing:1,marginTop:16}},d.archetype||'Искатель-строитель'),
         React.createElement('div',{style:{fontSize:16,color:'var(--muted)',fontStyle:'italic',fontFamily:"'Libre Baskerville',serif",marginTop:8}},d.superpower||''),
         React.createElement('div',{style:{display:'flex',alignItems:'center',gap:24,maxWidth:500,margin:'32px auto 0'}},
           React.createElement('div',{style:{flex:1}},
@@ -966,7 +1005,7 @@ function DnaPage({data, onBack, onStore, goHome}) {
               React.createElement('div',{className:'dna-bar',style:{width:(d.dna||22)+'%'}})
             )
           ),
-          React.createElement('div',{style:{fontFamily:'Anton',fontSize:'clamp(36px,5vw,56px)',background:'var(--gradient)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}},(d.dna||22)+'%')
+          React.createElement('div',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:'clamp(36px,5vw,56px)',background:'var(--gradient)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}},(d.dna||22)+'%')
         )
       ),
 
@@ -977,7 +1016,7 @@ function DnaPage({data, onBack, onStore, goHome}) {
 
       // BOTTOM CTA
       React.createElement('div',{style:{textAlign:'center',padding:'48px 0'}},
-        React.createElement('h2',{style:{fontFamily:'Anton',fontSize:24,letterSpacing:1,marginBottom:12}},'Открой все 8 кластеров'),
+        React.createElement('h2',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:24,letterSpacing:1,marginBottom:12}},'Открой все 8 кластеров'),
         React.createElement('p',{style:{color:'var(--muted)',fontSize:15,marginBottom:24}},'5 из 8 кластеров заблокированы. Полная карта ДНК — от 299₽'),
         React.createElement('button',{className:'btn-main',style:{borderRadius:999,padding:'16px 40px',fontSize:16},onClick:onStore},'Открыть полное ДНК'),
         React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginTop:16,cursor:'pointer'},onClick:onBack},'← Назад к результатам')
@@ -995,17 +1034,15 @@ function StorePage({data, onBack, onBridge, goHome}) {
   ];
   return React.createElement('div',{className:'page'},
     React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-summary.png)'}}),
+    React.createElement('div',{className:'nav'},
+      React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ'),
+      React.createElement('span',{style:{fontSize:13,color:'var(--muted)',cursor:'pointer'},onClick:onBack},'← Назад')
+    ),
     React.createElement('div',{className:'page-content resp-pad',style:{padding:'0 40px 60px',maxWidth:'1000px',width:'90%',margin:'0 auto'}},
-
-      // NAVBAR
-      React.createElement('div',{className:'nav'},
-        React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ'),
-        React.createElement('span',{style:{fontSize:13,color:'var(--muted)',cursor:'pointer'},onClick:onBack},'← Назад')
-      ),
 
       // HERO
       React.createElement('div',{style:{textAlign:'center',maxWidth:800,margin:'48px auto 48px'}},
-        React.createElement('h1',{style:{fontFamily:'Anton',fontSize:'clamp(28px,5vw,36px)',letterSpacing:2,textTransform:'uppercase',marginBottom:12}},'Твоё полное ДНК ждёт'),
+        React.createElement('h1',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:'clamp(28px,5vw,36px)',letterSpacing:2,textTransform:'uppercase',marginBottom:12}},'Твоё полное ДНК ждёт'),
         React.createElement('p',{style:{fontSize:16,color:'var(--muted)'}},'Один диалог — '+(d.dna||22)+'%. Это только начало.')
       ),
 
@@ -1018,7 +1055,7 @@ function StorePage({data, onBack, onBridge, goHome}) {
           onMouseLeave:e=>e.currentTarget.style.transform='translateY(0)'
         },
           React.createElement('div',{style:{fontSize:36,marginBottom:12}},f.icon),
-          React.createElement('div',{style:{fontFamily:'Anton',fontSize:16,letterSpacing:1,marginBottom:8}},f.title),
+          React.createElement('div',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:16,letterSpacing:1,marginBottom:8}},f.title),
           React.createElement('p',{style:{fontSize:14,color:'var(--muted)',lineHeight:1.5}},f.desc)
         ))
       ),
@@ -1027,8 +1064,8 @@ function StorePage({data, onBack, onBridge, goHome}) {
       React.createElement('div',{style:{display:'flex',gap:24,maxWidth:700,margin:'0 auto 48px',flexWrap:'wrap'}},
         // Left — recommended
         React.createElement('div',{style:{flex:1,minWidth:280,background:'rgba(255,255,255,0.03)',border:'2px solid var(--accent)',borderRadius:16,padding:32,textAlign:'center',position:'relative'}},
-          React.createElement('div',{style:{position:'absolute',top:-12,left:'50%',transform:'translateX(-50%)',background:'rgba(124,92,255,0.2)',color:'#a78bfa',fontSize:11,padding:'4px 12px',borderRadius:20,fontFamily:'Anton',letterSpacing:1}},'ПОПУЛЯРНЫЙ'),
-          React.createElement('div',{style:{fontFamily:'Anton',fontSize:48,letterSpacing:1,marginTop:16,marginBottom:4}},'299 ₽'),
+          React.createElement('div',{style:{position:'absolute',top:-12,left:'50%',transform:'translateX(-50%)',background:'rgba(124,92,255,0.2)',color:'#a78bfa',fontSize:11,padding:'4px 12px',borderRadius:20,fontFamily:"'Anton','Impact','Arial Black',sans-serif",letterSpacing:1}},'ПОПУЛЯРНЫЙ'),
+          React.createElement('div',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:48,letterSpacing:1,marginTop:16,marginBottom:4}},'299 ₽'),
           React.createElement('div',{style:{fontSize:14,color:'var(--muted)',marginBottom:16}},'разовая покупка'),
           React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginBottom:24,lineHeight:1.5}},'Полный ДНК + план + мероприятия'),
           React.createElement('button',{className:'btn-main',style:{width:'100%',borderRadius:999,fontSize:16,padding:'16px'}},'Выбрать')
@@ -1036,7 +1073,7 @@ function StorePage({data, onBack, onBridge, goHome}) {
         // Right — subscription
         React.createElement('div',{style:{flex:1,minWidth:280,background:'rgba(255,255,255,0.03)',border:'1px solid var(--border)',borderRadius:16,padding:32,textAlign:'center'}},
           React.createElement('div',{style:{marginTop:16}},
-            React.createElement('span',{style:{fontFamily:'Anton',fontSize:48,letterSpacing:1}},'299 ₽'),
+            React.createElement('span',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:48,letterSpacing:1}},'299 ₽'),
             React.createElement('span',{style:{fontSize:14,color:'var(--muted)'}},'/мес')
           ),
           React.createElement('div',{style:{fontSize:14,color:'var(--muted)',marginBottom:16,marginTop:4}},'подписка'),
@@ -1048,7 +1085,7 @@ function StorePage({data, onBack, onBridge, goHome}) {
       // PARENT SECTION
       React.createElement('div',{style:{height:1,background:'rgba(255,255,255,0.06)',margin:'40px 0'}}),
       React.createElement('div',{style:{textAlign:'center',marginBottom:48}},
-        React.createElement('h2',{style:{fontFamily:'Anton',fontSize:22,letterSpacing:1,marginBottom:12}},'Или покажи родителям'),
+        React.createElement('h2',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:22,letterSpacing:1,marginBottom:12}},'Или покажи родителям'),
         React.createElement('p',{style:{fontSize:14,color:'var(--muted)',maxWidth:600,margin:'0 auto 24px',lineHeight:1.6}},'Пусть они решат — и получат свой инструмент: ДНК ребёнка с цитатами + скрипты разговоров + навигатор образования'),
         React.createElement('button',{className:'btn-outline',style:{borderColor:'#5bbd72',color:'#5bbd72',borderRadius:999,padding:'14px 28px'},onClick:onBridge},'Отправить мост родителю'),
         React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:12}},'(для родителей: разовая 399₽ или подписка 499₽/мес)')
@@ -1056,7 +1093,7 @@ function StorePage({data, onBack, onBridge, goHome}) {
 
       // TRUST SECTION
       React.createElement('div',{style:{textAlign:'center',marginBottom:40}},
-        React.createElement('div',{style:{fontFamily:'Anton',fontSize:16,letterSpacing:1,marginBottom:16}},'Мы не берём деньги за воздух'),
+        React.createElement('div',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:16,letterSpacing:1,marginBottom:16}},'Мы не берём деньги за воздух'),
         React.createElement('div',{style:{display:'flex',gap:24,justifyContent:'center',flexWrap:'wrap'}},
           ['Не понравится — вернём','Данные не передаём','Можно отменить подписку в любой момент'].map((t,i)=>
             React.createElement('span',{key:i,style:{fontSize:13,color:'var(--muted)'}},'✓ '+t)
