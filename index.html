@@ -16,6 +16,7 @@ body{background:var(--bg);color:var(--text);font-family:'Libre Baskerville',seri
 .page-bg{position:fixed;inset:0;background-size:cover;background-position:center;background-attachment:fixed;z-index:0}
 .page-bg::after{content:'';position:absolute;inset:0;background:rgba(15,15,25,0.7)}
 .landing-bg::after{background:rgba(15,15,25,0.35)}
+.dna-bg::after{background:rgba(15,15,25,0.4)}
 .page-content{position:relative;z-index:1}
 .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;font-family:'Anton','Impact',sans-serif;font-size:22px;letter-spacing:3px;position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background:rgba(15,15,25,0.3);border-bottom:1px solid rgba(255,255,255,0.05)}
 .nav-links{display:flex;gap:8px;position:absolute;left:50%;transform:translateX(-50%)}
@@ -1124,7 +1125,7 @@ function DnaPage({data, onBack, onStore, onBridge, goHome}) {
 
   return React.createElement('div',{className:'page'},
     // blurred dimmed bg
-    React.createElement('div',{className:'page-bg',style:{backgroundImage:'url('+bgRef.current+')',filter:'blur(30px) brightness(0.4)'}}),
+    React.createElement('div',{className:'page-bg dna-bg',style:{backgroundImage:'url('+bgRef.current+')',filter:'blur(20px) brightness(0.7) saturate(1.3)'}}),
     // NAV
     React.createElement('div',{className:'nav',style:{display:'flex',justifyContent:'space-between',alignItems:'center'}},
       React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ'),
