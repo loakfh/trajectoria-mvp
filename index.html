@@ -234,7 +234,27 @@ h1.hero{font-size:clamp(24px,7vw,48px)}
 <div id="root"></div>
 <script type="text/babel">
 const { useState, useEffect, useRef, useCallback } = React;
-const EDGE_URL = 'https://icrqtyuiuoescihjvnma.supabase.co/functions/v1/chat_proxy';
+const SUPABASE_URL = 'https://icrqtyuiuoescihjvnma.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljcnF0eXVpdW9lc2NpaGp2bm1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MDk2NDEsImV4cCI6MjA2Nzk4NTY0MX0.placeholder_replace_me';
+const EDGE_URL = SUPABASE_URL + '/functions/v1/chat_proxy';
+
+function getOrCreateUserId() {
+  let uid = localStorage.getItem('traj_user_id');
+  if (!uid) { uid = crypto.randomUUID(); localStorage.setItem('traj_user_id', uid); }
+  return uid;
+}
+
+function saveDnaSummary(payload) {
+  if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.includes('placeholder')) { console.warn('SUPABASE_ANON_KEY not configured, skipping dna_summary save'); return; }
+  fetch(SUPABASE_URL + '/rest/v1/dna_summary', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Prefer': 'return=minimal' },
+    body: JSON.stringify(payload)
+  }).then(r => {
+    if (!r.ok) r.text().then(t => console.error('dna_summary save failed:', r.status, t));
+    else console.log('dna_summary saved OK');
+  }).catch(e => console.error('dna_summary save error:', e));
+}
 const SKIP_CODE = 'траектория39';
 const PAINS = [
   'Не знаю, кем хочу стать, — и это пугает',
@@ -352,13 +372,28 @@ ${finishBlock}
 }
 
 function parseDnaBlock(raw) {
-  const patterns = [/\`\`\`json_dna\s*(\{[\s\S]*?\})\s*\`\`\`/, /\`\`\`json\s*(\{[\s\S]*?\})\s*\`\`\`/, /(\{"dna_percent"[\s\S]*?\})/];
-  for (const p of patterns) {
+  // Patterns 1-2: inside code blocks (backtick-anchored — handles nested objects via backtracking)
+  const blockPatterns = [/\`\`\`json_dna\s*(\{[\s\S]*?\})\s*\`\`\`/, /\`\`\`json\s*(\{[\s\S]*?\})\s*\`\`\`/];
+  for (const p of blockPatterns) {
     const m = raw.match(p);
     if (m) try { const parsed=JSON.parse(m[1]); console.log('DNA parsed OK:', parsed.dna_percent); return parsed; } catch(e) { console.log('DNA JSON parse error:', e.message); }
   }
+  // Pattern 3: raw JSON without code block — balanced brace matching for nested objects (hidden_insights etc.)
+  const idx = raw.indexOf('"dna_percent"');
+  if (idx !== -1) {
+    const openIdx = raw.lastIndexOf('{', idx);
+    if (openIdx !== -1) {
+      let depth = 0;
+      for (let i = openIdx; i < raw.length; i++) {
+        if (raw[i] === '{') depth++;
+        else if (raw[i] === '}') { depth--; if (depth === 0) {
+          try { const parsed=JSON.parse(raw.slice(openIdx, i+1)); console.log('DNA parsed OK (fallback):', parsed.dna_percent); return parsed; } catch(e) { console.log('DNA fallback parse error:', e.message); break; }
+        }}
+      }
+    }
+  }
   const fb=raw.match(/"dna_percent"\s*:\s*(\d+)/);
-  if(fb){console.log('DNA fallback extract:', fb[1]); return {dna_percent:parseInt(fb[1],10)};}
+  if(fb){console.log('DNA number-only extract:', fb[1]); return {dna_percent:parseInt(fb[1],10)};}
   console.log('No DNA block found in response');
   return null;
 }
@@ -540,6 +575,7 @@ function Chat({userName, copilotName, onFinish, goHome}) {
   const recognitionRef = useRef(null);
   const summaryDataRef = useRef(null);
   const traitsRef = useRef([]);
+  const sessionIdRef = useRef(crypto.randomUUID());
 
   useEffect(()=>{
     const t=setInterval(()=>setElapsed(Math.floor((Date.now()-startTime.current)/1000)),1000);
@@ -654,6 +690,26 @@ function Chat({userName, copilotName, onFinish, goHome}) {
             suggested_feature:dnaData.suggested_feature||'',
             opinion:clean.slice(-300),
           };
+          // Fire-and-forget save to Supabase
+          saveDnaSummary({
+            user_id:getOrCreateUserId(),
+            session_id:sessionIdRef.current,
+            archetype:dnaData.archetype||'',
+            archetype_desc:dnaData.archetype_desc||'',
+            superpower:dnaData.superpower||'',
+            fuel:dnaData.fuel||'',
+            reframe_fear:dnaData.reframe_fear||'',
+            growth_edge:dnaData.growth_edge||'',
+            hidden_insights:Array.isArray(dnaData.hidden_insights)?dnaData.hidden_insights:[],
+            copilot_note:dnaData.copilot_note||'',
+            traits:traitsRef.current,
+            final_dna_percent:newDna,
+            dialogue_duration_sec:Math.floor((Date.now()-startTime.current)/1000),
+            total_messages:msgCountRef.current,
+            tone_used:tone,
+            readiness_score:dnaData.readiness_score||null,
+            readiness_factors:dnaData.readiness_factors||[]
+          });
         }
       }
       if(complete)setDialogueComplete(true);
