@@ -1266,12 +1266,11 @@ function DnaPage({data, onBack, onStore, onBridge, goHome}) {
       ),
 
       // ========== SECTION 1.5: WHOOP GAUGES ==========
-      // Wrapper with generous top margin for breathing room from block above
-      React.createElement('div',{style:{marginTop:80,position:'relative'}},
-        // Card with overflow:hidden clips the giant title at its own top edge
-        React.createElement('div',{style:{position:'relative',background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:20,padding:'72px 32px 52px',overflow:'hidden'}},
-          // Giant clipped title — positioned so only bottom ~12% peeks into the card
-          React.createElement('div',{style:{position:'absolute',top:-54,left:0,right:0,textAlign:'center',fontFamily:anton,fontSize:'clamp(52px,7vw,76px)',letterSpacing:10,textTransform:'uppercase',color:'#fff',fontWeight:400,lineHeight:1,pointerEvents:'none'}},'ИНДИКАТОРЫ ДНК'),
+      // Title sits ABOVE the card — 90% visible, bottom 10% dips behind card top edge
+      React.createElement('div',{style:{textAlign:'center',fontFamily:anton,fontSize:'clamp(52px,7vw,76px)',letterSpacing:10,textTransform:'uppercase',color:'#fff',fontWeight:400,lineHeight:1,marginTop:80,marginBottom:-12,position:'relative',zIndex:1}},'ИНДИКАТОРЫ ДНК'),
+      // Card — no overflow:hidden so gauges aren't clipped, title overlaps top edge naturally
+      React.createElement('div',{style:{position:'relative'}},
+        React.createElement('div',{style:{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:20,padding:'52px 32px 52px'}},
           // Gauges row
           React.createElement('div',{className:'dna-gauges-row',style:{display:'flex',justifyContent:'space-evenly',gap:48,flexWrap:'wrap',marginTop:8}},
             ...[
