@@ -307,10 +307,10 @@ const DEMO_SUMMARY = {
     {quote:'Мне норм и без денег, главное чтобы было интересно',context:'Ты сказал это вскользь, отвечая про страхи',title:'Это не про деньги. Это про систему ценностей.',text:'Большинство в твоём возрасте ставят деньги на первое место. Ты уже отделил средство от цели. Редкая ясность.'},
     {quote:'Один я не успею всё это сделать',context:'Обронил, когда говорил про мечту',title:'Это не слабость. Это точный диагноз.',text:'Ты видишь масштаб задачи. Люди годами не могут сформулировать чего не хватает. Ты уже знаешь.'}
   ],
-  readiness_score:7,
-  readiness_factors:['Высокая энергия в теме создания','Появилась ясность к концу диалога','Давление родителей немного снижает заряд'],
+  readiness_score:2,
+  readiness_factors:[],
   barriers_score:4,
-  agency_score:7,
+  agency_score:8,
   opinion:'Знаешь что? Ты пришёл сюда не потому что потерялся. А потому что тебе не всё равно. Большинство людей живут на автопилоте. А ты задумался. Это уже не мало.\n\nЯ вижу человека, который хочет жить по-своему, но пока не знает, как сказать об этом миру. Твоя мечта — создать что-то своё. Это не фантазия. Это вектор.\n\nДержи этот вектор. Остальное разберём вместе.',
   suggested_feature:'roadmap',
   dna: 22
@@ -1266,34 +1266,41 @@ function DnaPage({data, onBack, onStore, onBridge, goHome}) {
       ),
 
       // ========== SECTION 1.5: WHOOP GAUGES ==========
-      React.createElement('div',{style:{position:'relative',background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:20,padding:'64px 32px 48px',marginBottom:60,overflow:'hidden'}},
-        // Giant clipped title — peeks above card top
-        React.createElement('div',{style:{position:'absolute',top:-48,left:0,right:0,textAlign:'center',fontFamily:anton,fontSize:'clamp(48px,6vw,72px)',letterSpacing:8,textTransform:'uppercase',color:'rgba(255,255,255,0.95)',fontWeight:400,lineHeight:1,pointerEvents:'none'}},'ИНДИКАТОРЫ ДНК'),
-        React.createElement('div',{className:'dna-gauges-row',style:{display:'flex',justifyContent:'space-around',gap:32,flexWrap:'wrap',marginTop:24}},
-          ...[
-            {val:d.readiness_score||0,max:10,title:'МОРАЛЬНЫЙ ЗАРЯД',lo:'Разряжен',mid:'Заряжается',hi:'Заряжен',loT:3,hiT:7,invert:false},
-            {val:d.barriers_score??0,max:9,title:'БАРЬЕРЫ',lo:'Путь свободен',mid:'Есть сопротивление',hi:'Сильное давление',loT:2,hiT:6,invert:true},
-            {val:d.agency_score??0,max:9,title:'ОСОЗНАННОСТЬ',lo:'По течению',mid:'Начинает влиять',hi:'Рулит сам',loT:2,hiT:6,invert:false}
-          ].map((g,gi)=>{
-            const isHi=g.invert?(g.val<=g.loT):(g.val>=g.hiT);
-            const isLo=g.invert?(g.val>=g.hiT):(g.val<=g.loT);
-            const gc1=isHi?'#06b6d4':isLo?'#2d1b69':'#1a56db';
-            const gc2=isHi?'#2563eb':isLo?'#0a0a14':'#6b21a8';
-            const gLabel=isHi?g.hi:isLo?g.lo:g.mid;
-            const gDeg=Math.round(Math.min(g.val/g.max,1)*270);
-            const gShadow=isHi?'0 0 40px rgba(6,182,212,0.4)':isLo?'0 0 30px rgba(45,27,105,0.4)':'0 0 35px rgba(26,86,219,0.35)';
-            // Use background-size animation for shimmer effect on arc
-            const arcBg='conic-gradient('+gc1+' 0deg,'+gc2+' '+Math.round(gDeg*0.5)+'deg,'+gc1+' '+gDeg+'deg,rgba(255,255,255,0.05) '+gDeg+'deg,rgba(255,255,255,0.05) 270deg,transparent 270deg)';
-            return React.createElement('div',{key:gi,style:{textAlign:'center',flex:'0 0 200px'}},
-              React.createElement('div',{style:{fontFamily:anton,fontSize:18,letterSpacing:2,textTransform:'uppercase',color:'#fff',marginBottom:20,fontWeight:400}},g.title),
-              React.createElement('div',{style:{width:170,height:170,borderRadius:'50%',margin:'0 auto 16px',position:'relative',background:arcBg,transform:'rotate(135deg)',boxShadow:gShadow,transition:'box-shadow 0.5s ease'}},
-                React.createElement('div',{style:{position:'absolute',inset:14,borderRadius:'50%',background:'#0f0f19',display:'flex',alignItems:'center',justifyContent:'center',transform:'rotate(-135deg)'}},
-                  React.createElement('div',{style:{fontFamily:anton,fontSize:48,color:'#fff',lineHeight:1}},g.val)
-                )
-              ),
-              React.createElement('div',{style:{fontFamily:anton,fontSize:15,letterSpacing:1,color:isHi?'#06b6d4':isLo?'#a78bfa':'#818cf8',textTransform:'uppercase'}},gLabel)
-            );
-          })
+      // Wrapper with generous top margin for breathing room from block above
+      React.createElement('div',{style:{marginTop:80,position:'relative'}},
+        // Card with overflow:hidden clips the giant title at its own top edge
+        React.createElement('div',{style:{position:'relative',background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:20,padding:'72px 32px 52px',overflow:'hidden'}},
+          // Giant clipped title — positioned so only bottom ~12% peeks into the card
+          React.createElement('div',{style:{position:'absolute',top:-54,left:0,right:0,textAlign:'center',fontFamily:anton,fontSize:'clamp(52px,7vw,76px)',letterSpacing:10,textTransform:'uppercase',color:'#fff',fontWeight:400,lineHeight:1,pointerEvents:'none'}},'ИНДИКАТОРЫ ДНК'),
+          // Gauges row
+          React.createElement('div',{className:'dna-gauges-row',style:{display:'flex',justifyContent:'space-evenly',gap:48,flexWrap:'wrap',marginTop:8}},
+            ...[
+              {val:d.readiness_score||0,max:10,title:'МОРАЛЬНЫЙ ЗАРЯД',lo:'Разряжен',mid:'Заряжается',hi:'Заряжен',loT:3,hiT:7,invert:false},
+              {val:d.barriers_score??0,max:9,title:'БАРЬЕРЫ',lo:'Путь свободен',mid:'Есть сопротивление',hi:'Сильное давление',loT:2,hiT:6,invert:true},
+              {val:d.agency_score??0,max:9,title:'ОСОЗНАННОСТЬ',lo:'По течению',mid:'Начинает влиять',hi:'Рулит сам',loT:2,hiT:6,invert:false}
+            ].map((g,gi)=>{
+              const isHi=g.invert?(g.val<=g.loT):(g.val>=g.hiT);
+              const isLo=g.invert?(g.val>=g.hiT):(g.val<=g.loT);
+              // Color scheme: 1-3 red↔orange, 4-6 blue↔cyan, 7-10 green↔lime
+              const gc1=isLo?'#ef4444':isHi?'#22c55e':'#2563eb';
+              const gc2=isLo?'#f97316':isHi?'#84cc16':'#06b6d4';
+              const gLabel=isHi?g.hi:isLo?g.lo:g.mid;
+              // Fill: strictly proportional — val/max * 270 degrees
+              const gDeg=Math.round((g.val/g.max)*270);
+              const gShadow=isLo?'0 0 35px rgba(239,68,68,0.3)':isHi?'0 0 40px rgba(34,197,94,0.35)':'0 0 35px rgba(37,99,235,0.3)';
+              // Shimmer gradient arc: two colors alternate across the filled portion
+              const arcBg='conic-gradient('+gc1+' 0deg,'+gc2+' '+Math.round(gDeg*0.5)+'deg,'+gc1+' '+gDeg+'deg,rgba(255,255,255,0.05) '+gDeg+'deg,rgba(255,255,255,0.05) 270deg,transparent 270deg)';
+              return React.createElement('div',{key:gi,style:{textAlign:'center',flex:'0 0 220px'}},
+                React.createElement('div',{style:{fontFamily:anton,fontSize:21,letterSpacing:2,textTransform:'uppercase',color:'#fff',marginBottom:20,fontWeight:400}},g.title),
+                React.createElement('div',{style:{width:190,height:190,borderRadius:'50%',margin:'0 auto 18px',position:'relative',background:arcBg,transform:'rotate(135deg)',boxShadow:gShadow,transition:'box-shadow 0.5s ease'}},
+                  React.createElement('div',{style:{position:'absolute',inset:16,borderRadius:'50%',background:'#0f0f19',display:'flex',alignItems:'center',justifyContent:'center',transform:'rotate(-135deg)'}},
+                    React.createElement('div',{style:{fontFamily:anton,fontSize:52,color:'#fff',lineHeight:1}},g.val)
+                  )
+                ),
+                React.createElement('div',{style:{fontFamily:anton,fontSize:16,letterSpacing:1,color:isLo?'#f87171':isHi?'#4ade80':'#60a5fa',textTransform:'uppercase'}},gLabel)
+              );
+            })
+          )
         )
       ),
 
