@@ -1461,7 +1461,7 @@ function StorePage({data, onBack, onBridge, goHome}) {
 
   return React.createElement('div',{className:'page'},
     // Blurred bg image + dark overlay
-    React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg_store.jpeg)',filter:'blur(6px) brightness(0.4) saturate(1.2)'}}),
+    React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg_store.jpeg)',filter:'blur(6px) saturate(1.2)'}}),
     React.createElement('div',{className:'nav'},
       React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ'),
       React.createElement('span',{style:{fontSize:13,color:'var(--muted)',cursor:'pointer',fontFamily:anton,letterSpacing:2,textTransform:'uppercase'},onClick:onBack},'\u2190 НАЗАД')
@@ -1475,17 +1475,17 @@ function StorePage({data, onBack, onBridge, goHome}) {
       ),
 
       // STORIES CAROUSEL
-      React.createElement('div',{style:{position:'relative',marginBottom:56,height:260,display:'flex',alignItems:'center',justifyContent:'center'}},
+      React.createElement('div',{style:{position:'relative',marginBottom:56,height:300,display:'flex',alignItems:'center',justifyContent:'center'}},
         React.createElement('button',{onClick:()=>goCarousel(-1),style:{position:'absolute',left:'clamp(4px,3vw,40px)',zIndex:5,width:44,height:44,borderRadius:'50%',background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.15)',color:'#fff',fontSize:20,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',backdropFilter:'blur(4px)',transition:'background 0.2s'},onMouseEnter:e=>e.currentTarget.style.background='rgba(255,255,255,0.15)',onMouseLeave:e=>e.currentTarget.style.background='rgba(255,255,255,0.08)'},'\u25C0'),
         React.createElement('div',{style:{position:'relative',width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center'}},
           valCards.map((c,i)=>{
             const off=((i-carIdx+N)%N); const pos=off>N/2?off-N:off;
             if(Math.abs(pos)>2)return null;
             const isC=pos===0;
-            return React.createElement('div',{key:i,style:{position:'absolute',width:320,padding:'28px 24px',background:'#1a1a2e',borderRadius:18,border:'1px solid rgba(255,255,255,0.1)',boxSizing:'border-box',transform:'translateX('+(pos*280)+'px) scale('+(isC?1:0.7)+')',opacity:isC?1:0.5,filter:'blur('+(isC?0:3)+'px)',zIndex:isC?10:5-Math.abs(pos),transition:'all 0.5s cubic-bezier(0.4,0,0.2,1)',display:'flex',flexDirection:'column',gap:14,backgroundImage:'linear-gradient(135deg,rgba(124,92,255,0.06),rgba(6,182,212,0.06))',boxShadow:isC?'0 0 40px rgba(124,92,255,0.15)':'none'}},
-              React.createElement('p',{style:{fontFamily:caveat,fontSize:15,fontStyle:'italic',color:'rgba(255,255,255,0.6)',lineHeight:1.4}},'\u00AB'+c.quote+'\u00BB'),
-              React.createElement('p',{style:{fontFamily:libre,fontSize:15,color:'#fff',lineHeight:1.5}},c.val),
-              React.createElement('div',{style:{fontFamily:anton,fontSize:12,letterSpacing:2,color:'rgba(255,255,255,0.35)',textTransform:'uppercase',fontWeight:400}},c.feat)
+            return React.createElement('div',{key:i,style:{position:'absolute',width:360,minHeight:240,padding:'32px 28px',background:'#1a1a2e',borderRadius:18,border:'1px solid rgba(255,255,255,0.1)',boxSizing:'border-box',transform:'translateX('+(pos*320)+'px) scale('+(isC?1:0.65)+')',opacity:isC?1:0.5,filter:'blur('+(isC?0:3)+'px)',zIndex:isC?10:5-Math.abs(pos),transition:'all 0.5s cubic-bezier(0.4,0,0.2,1)',display:'flex',flexDirection:'column',gap:16,backgroundImage:'linear-gradient(135deg,rgba(124,92,255,0.06),rgba(6,182,212,0.06))',boxShadow:isC?'0 0 40px rgba(124,92,255,0.15)':'none'}},
+              React.createElement('p',{style:{fontFamily:caveat,fontSize:17,fontStyle:'italic',color:'rgba(255,255,255,0.6)',lineHeight:1.4}},'\u00AB'+c.quote+'\u00BB'),
+              React.createElement('p',{style:{fontFamily:libre,fontSize:16,color:'#fff',lineHeight:1.5}},c.val),
+              React.createElement('div',{style:{fontFamily:anton,fontSize:13,letterSpacing:2,color:'rgba(255,255,255,0.35)',textTransform:'uppercase',fontWeight:400,marginTop:'auto'}},c.feat)
             );
           })
         ),
@@ -1533,7 +1533,11 @@ function StorePage({data, onBack, onBridge, goHome}) {
             check('Подборка мероприятий под тво\u0439 профиль'),
             check('Скрытые инсайты \u2014 что ты не замечаешь в себе')
           ),
-          React.createElement('button',{style:{width:'100%',marginTop:20,background:'#fff',color:'#000',borderRadius:999,padding:'14px',border:'none',fontFamily:anton,fontSize:15,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'transform 0.2s'},onClick:()=>openModal('buy'),onMouseEnter:e=>e.currentTarget.style.transform='translateY(-2px)',onMouseLeave:e=>e.currentTarget.style.transform='translateY(0)'},'ВЫБРАТЬ')
+          React.createElement('div',{style:{background:'rgba(255,255,255,0.05)',borderRadius:10,padding:'12px 14px',marginTop:16}},
+            React.createElement('div',{style:{fontFamily:anton,fontSize:11,letterSpacing:1,color:'var(--muted)',textTransform:'uppercase',marginBottom:4,fontWeight:400}},'Подходит если:'),
+            React.createElement('p',{style:{fontFamily:libre,fontSize:13,fontStyle:'italic',color:'rgba(255,255,255,0.7)',lineHeight:1.5}},'Хочешь разобраться в себе прямо сейчас \u2014 без обязательств и подписок')
+          ),
+          React.createElement('button',{style:{width:'100%',marginTop:16,background:'#fff',color:'#000',borderRadius:999,padding:'14px',border:'none',fontFamily:anton,fontSize:15,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'transform 0.2s'},onClick:()=>openModal('buy'),onMouseEnter:e=>e.currentTarget.style.transform='translateY(-2px)',onMouseLeave:e=>e.currentTarget.style.transform='translateY(0)'},'ВЫБРАТЬ')
         ),
         // Card 3: ПОДПИСКА 349₽/мес
         React.createElement('div',{style:{flex:'1 1 280px',maxWidth:360,background:'rgba(255,255,255,0.03)',border:'1px solid rgba(6,182,212,0.3)',borderRadius:20,padding:'32px 28px',position:'relative',display:'flex',flexDirection:'column'}},
@@ -1545,9 +1549,14 @@ function StorePage({data, onBack, onBridge, goHome}) {
             check('Копилот без лимитов'),
             check('Трекинг прогресса'),
             check('Peer-чат с единомышленниками'),
-            check('ДНК обновляется с каждым диалогом')
+            check('ДНК обновляется с каждым диалогом'),
+            check('Коннект ДНК с другом \u2014 сравни профили и найди общие цели')
           ),
-          React.createElement('button',{style:{width:'100%',marginTop:20,background:'transparent',color:'#fff',borderRadius:999,padding:'14px',border:'1px solid rgba(255,255,255,0.3)',fontFamily:anton,fontSize:15,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'all 0.2s'},onClick:()=>openModal('subscribe'),onMouseEnter:e=>{e.currentTarget.style.borderColor='#fff';e.currentTarget.style.transform='translateY(-2px)'},onMouseLeave:e=>{e.currentTarget.style.borderColor='rgba(255,255,255,0.3)';e.currentTarget.style.transform='translateY(0)'}},'ВЫБРАТЬ')
+          React.createElement('div',{style:{background:'rgba(255,255,255,0.05)',borderRadius:10,padding:'12px 14px',marginTop:16}},
+            React.createElement('div',{style:{fontFamily:anton,fontSize:11,letterSpacing:1,color:'var(--muted)',textTransform:'uppercase',marginBottom:4,fontWeight:400}},'Подходит если:'),
+            React.createElement('p',{style:{fontFamily:libre,fontSize:13,fontStyle:'italic',color:'rgba(255,255,255,0.7)',lineHeight:1.5}},'Хочешь расти каждый день \u2014 с копилотом, трекингом и поддержкой сообщества')
+          ),
+          React.createElement('button',{style:{width:'100%',marginTop:16,background:'transparent',color:'#fff',borderRadius:999,padding:'14px',border:'1px solid rgba(255,255,255,0.3)',fontFamily:anton,fontSize:15,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'all 0.2s'},onClick:()=>openModal('subscribe'),onMouseEnter:e=>{e.currentTarget.style.borderColor='#fff';e.currentTarget.style.transform='translateY(-2px)'},onMouseLeave:e=>{e.currentTarget.style.borderColor='rgba(255,255,255,0.3)';e.currentTarget.style.transform='translateY(0)'}},'ВЫБРАТЬ')
         )
       ),
 
@@ -1569,12 +1578,10 @@ function StorePage({data, onBack, onBridge, goHome}) {
         )
       ),
 
-      // PARENT BRIDGE
+      // INVITE FRIEND/PARENT
       React.createElement('div',{style:{textAlign:'center',marginBottom:48,padding:'36px 0'}},
-        React.createElement('div',{style:{fontFamily:anton,fontSize:'clamp(20px,3vw,28px)',letterSpacing:1,textTransform:'uppercase',fontWeight:400,marginBottom:16}},'ПОДКЛЮЧИ РОДИТЕЛЯ \u2014 ПОЛУЧИ БОЛЬШЕ'),
-        React.createElement('p',{style:{fontFamily:libre,fontSize:15,color:'var(--muted)',maxWidth:620,margin:'0 auto 28px',lineHeight:1.8}},'Когда родитель видит тво\u0451 ДНК с цитатами из диалога \u2014 он начинает понимать тебя по-настоящему. Не контролировать, а понимать. А ты получаешь скидку 35% на любой план. Выполни оба условия \u2014 и разовый план бесплатно.'),
-        React.createElement('button',{style:{background:'transparent',color:'#5bbd72',border:'1px solid #5bbd72',borderRadius:999,padding:'14px 36px',fontFamily:anton,fontSize:16,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'all 0.2s'},onClick:onBridge,onMouseEnter:e=>e.currentTarget.style.background='rgba(91,189,114,0.1)',onMouseLeave:e=>e.currentTarget.style.background='transparent'},'ОТПРАВИТЬ МОСТ'),
-        React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:12}},'Для родителя: разовая 499\u20BD или подписка 349\u20BD/мес')
+        React.createElement('div',{style:{fontFamily:anton,fontSize:'clamp(20px,3vw,28px)',letterSpacing:1,textTransform:'uppercase',fontWeight:400,marginBottom:24}},'ПРИГЛАСИ ДРУГА ИЛИ РОДИТЕЛЯ'),
+        React.createElement('button',{style:{background:'transparent',color:'#5bbd72',border:'1px solid #5bbd72',borderRadius:999,padding:'14px 36px',fontFamily:anton,fontSize:16,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'all 0.2s'},onClick:onBridge,onMouseEnter:e=>e.currentTarget.style.background='rgba(91,189,114,0.1)',onMouseLeave:e=>e.currentTarget.style.background='transparent'},'ОТПРАВИТЬ ССЫЛКУ')
       ),
 
       // BACK LINK
