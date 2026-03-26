@@ -238,22 +238,37 @@ const SUPABASE_URL = 'https://icrqtyuiuoescihjvnma.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljcnF0eXVpdW9lc2NpaGp2bm1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MDk2NDEsImV4cCI6MjA2Nzk4NTY0MX0.placeholder_replace_me';
 const EDGE_URL = SUPABASE_URL + '/functions/v1/chat_proxy';
 
-function getOrCreateUserId() {
-  let uid = localStorage.getItem('traj_user_id');
-  if (!uid) { uid = crypto.randomUUID(); localStorage.setItem('traj_user_id', uid); }
-  return uid;
+const SB_HEADERS={'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY};
+function sbOk(){return SUPABASE_ANON_KEY&&!SUPABASE_ANON_KEY.includes('placeholder');}
+
+async function sbPost(table,data,returnRepr){
+  if(!sbOk())return null;
+  try{
+    const r=await fetch(SUPABASE_URL+'/rest/v1/'+table,{method:'POST',headers:{...SB_HEADERS,'Prefer':returnRepr?'return=representation':'return=minimal'},body:JSON.stringify(data)});
+    if(!r.ok){const t=await r.text();console.error(table+' POST:',r.status,t);return null;}
+    if(returnRepr){const arr=await r.json();return arr[0]||null;}
+    return true;
+  }catch(e){console.error(table+' POST error:',e);return null;}
 }
 
-function saveDnaSummary(payload) {
-  if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.includes('placeholder')) { console.warn('SUPABASE_ANON_KEY not configured, skipping dna_summary save'); return; }
-  fetch(SUPABASE_URL + '/rest/v1/dna_summary', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Prefer': 'return=minimal' },
-    body: JSON.stringify(payload)
-  }).then(r => {
-    if (!r.ok) r.text().then(t => console.error('dna_summary save failed:', r.status, t));
-    else console.log('dna_summary saved OK');
-  }).catch(e => console.error('dna_summary save error:', e));
+function sbPostFaf(table,data){
+  if(!sbOk())return;
+  fetch(SUPABASE_URL+'/rest/v1/'+table,{method:'POST',headers:{...SB_HEADERS,'Prefer':'return=minimal'},body:JSON.stringify(data)})
+    .then(r=>{if(!r.ok)r.text().then(t=>console.error(table+' POST:',r.status,t));})
+    .catch(e=>console.error(table+' error:',e));
+}
+
+function sbPatch(table,col,val,data){
+  if(!sbOk())return;
+  fetch(SUPABASE_URL+'/rest/v1/'+table+'?'+col+'=eq.'+val,{method:'PATCH',headers:{...SB_HEADERS,'Prefer':'return=minimal'},body:JSON.stringify(data)})
+    .then(r=>{if(!r.ok)r.text().then(t=>console.error(table+' PATCH:',r.status,t));})
+    .catch(e=>console.error(table+' error:',e));
+}
+
+function getOrCreateUserId(){
+  let uid=localStorage.getItem('traj_user_id');
+  if(!uid){uid=crypto.randomUUID();localStorage.setItem('traj_user_id',uid);}
+  return uid;
 }
 const SKIP_CODE = 'траектория39';
 const PAINS = [
@@ -559,7 +574,7 @@ function Onboarding({onSubmit, goHome}) {
   );
 }
 
-function Chat({userName, copilotName, onFinish, goHome}) {
+function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -580,7 +595,6 @@ function Chat({userName, copilotName, onFinish, goHome}) {
   const recognitionRef = useRef(null);
   const summaryDataRef = useRef(null);
   const traitsRef = useRef([]);
-  const sessionIdRef = useRef(crypto.randomUUID());
 
   useEffect(()=>{
     const t=setInterval(()=>setElapsed(Math.floor((Date.now()-startTime.current)/1000)),1000);
@@ -695,37 +709,36 @@ function Chat({userName, copilotName, onFinish, goHome}) {
             suggested_feature:dnaData.suggested_feature||'',
             opinion:clean.slice(-300),
           };
-          // Fire-and-forget save to Supabase
-          saveDnaSummary({
-            user_id:getOrCreateUserId(),
-            session_id:sessionIdRef.current,
-            archetype:dnaData.archetype||'',
-            archetype_desc:dnaData.archetype_desc||'',
-            superpower:dnaData.superpower||'',
-            fuel:dnaData.fuel||'',
-            reframe_fear:dnaData.reframe_fear||'',
-            growth_edge:dnaData.growth_edge||'',
+          // Fire-and-forget save dna_summary to Supabase
+          sbPostFaf('dna_summary',{
+            user_id:userId,session_id:sessionId,
+            archetype:dnaData.archetype||'',archetype_desc:dnaData.archetype_desc||'',
+            superpower:dnaData.superpower||'',fuel:dnaData.fuel||'',
+            reframe_fear:dnaData.reframe_fear||'',growth_edge:dnaData.growth_edge||'',
             hidden_insights:Array.isArray(dnaData.hidden_insights)?dnaData.hidden_insights:[],
-            copilot_note:dnaData.copilot_note||'',
-            traits:traitsRef.current,
+            copilot_note:dnaData.copilot_note||'',traits:traitsRef.current,
             final_dna_percent:newDna,
             dialogue_duration_sec:Math.floor((Date.now()-startTime.current)/1000),
-            total_messages:msgCountRef.current,
-            tone_used:tone,
+            total_messages:msgCountRef.current,tone_used:tone,
             readiness_score:dnaData.readiness_score||null,
             readiness_factors:dnaData.readiness_factors||[]
           });
         }
+        // Update session state in Supabase
+        sbPatch('sessions','id',sessionId,{dna_percentage:dnaData.dna_percent||0,dialogue_phase:dnaData.phase||'',emotional_state:dnaData.emotion||''});
       }
       if(complete)setDialogueComplete(true);
       const asstMsg={role:'assistant',content:clean};
       setMessages(prev=>[...prev,asstMsg]);
       historyRef.current.push({role:'assistant',content:raw});
+      // Fire-and-forget: save both messages to Supabase
+      sbPostFaf('messages',{user_id:userId,session_id:sessionId,role:'user',content:text});
+      sbPostFaf('messages',{user_id:userId,session_id:sessionId,role:'copilot',content:clean});
     }catch(e){
       setMessages(prev=>[...prev,{role:'assistant',content:'Упс, что-то пошло не так. Попробуй ещё раз.'}]);
     }
     setIsTyping(false);
-  },[input,isTyping,tone,dna,userName,copilotName,onFinish]);
+  },[input,isTyping,tone,dna,userName,copilotName,userId,sessionId,onFinish]);
 
   const handleSkip=useCallback(()=>{
     if(isTyping)return;
@@ -742,13 +755,15 @@ function Chat({userName, copilotName, onFinish, goHome}) {
         console.log('GPT skip raw (last 500):', raw ? raw.slice(-500) : 'EMPTY');
         const clean=stripDnaBlock(raw);
         const dnaData=parseDnaBlock(raw);
-        if(dnaData){const nd=dnaData.dna_percent??dna;setDna(nd);prevDnaRef.current=nd;}
+        if(dnaData){const nd=dnaData.dna_percent??dna;setDna(nd);prevDnaRef.current=nd;sbPatch('sessions','id',sessionId,{dna_percentage:nd,dialogue_phase:dnaData.phase||'',emotional_state:dnaData.emotion||''});}
         setMessages(prev=>[...prev,{role:'assistant',content:clean}]);
         historyRef.current.push({role:'assistant',content:raw});
+        sbPostFaf('messages',{user_id:userId,session_id:sessionId,role:'user',content:'[SKIP]'});
+        sbPostFaf('messages',{user_id:userId,session_id:sessionId,role:'copilot',content:clean});
       }catch(e){}
       setIsTyping(false);
     },1500);
-  },[isTyping,tone,dna,userName,copilotName]);
+  },[isTyping,tone,dna,userName,copilotName,userId,sessionId]);
 
   const handleResult=()=>{
     const data=summaryDataRef.current||{...DEMO_SUMMARY,userName,dna};
@@ -834,7 +849,7 @@ function Chat({userName, copilotName, onFinish, goHome}) {
   );
 }
 
-function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName}) {
+function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName, userId}) {
   const d = data || DEMO_SUMMARY;
   const abstractImages = ['assets/дверь_разлом_цветы.png','assets/парень_комп_разлом.png','assets/дверь_размлом.png','assets/дыра_разломы.png','assets/вода_разломы.png'];
   const randomImgRef = useRef(abstractImages[Math.floor(Math.random()*abstractImages.length)]);
@@ -873,9 +888,7 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName
   const handleContactSave = () => {
     if(!contactTg.trim())return;
     console.log('Contact saved:',contactTg);
-    if(SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.includes('placeholder')){
-      fetch(SUPABASE_URL+'/rest/v1/contacts',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Prefer':'return=minimal'},body:JSON.stringify({user_id:getOrCreateUserId(),telegram:contactTg.trim()})}).catch(e=>console.error(e));
-    }
+    if(userId) sbPatch('users','id',userId,{contact:contactTg.trim()});
     setContactSaved(true);
   };
 
@@ -1026,7 +1039,7 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName
           React.createElement('div',{style:{fontFamily:anton,fontSize:20,letterSpacing:1,textTransform:'uppercase',marginBottom:8,fontWeight:400}},'ФИЧА В РАЗРАБОТКЕ'),
           React.createElement('p',{style:{fontSize:14,color:'var(--muted)',marginBottom:20}},'Оставь Telegram \u2014 напишем когда запустим'),
           React.createElement('input',{className:'input-field',placeholder:'@username',value:featureTg,onChange:e=>setFeatureTg(e.target.value),style:{width:'100%',marginBottom:12,boxSizing:'border-box'}}),
-          React.createElement('button',{className:'btn-main',style:{width:'100%'},onClick:()=>{console.log('Feature interest:',featureModal,featureTg);setFeatureModal(null);setFeatureTg('');}},'ОТПРАВИТЬ'),
+          React.createElement('button',{className:'btn-main',style:{width:'100%'},onClick:()=>{sbPostFaf('fakedoor_clicks',{user_id:userId||null,feature_name:featureModal,contact:featureTg.trim()||null});setFeatureModal(null);setFeatureTg('');}},'ОТПРАВИТЬ'),
           React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:12,cursor:'pointer'},onClick:()=>setFeatureModal(null)},'Закрыть')
         )
       ),
@@ -1528,8 +1541,14 @@ function App() {
   const [userData, setUserData] = useState({userName:'',copilotName:''});
   const [summaryData, setSummaryData] = useState(null);
 
-  const handleOnboard = (name, copilot) => {
-    setUserData({userName:name, copilotName:copilot});
+  const handleOnboard = async (name, copilot) => {
+    // Create user in Supabase (blocking — need the id)
+    const user = await sbPost('users',{name,copilot_name:copilot,source:'web_mvp'},true);
+    const uId = user?.id || getOrCreateUserId();
+    // Create session
+    const session = await sbPost('sessions',{user_id:uId,tone_preference:'direct'},true);
+    const sId = session?.id || crypto.randomUUID();
+    setUserData({userName:name,copilotName:copilot,userId:uId,sessionId:sId});
     setPage('chat');
   };
 
@@ -1541,12 +1560,15 @@ function App() {
     page === 'chat' ? React.createElement(Chat, {
       userName: userData.userName,
       copilotName: userData.copilotName,
+      userId: userData.userId,
+      sessionId: userData.sessionId,
       onFinish: (data) => { setSummaryData(data); setPage('summary'); },
       goHome
     }) :
     page === 'summary' ? React.createElement(Summary, {
       data: summaryData,
       copilotName: userData.copilotName,
+      userId: userData.userId,
       onBridge: () => setPage('bridge'),
       onDna: () => setPage('dna'),
       onStore: () => setPage('store'),
