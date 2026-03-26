@@ -1412,29 +1412,34 @@ function StorePage({data, onBack, onBridge, goHome}) {
   const [modal, setModal] = useState(false);
   const [tg, setTg] = useState('');
   const [saved, setSaved] = useState(false);
+  const [carIdx, setCarIdx] = useState(0);
+  const autoRef = useRef(null);
   const anton = "'Anton','Impact','Arial Black',sans-serif";
   const libre = "'Libre Baskerville',serif";
   const caveat = "'Caveat',cursive";
 
   useEffect(()=>{window.scrollTo(0,0);},[]);
 
-  // Value carousel cards — personalized via keyword matching on traits/opinion
+  // Value cards — stories carousel
   const traitText = ((d.traits||[]).map(t=>t.text).join(' ')+(d.opinion||'')).toLowerCase();
   const valCards = [
-    {icon:'\uD83E\uDDEC',val:traitText.includes('не знаю')||traitText.includes('разобраться')?'Наконец разобраться в себе':'Понять себя глубже',feat:'Полная карта ДНК \u2014 15 параметров',clr:'#06b6d4'},
-    {icon:'\uD83D\uDDFA\uFE0F',val:traitText.includes('план')||traitText.includes('что делать')?'Перестать гадать что дальше':'Знать что делать дальше',feat:'Персональный план на 2 месяца',clr:'#a855f7'},
-    {icon:'\uD83C\uDFAF',val:traitText.includes('хаос')||traitText.includes('интерес')?'Собрать хаос в систему':'Найти сво\u0451 среди хаоса',feat:'Подборка мероприятий под профиль',clr:'#ec4899'},
-    {icon:'\uD83E\uDD16',val:traitText.includes('слышит')||traitText.includes('понимает')?'Чтобы кто-то понимал':'Иметь кого-то кто понимает',feat:'Копилот без лимитов',clr:'#f97316'},
-    {icon:'\uD83D\uDCCA',val:traitText.includes('цель')||traitText.includes('прогресс')?'Видеть что раст\u0451шь':'Видеть свой прогресс',feat:'Трекинг роста ДНК',clr:'#22c55e'},
-    {icon:'\uD83D\uDC65',val:traitText.includes('один')||traitText.includes('одиноч')?'Перестать быть одному':'Найти таких же как я',feat:'Peer-чат с единомышленниками',clr:'#3b82f6'}
+    {quote:traitText.includes('не знаю')?'Я не знаю что мне подходит...':'Я не знаю кем хочу стать...',val:'Полная карта того, кто ты \u2014 без тестов и оценок',feat:'ПОЛНАЯ КАРТА ДНК'},
+    {quote:traitText.includes('дальше')?'Что мне делать после школы?':'Хочу понять что делать дальше',val:'Конкретные шаги на месяц \u2014 не абстракция, а действия',feat:'ПЕРСОНАЛЬНЫЙ ПЛАН'},
+    {quote:traitText.includes('хаос')?'У меня слишком много интересов':'Столько всего, не знаю за что хвататься',val:'Хакатоны, курсы, олимпиады \u2014 отфильтрованные под тебя',feat:'ПОДБОРКА МЕРОПРИЯТИЙ'},
+    {quote:traitText.includes('понимает')?'Впервые кто-то реально слышит':'Наконец кто-то слушает',val:'Копилот, который помнит вс\u0451 и всегда на связи',feat:'КОПИЛОТ БЕЗ ЛИМИТОВ'},
+    {quote:traitText.includes('прогресс')?'Мне важно видеть результат':'Хочу видеть что двигаюсь',val:'Смотри как раст\u0451шь \u2014 ДНК обновляется с каждым шагом',feat:'ТРЕКИНГ ПРОГРЕССА'},
+    {quote:traitText.includes('один')?'Кажется я один такой':'Чувствую что один с этим',val:'Чат с теми, кто тоже ищет свой путь',feat:'PEER-ЧАТ'}
   ];
-  // Double the cards for infinite scroll
-  const doubled = [...valCards,...valCards];
+  const N = valCards.length;
+
+  // Auto-advance carousel
+  const resetAuto = () => { clearInterval(autoRef.current); autoRef.current = setInterval(()=>setCarIdx(p=>(p+1)%N),5000); };
+  useEffect(()=>{ resetAuto(); return ()=>clearInterval(autoRef.current); },[]);
+  const goCarousel = (dir) => { setCarIdx(p=>(p+dir+N)%N); resetAuto(); };
 
   const handleBuy = () => setModal(true);
   const handleSave = () => {
     if(!tg.trim())return;
-    console.log('Store lead:',tg);
     if(typeof sbPostFaf==='function') sbPostFaf('fakedoor_clicks',{user_id:null,feature_name:'store_purchase',contact:tg.trim()});
     setSaved(true);
   };
@@ -1452,56 +1457,86 @@ function StorePage({data, onBack, onBridge, goHome}) {
     ),
     React.createElement('div',{className:'page-content resp-pad zoomable',style:{padding:'0 40px 60px',maxWidth:1100,width:'92%',margin:'0 auto'}},
 
-      // 2A: HERO
+      // HERO
       React.createElement('div',{style:{textAlign:'center',margin:'56px auto 48px',maxWidth:800}},
         React.createElement('h1',{style:{fontFamily:anton,fontSize:'clamp(32px,5vw,48px)',letterSpacing:3,textTransform:'uppercase',marginBottom:12,fontWeight:400}},'ТВО\u0401 ПОЛНОЕ ДНК ЖД\u0401Т'),
         React.createElement('p',{style:{fontFamily:libre,fontSize:17,color:'var(--muted)'}},'Один диалог \u2014 '+(d.dna||22)+'%. Это только начало.')
       ),
 
-      // 2B: VALUE CAROUSEL — auto-scrolling
-      React.createElement('div',{style:{overflow:'hidden',marginBottom:56,position:'relative'}},
-        // fade edges
-        React.createElement('div',{style:{position:'absolute',left:0,top:0,bottom:0,width:60,background:'linear-gradient(to right,#0f0f19,transparent)',zIndex:2}}),
-        React.createElement('div',{style:{position:'absolute',right:0,top:0,bottom:0,width:60,background:'linear-gradient(to left,#0f0f19,transparent)',zIndex:2}}),
-        React.createElement('div',{style:{display:'flex',gap:16,animation:'scroll 30s linear infinite',width:'max-content'}},
-          doubled.map((c,i)=>React.createElement('div',{key:i,style:{flex:'0 0 210px',height:170,background:'rgba(255,255,255,0.03)',borderRadius:16,padding:'20px 18px',display:'flex',flexDirection:'column',justifyContent:'space-between',borderLeft:'3px solid '+c.clr,borderBottom:'1px solid '+c.clr+'40',boxShadow:'0 0 20px '+c.clr+'20',transition:'box-shadow 0.3s'}},
-            React.createElement('div',{style:{fontSize:28}},c.icon),
-            React.createElement('div',{style:{fontFamily:libre,fontSize:14,color:'#fff',lineHeight:1.4}},c.val),
-            React.createElement('div',{style:{fontFamily:anton,fontSize:11,letterSpacing:1,color:c.clr,textTransform:'uppercase',fontWeight:400}},c.feat)
-          ))
-        )
-      ),
-
-      // 2C: PRICING — two cards
-      React.createElement('div',{style:{display:'flex',gap:24,marginBottom:56,flexWrap:'wrap',justifyContent:'center'}},
-        // Left — one-time (highlighted)
-        React.createElement('div',{style:{flex:'1 1 320px',maxWidth:440,background:'rgba(255,255,255,0.03)',border:'2px solid rgba(124,92,255,0.5)',borderRadius:20,padding:'36px 32px',position:'relative',boxShadow:'0 0 40px rgba(124,92,255,0.15)'}},
-          React.createElement('div',{style:{position:'absolute',top:-13,left:'50%',transform:'translateX(-50%)',background:'rgba(124,92,255,0.25)',color:'#c4b5fd',fontSize:11,padding:'5px 16px',borderRadius:20,fontFamily:anton,letterSpacing:2,textTransform:'uppercase',fontWeight:400}},'ПОПУЛЯРНЫЙ'),
-          React.createElement('div',{style:{fontFamily:anton,fontSize:56,letterSpacing:1,marginTop:12,marginBottom:4,fontWeight:400}},'349 \u20BD'),
-          React.createElement('div',{style:{fontSize:15,color:'var(--muted)',marginBottom:24}},'разовая покупка'),
-          check('Полная карта ДНК \u2014 все 15 параметров'),
-          check('Персональный план на 2 месяца'),
-          check('Подборка хакатонов, курсов, олимпиад под тво\u0439 профиль'),
-          check('Скрытые инсайты \u2014 что ты не замечаешь в себе'),
-          React.createElement('button',{style:{width:'100%',marginTop:20,background:'#fff',color:'#000',borderRadius:999,padding:'16px',border:'none',fontFamily:anton,fontSize:17,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'transform 0.2s'},onClick:handleBuy,onMouseEnter:e=>e.currentTarget.style.transform='translateY(-2px)',onMouseLeave:e=>e.currentTarget.style.transform='translateY(0)'},'ВЫБРАТЬ')
+      // STORIES CAROUSEL
+      React.createElement('div',{style:{position:'relative',marginBottom:56,height:260,display:'flex',alignItems:'center',justifyContent:'center'}},
+        // Left nav
+        React.createElement('button',{onClick:()=>goCarousel(-1),style:{position:'absolute',left:'clamp(4px,3vw,40px)',zIndex:5,width:44,height:44,borderRadius:'50%',background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.15)',color:'#fff',fontSize:20,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',backdropFilter:'blur(4px)',transition:'background 0.2s'},onMouseEnter:e=>e.currentTarget.style.background='rgba(255,255,255,0.15)',onMouseLeave:e=>e.currentTarget.style.background='rgba(255,255,255,0.08)'},'\u25C0'),
+        // Cards container
+        React.createElement('div',{style:{position:'relative',width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center'}},
+          valCards.map((c,i)=>{
+            const off = ((i-carIdx+N)%N);
+            const pos = off > N/2 ? off-N : off;
+            if(Math.abs(pos)>2) return null;
+            const isCenter = pos===0;
+            const sc = isCenter?1:0.7;
+            const tx = pos*280;
+            const op = isCenter?1:0.5;
+            const bl = isCenter?0:3;
+            const z = isCenter?10:5-Math.abs(pos);
+            return React.createElement('div',{key:i,style:{position:'absolute',width:320,padding:'28px 24px',background:'#1a1a2e',borderRadius:18,border:'1px solid rgba(255,255,255,0.1)',boxSizing:'border-box',transform:'translateX('+tx+'px) scale('+sc+')',opacity:op,filter:'blur('+bl+'px)',zIndex:z,transition:'all 0.5s cubic-bezier(0.4,0,0.2,1)',display:'flex',flexDirection:'column',gap:14,backgroundImage:'linear-gradient(135deg,rgba(124,92,255,0.06),rgba(6,182,212,0.06))',boxShadow:isCenter?'0 0 40px rgba(124,92,255,0.15)':'none'}},
+              React.createElement('p',{style:{fontFamily:caveat,fontSize:15,fontStyle:'italic',color:'rgba(255,255,255,0.6)',lineHeight:1.4}},'\u00AB'+c.quote+'\u00BB'),
+              React.createElement('p',{style:{fontFamily:libre,fontSize:15,color:'#fff',lineHeight:1.5}},c.val),
+              React.createElement('div',{style:{fontFamily:anton,fontSize:12,letterSpacing:2,color:'rgba(255,255,255,0.35)',textTransform:'uppercase',fontWeight:400}},c.feat)
+            );
+          })
         ),
-        // Right — subscription
-        React.createElement('div',{style:{flex:'1 1 320px',maxWidth:440,background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:20,padding:'36px 32px'}},
-          React.createElement('div',{style:{marginTop:12,marginBottom:4}},
-            React.createElement('span',{style:{fontFamily:anton,fontSize:56,letterSpacing:1,fontWeight:400}},'249 \u20BD'),
-            React.createElement('span',{style:{fontSize:16,color:'var(--muted)',marginLeft:4}},'/мес')
-          ),
-          React.createElement('div',{style:{fontSize:15,color:'var(--muted)',marginBottom:24}},'подписка'),
-          check('Вс\u0451 из разовой покупки'),
-          check('Копилот без лимитов \u2014 спрашивай что угодно'),
-          check('Трекинг прогресса \u2014 смотри как раст\u0451шь'),
-          check('Peer-чат с единомышленниками'),
-          check('ДНК обновляется с каждым диалогом'),
-          React.createElement('button',{style:{width:'100%',marginTop:20,background:'transparent',color:'#fff',borderRadius:999,padding:'16px',border:'1px solid rgba(255,255,255,0.3)',fontFamily:anton,fontSize:17,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'all 0.2s'},onClick:handleBuy,onMouseEnter:e=>{e.currentTarget.style.borderColor='#fff';e.currentTarget.style.transform='translateY(-2px)'},onMouseLeave:e=>{e.currentTarget.style.borderColor='rgba(255,255,255,0.3)';e.currentTarget.style.transform='translateY(0)'}},'ВЫБРАТЬ')
+        // Right nav
+        React.createElement('button',{onClick:()=>goCarousel(1),style:{position:'absolute',right:'clamp(4px,3vw,40px)',zIndex:5,width:44,height:44,borderRadius:'50%',background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.15)',color:'#fff',fontSize:20,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',backdropFilter:'blur(4px)',transition:'background 0.2s'},onMouseEnter:e=>e.currentTarget.style.background='rgba(255,255,255,0.15)',onMouseLeave:e=>e.currentTarget.style.background='rgba(255,255,255,0.08)'},'\u25B6'),
+        // Dots
+        React.createElement('div',{style:{position:'absolute',bottom:0,display:'flex',gap:8,justifyContent:'center'}},
+          valCards.map((_,i)=>React.createElement('div',{key:i,style:{width:i===carIdx?20:6,height:6,borderRadius:3,background:i===carIdx?'var(--accent)':'rgba(255,255,255,0.2)',transition:'all 0.3s',cursor:'pointer'},onClick:()=>{setCarIdx(i);resetAuto();}}))
         )
       ),
 
-      // PAYMENT MODAL (fakedoor)
+      // PRICING — 3 cards
+      React.createElement('div',{style:{display:'flex',gap:20,marginBottom:56,flexWrap:'wrap',justifyContent:'center',alignItems:'stretch'}},
+        // Card 1: SHARE (free)
+        React.createElement('div',{style:{flex:'1 1 280px',maxWidth:340,background:'rgba(255,255,255,0.03)',border:'1px solid rgba(91,189,114,0.3)',borderRadius:20,padding:'32px 28px',display:'flex',flexDirection:'column'}},
+          React.createElement('div',{style:{fontFamily:anton,fontSize:26,letterSpacing:1,textTransform:'uppercase',fontWeight:400,marginBottom:4}},'ПОДЕЛИСЬ С БЛИЗКИМИ'),
+          React.createElement('div',{style:{fontFamily:anton,fontSize:20,color:'rgba(255,255,255,0.5)',marginBottom:24,fontWeight:400}},'Бесплатно'),
+          React.createElement('div',{style:{flex:1}},
+            check('Полная карта ДНК открывается бесплатно'),
+            check('Скидка 35% на план \u00ABРазовая покупка\u00BB'),
+            check('Родитель получает свой инструмент')
+          ),
+          React.createElement('button',{style:{width:'100%',marginTop:20,background:'transparent',color:'#5bbd72',borderRadius:999,padding:'14px',border:'1px solid #5bbd72',fontFamily:anton,fontSize:15,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'all 0.2s'},onClick:handleBuy,onMouseEnter:e=>e.currentTarget.style.background='rgba(91,189,114,0.1)',onMouseLeave:e=>e.currentTarget.style.background='transparent'},'ОТПРАВИТЬ ССЫЛКУ')
+        ),
+        // Card 2: ONE-TIME (popular)
+        React.createElement('div',{style:{flex:'1 1 280px',maxWidth:340,background:'rgba(255,255,255,0.03)',border:'2px solid rgba(124,92,255,0.5)',borderRadius:20,padding:'32px 28px',position:'relative',boxShadow:'0 0 40px rgba(124,92,255,0.12)',display:'flex',flexDirection:'column'}},
+          React.createElement('div',{style:{position:'absolute',top:-13,left:'50%',transform:'translateX(-50%)',background:'rgba(124,92,255,0.25)',color:'#c4b5fd',fontSize:11,padding:'5px 16px',borderRadius:20,fontFamily:anton,letterSpacing:2,textTransform:'uppercase',fontWeight:400}},'ПОПУЛЯРНЫЙ'),
+          React.createElement('div',{style:{fontFamily:anton,fontSize:26,letterSpacing:1,textTransform:'uppercase',fontWeight:400,marginTop:8,marginBottom:4}},'РАЗОВАЯ ПОКУПКА'),
+          React.createElement('div',{style:{fontFamily:anton,fontSize:20,color:'rgba(255,255,255,0.5)',marginBottom:24,fontWeight:400}},'349 \u20BD'),
+          React.createElement('div',{style:{flex:1}},
+            check('Полная карта ДНК \u2014 все 15 параметров'),
+            check('Персональный план на 1 месяц'),
+            check('Подборка мероприятий под тво\u0439 профиль'),
+            check('Скрытые инсайты \u2014 что ты не замечаешь в себе')
+          ),
+          React.createElement('button',{style:{width:'100%',marginTop:20,background:'#fff',color:'#000',borderRadius:999,padding:'14px',border:'none',fontFamily:anton,fontSize:15,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'transform 0.2s'},onClick:handleBuy,onMouseEnter:e=>e.currentTarget.style.transform='translateY(-2px)',onMouseLeave:e=>e.currentTarget.style.transform='translateY(0)'},'ВЫБРАТЬ')
+        ),
+        // Card 3: SUBSCRIPTION (recommended)
+        React.createElement('div',{style:{flex:'1 1 280px',maxWidth:340,background:'rgba(255,255,255,0.03)',border:'1px solid rgba(6,182,212,0.3)',borderRadius:20,padding:'32px 28px',position:'relative',display:'flex',flexDirection:'column'}},
+          React.createElement('div',{style:{position:'absolute',top:-13,left:'50%',transform:'translateX(-50%)',background:'rgba(6,182,212,0.2)',color:'#67e8f9',fontSize:11,padding:'5px 16px',borderRadius:20,fontFamily:anton,letterSpacing:2,textTransform:'uppercase',fontWeight:400}},'ЛУЧШИЙ ДЛЯ ТЕБЯ'),
+          React.createElement('div',{style:{fontFamily:anton,fontSize:26,letterSpacing:1,textTransform:'uppercase',fontWeight:400,marginTop:8,marginBottom:4}},'ПОДПИСКА'),
+          React.createElement('div',{style:{fontFamily:anton,fontSize:20,color:'rgba(255,255,255,0.5)',marginBottom:24,fontWeight:400}},'449 \u20BD/мес'),
+          React.createElement('div',{style:{flex:1}},
+            check('Вс\u0451 из разовой покупки'),
+            check('Копилот без лимитов'),
+            check('Трекинг прогресса'),
+            check('Peer-чат с единомышленниками'),
+            check('ДНК обновляется с каждым диалогом')
+          ),
+          React.createElement('button',{style:{width:'100%',marginTop:20,background:'transparent',color:'#fff',borderRadius:999,padding:'14px',border:'1px solid rgba(255,255,255,0.3)',fontFamily:anton,fontSize:15,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'all 0.2s'},onClick:handleBuy,onMouseEnter:e=>{e.currentTarget.style.borderColor='#fff';e.currentTarget.style.transform='translateY(-2px)'},onMouseLeave:e=>{e.currentTarget.style.borderColor='rgba(255,255,255,0.3)';e.currentTarget.style.transform='translateY(0)'}},'ВЫБРАТЬ')
+        )
+      ),
+
+      // FAKEDOOR MODAL
       modal && React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.75)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20},onClick:()=>setModal(false)},
         React.createElement('div',{style:{background:'#1a1a2e',border:'1px solid rgba(255,255,255,0.1)',borderRadius:20,padding:36,maxWidth:420,width:'100%',textAlign:'center'},onClick:e=>e.stopPropagation()},
           !saved ? React.createElement(React.Fragment,null,
@@ -1517,25 +1552,15 @@ function StorePage({data, onBack, onBridge, goHome}) {
         )
       ),
 
-      // 2D: PARENT BRIDGE
-      React.createElement('div',{style:{textAlign:'center',marginBottom:48}},
-        React.createElement('p',{style:{fontFamily:caveat,fontSize:'clamp(24px,3.5vw,36px)',color:'rgba(255,255,255,0.85)',marginBottom:12}},'Или покажи родителям'),
-        React.createElement('p',{style:{fontFamily:libre,fontSize:15,color:'var(--muted)',maxWidth:600,margin:'0 auto 24px',lineHeight:1.7}},'Пусть они решат \u2014 и получат свой инструмент: ДНК реб\u0451нка с цитатами + скрипты разговоров + навигатор образования'),
-        React.createElement('button',{style:{background:'transparent',color:'#5bbd72',border:'1px solid #5bbd72',borderRadius:999,padding:'14px 36px',fontFamily:anton,fontSize:16,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'all 0.2s'},onClick:onBridge,onMouseEnter:e=>{e.currentTarget.style.background='rgba(91,189,114,0.1)'},onMouseLeave:e=>{e.currentTarget.style.background='transparent'}},'ОТПРАВИТЬ МОСТ РОДИТЕЛЮ'),
-        React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:12}},'(для родителей: разовая 499\u20BD или подписка 449\u20BD/мес)')
+      // PARENT BRIDGE — reframed around student benefits
+      React.createElement('div',{style:{textAlign:'center',marginBottom:48,padding:'36px 0'}},
+        React.createElement('div',{style:{fontFamily:anton,fontSize:'clamp(20px,3vw,28px)',letterSpacing:1,textTransform:'uppercase',fontWeight:400,marginBottom:16}},'ПОДКЛЮЧИ РОДИТЕЛЯ \u2014 ПОЛУЧИ БОЛЬШЕ'),
+        React.createElement('p',{style:{fontFamily:libre,fontSize:15,color:'var(--muted)',maxWidth:620,margin:'0 auto 28px',lineHeight:1.8}},'Когда родитель видит тво\u0451 ДНК с цитатами из диалога \u2014 он начинает понимать тебя по-настоящему. А ты получаешь полную карту бесплатно + скидку 35% на любой план. Это не контроль \u2014 это мост.'),
+        React.createElement('button',{style:{background:'transparent',color:'#5bbd72',border:'1px solid #5bbd72',borderRadius:999,padding:'14px 36px',fontFamily:anton,fontSize:16,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'all 0.2s'},onClick:onBridge,onMouseEnter:e=>e.currentTarget.style.background='rgba(91,189,114,0.1)',onMouseLeave:e=>e.currentTarget.style.background='transparent'},'ОТПРАВИТЬ МОСТ'),
+        React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:12}},'Для родителя: разовая 499\u20BD или подписка 449\u20BD/мес')
       ),
 
-      // 2E: TRUST
-      React.createElement('div',{style:{textAlign:'center',marginBottom:40}},
-        React.createElement('div',{style:{fontFamily:anton,fontSize:18,letterSpacing:1,marginBottom:16,fontWeight:400}},'Мы не бер\u0451м деньги за воздух'),
-        React.createElement('div',{style:{display:'flex',gap:28,justifyContent:'center',flexWrap:'wrap'}},
-          ['Не понравится \u2014 верн\u0451м','Данные не переда\u0451м','Можно отменить подписку в любой момент'].map((t,i)=>
-            React.createElement('span',{key:i,style:{fontSize:14,color:'var(--muted)'}},'\u2713 '+t)
-          )
-        )
-      ),
-
-      // 2F: BACK LINK
+      // BACK LINK
       React.createElement('div',{style:{textAlign:'center',paddingBottom:32}},
         React.createElement('p',{style:{fontSize:14,color:'var(--muted)',cursor:'pointer'},onClick:onBack},'\u2190 Назад к результатам')
       )
