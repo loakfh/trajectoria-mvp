@@ -863,8 +863,6 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName
   const randomImgRef = useRef(abstractImages[Math.floor(Math.random()*abstractImages.length)]);
   if (d) d.dnaBgImage = CRACK_TO_CLEAN[randomImgRef.current] || 'assets/вода.jpeg';
   const [clickGlow, setClickGlow] = useState(false);
-  const [featureModal, setFeatureModal] = useState(null);
-  const [featureTg, setFeatureTg] = useState('');
   const [contactTg, setContactTg] = useState('');
   const [contactSaved, setContactSaved] = useState(false);
   const handleImageClick = () => { setClickGlow(true); setTimeout(()=>{setClickGlow(false);onDna();},600); };
@@ -874,15 +872,6 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName
   const anton = "'Anton','Impact','Arial Black',sans-serif";
   const libre = "'Libre Baskerville',serif";
   const caveat = "'Caveat',cursive";
-  const label = (text, color) => React.createElement('div',{style:{fontFamily:anton,fontSize:13,letterSpacing:2,textTransform:'uppercase',marginBottom:12,color:color||'var(--muted)',fontWeight:400}},text);
-
-  const featureButtons = [
-    {id:'roadmap',label:'Роадмап',icon:'\uD83D\uDDFA\uFE0F'},
-    {id:'case',label:'Кейс от компании',icon:'\uD83C\uDFAF'},
-    {id:'community',label:'Найти таких же',icon:'\uD83D\uDC65'},
-    {id:'parents',label:'Позвать родителей',icon:'\uD83D\uDCE9'},
-    {id:'deeper',label:'Пойти глубже',icon:'\uD83E\uDDE0'}
-  ];
 
   const handleContactSave = () => {
     if(!contactTg.trim())return;
@@ -912,10 +901,11 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName
           React.createElement('div',{style:{fontFamily:anton,fontSize:16,letterSpacing:2,textTransform:'uppercase',fontWeight:400}},'ЦИФРОВОЕ ДНК'),
           React.createElement('div',{style:{fontFamily:anton,fontSize:52,color:'#fff',textShadow:'0 0 30px rgba(255,255,255,0.5)',lineHeight:1}},pct+'%')
         ),
-        React.createElement('div',{style:{position:'relative',marginTop:48}},
-          React.createElement('div',{style:{position:'absolute',left:'15%',top:-36,transform:'translateX(-50%)',fontSize:13,color:'rgba(255,255,255,0.7)',whiteSpace:'nowrap',display:'flex',flexDirection:'column',alignItems:'center'}},
-            React.createElement('span',null,'\u2190 большинство останавливаются здесь'),
-            React.createElement('div',{style:{width:2,height:30,background:'rgba(255,255,255,0.7)',marginTop:4}})
+        React.createElement('div',{style:{position:'relative',marginTop:28}},
+          // marker — text above bar, line extends down through bar
+          React.createElement('div',{style:{position:'absolute',left:'15%',top:-24,transform:'translateX(-50%)',fontSize:13,color:'rgba(255,255,255,0.6)',whiteSpace:'nowrap',display:'flex',flexDirection:'column',alignItems:'center'}},
+            React.createElement('span',null,'большинство здесь'),
+            React.createElement('div',{style:{width:1,height:52,background:'rgba(255,255,255,0.5)',marginTop:4}})
           ),
           React.createElement('div',{style:{height:18,background:'rgba(255,255,255,0.1)',borderRadius:9,overflow:'hidden'}},
             React.createElement('div',{style:{height:'100%',borderRadius:9,background:'var(--gradient)',backgroundSize:'200% 100%',animation:'dnaShimmer 3s linear infinite',width:pct+'%',transition:'width 0.8s ease'}})
@@ -943,75 +933,39 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName
       ),
       React.createElement('p',{style:{textAlign:'center',fontSize:14,color:'rgba(255,255,255,0.4)',fontFamily:anton,letterSpacing:2,textTransform:'uppercase',marginBottom:48,cursor:'pointer'},onClick:handleImageClick},'Нажми чтобы открыть карту ДНК \u2192'),
 
-      // 4. TWO-COLUMN: traits (left) + copilot opinion (right)
-      React.createElement('div',{className:'summary-opinion-row',style:{display:'flex',gap:32,marginBottom:48,flexWrap:'wrap',alignItems:'stretch'}},
-        // LEFT — trait cards
-        React.createElement('div',{style:{flex:'6 1 0',display:'flex',flexDirection:'column',gap:16,minWidth:300}},
-          label('ЧТО Я УЗНАЛ О ТЕБЕ'),
-          (d.traits||[]).map((t,i)=>React.createElement('div',{key:i,style:{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)',borderLeft:'4px solid '+t.color,borderRadius:14,padding:'24px 28px'}},
-            React.createElement('div',{style:{fontFamily:anton,fontSize:12,letterSpacing:2,color:t.color,textTransform:'uppercase',marginBottom:8,fontWeight:400}},t.name),
-            React.createElement('div',{style:{fontFamily:libre,fontSize:16,color:'rgba(255,255,255,0.85)',lineHeight:1.7}},t.text)
-          ))
-        ),
-        // RIGHT — copilot opinion
-        React.createElement('div',{style:{flex:'4 1 0',minWidth:280}},
-          React.createElement('div',{style:{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:16,padding:32,position:'sticky',top:100}},
-            React.createElement('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:20}},
-              React.createElement('div',{style:{width:42,height:42,borderRadius:'50%',background:'var(--gradient)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,flexShrink:0}},'\u2728'),
-              React.createElement('div',{style:{fontFamily:anton,fontSize:16,letterSpacing:1,textTransform:'uppercase',fontWeight:400}},'МНЕНИЕ '+pilot.toUpperCase())
-            ),
-            React.createElement('div',{style:{fontFamily:libre,fontSize:16,fontStyle:'italic',color:'rgba(255,255,255,0.8)',lineHeight:1.8}},
-              (d.opinion||d.title||'').split('\n').filter(l=>l.trim()).map((line,i)=>React.createElement('p',{key:i,style:{marginBottom:12}},line))
-            ),
-            insightQuote && React.createElement('div',{style:{borderLeft:'3px solid var(--accent)',paddingLeft:16,marginTop:24}},
-              React.createElement('div',{style:{fontSize:13,color:'var(--accent)',fontFamily:anton,letterSpacing:1,textTransform:'uppercase',marginBottom:8,fontWeight:400}},'МЕЖДУ СТРОК'),
-              React.createElement('p',{style:{fontFamily:caveat,fontSize:20,fontStyle:'italic',color:'rgba(255,255,255,0.8)',margin:'10px 0'}},'\u00AB',insightQuote.quote,'\u00BB'),
-              React.createElement('p',{style:{fontSize:14,color:'var(--muted)'}},insightQuote.text)
-            )
+      // 4. TWO-COLUMN: copilot opinion (left ~65%) + disagree (right ~35%)
+      React.createElement('div',{className:'summary-opinion-row',style:{display:'flex',gap:24,marginBottom:48,flexWrap:'wrap',alignItems:'stretch'}},
+        // LEFT — copilot opinion
+        React.createElement('div',{style:{flex:'7 1 0',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:16,padding:32,minWidth:300}},
+          React.createElement('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:24}},
+            React.createElement('div',{style:{width:42,height:42,borderRadius:'50%',background:'var(--gradient)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,flexShrink:0}},'\u2728'),
+            React.createElement('div',{style:{fontFamily:anton,fontSize:20,letterSpacing:1,textTransform:'uppercase',fontWeight:400}},'МНЕНИЕ '+pilot.toUpperCase())
+          ),
+          React.createElement('div',{style:{fontFamily:libre,fontSize:17,color:'rgba(255,255,255,0.8)',lineHeight:1.8,marginBottom:24}},
+            (d.opinion||d.title||'').split('\n').filter(l=>l.trim()).map((line,i)=>React.createElement('p',{key:i,style:{marginBottom:12}},line))
+          ),
+          insightQuote && React.createElement('div',{style:{borderLeft:'3px solid var(--accent)',paddingLeft:16,marginTop:8}},
+            React.createElement('div',{style:{fontSize:14,color:'var(--accent)',fontFamily:anton,letterSpacing:1,textTransform:'uppercase',marginBottom:8,fontWeight:400}},'МЕЖДУ СТРОК'),
+            React.createElement('p',{style:{fontFamily:caveat,fontSize:20,fontStyle:'italic',color:'rgba(255,255,255,0.8)',margin:'10px 0'}},'\u00AB',insightQuote.quote,'\u00BB'),
+            React.createElement('p',{style:{fontSize:15,color:'var(--muted)'}},insightQuote.text)
           )
-        )
-      ),
-
-      // 5. "НЕ СОГЛАСЕН" BLOCK — amber/orange tint
-      React.createElement('div',{style:{background:'rgba(249,115,22,0.06)',border:'1px solid rgba(249,115,22,0.15)',borderRadius:16,padding:'32px 36px',marginBottom:48}},
-        React.createElement('div',{style:{fontFamily:anton,fontSize:20,letterSpacing:1,textTransform:'uppercase',marginBottom:8,color:'#f59e0b',fontWeight:400}},'НЕ СОГЛАСЕН?'),
-        React.createElement('p',{style:{fontSize:15,color:'var(--muted)',marginBottom:16}},'Напиши что не так \u2014 пересчитаем.'),
-        React.createElement('textarea',{className:'input-field',placeholder:'Что хочешь изменить...',style:{width:'100%',minHeight:80,resize:'vertical',boxSizing:'border-box',marginBottom:16}}),
-        React.createElement('button',{className:'btn-outline',style:{borderColor:'#f59e0b',color:'#f59e0b',fontFamily:anton,fontWeight:400,padding:'12px 32px',animation:'pulseGlow 3s ease-in-out infinite'},onClick:()=>console.log('disagree submitted')},'ИЗМЕНИТЬ РЕЗУЛЬТАТЫ')
-      ),
-
-      // 6. FAKEDOORS — purple blurred card + feature buttons
-      React.createElement('div',{style:{marginBottom:48}},
-        React.createElement('div',{style:{background:'rgba(124,92,255,0.06)',border:'1px solid rgba(124,92,255,0.12)',borderRadius:16,padding:'32px 36px',marginBottom:20}},
-          React.createElement('div',{style:{fontFamily:anton,fontSize:20,letterSpacing:1,textTransform:'uppercase',color:'#a78bfa',fontWeight:400,marginBottom:8}},'ХОЧЕШЬ ЗНАТЬ ЧТО ДАЛЬШЕ?'),
-          React.createElement('p',{style:{fontFamily:libre,fontSize:16,color:'rgba(255,255,255,0.6)',lineHeight:1.7}},'Ты прош\u0451л первый этап. Дальше \u2014 роадмап, реальные кейсы, единомышленники и связь с родителями. Выбери что важнее.')
         ),
-        React.createElement('div',{style:{display:'flex',flexWrap:'wrap',gap:12}},
-          featureButtons.map(fb=>React.createElement('button',{key:fb.id,style:{flex:'1 1 calc(20% - 12px)',minWidth:150,background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:14,padding:'20px 16px',cursor:'pointer',color:'#fff',textAlign:'center',transition:'all 0.2s',fontSize:14},onClick:()=>setFeatureModal(fb.id),onMouseEnter:e=>{e.currentTarget.style.borderColor='var(--accent)';e.currentTarget.style.transform='translateY(-4px)'},onMouseLeave:e=>{e.currentTarget.style.borderColor='rgba(255,255,255,0.1)';e.currentTarget.style.transform='translateY(0)'}},
-            React.createElement('div',{style:{fontSize:28,marginBottom:8}},fb.icon),
-            React.createElement('div',{style:{fontFamily:anton,fontSize:13,letterSpacing:1,textTransform:'uppercase',fontWeight:400}},fb.label)
-          ))
+        // RIGHT — disagree
+        React.createElement('div',{style:{flex:'3 1 0',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:16,padding:24,display:'flex',flexDirection:'column',minWidth:240}},
+          React.createElement('div',{style:{fontFamily:anton,fontSize:18,letterSpacing:1,textTransform:'uppercase',fontWeight:400,marginBottom:4}},'НЕ СОГЛАСЕН?'),
+          React.createElement('p',{style:{fontSize:14,color:'var(--muted)',marginBottom:12}},'Результат можно изменить'),
+          React.createElement('textarea',{className:'input-field',placeholder:'Напиши что хочешь изменить...',style:{width:'100%',flex:1,minHeight:100,resize:'vertical',boxSizing:'border-box',marginBottom:12}}),
+          React.createElement('button',{className:'btn-outline',style:{borderColor:'#f7c948',color:'#f7c948',width:'100%',fontFamily:anton,fontWeight:400,padding:'12px 0'}},'ИЗМЕНИТЬ')
         )
       ),
 
-      // FEATURE MODAL
-      featureModal && React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20},onClick:()=>setFeatureModal(null)},
-        React.createElement('div',{style:{background:'#1a1a2e',border:'1px solid rgba(255,255,255,0.1)',borderRadius:16,padding:32,maxWidth:400,width:'100%',textAlign:'center'},onClick:e=>e.stopPropagation()},
-          React.createElement('div',{style:{fontFamily:anton,fontSize:20,letterSpacing:1,textTransform:'uppercase',marginBottom:8,fontWeight:400}},'ФИЧА В РАЗРАБОТКЕ'),
-          React.createElement('p',{style:{fontSize:14,color:'var(--muted)',marginBottom:20}},'Оставь Telegram \u2014 напишем когда запустим'),
-          React.createElement('input',{className:'input-field',placeholder:'@username',value:featureTg,onChange:e=>setFeatureTg(e.target.value),style:{width:'100%',marginBottom:12,boxSizing:'border-box'}}),
-          React.createElement('button',{className:'btn-main',style:{width:'100%'},onClick:()=>{sbPostFaf('fakedoor_clicks',{user_id:userId||null,feature_name:featureModal,contact:featureTg.trim()||null});setFeatureModal(null);setFeatureTg('');}},'ОТПРАВИТЬ'),
-          React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:12,cursor:'pointer'},onClick:()=>setFeatureModal(null)},'Закрыть')
-        )
-      ),
-
-      // 7. CONTACT
+      // 5. CONTACT
       React.createElement('div',{style:{textAlign:'center',padding:'48px 0'}},
-        React.createElement('div',{style:{fontFamily:anton,fontSize:22,letterSpacing:2,textTransform:'uppercase',marginBottom:12,fontWeight:400}},'ОСТАНЕМСЯ НА СВЯЗИ?'),
-        React.createElement('p',{style:{fontSize:14,color:'var(--muted)',marginBottom:16}},'Оставь контакт, напишем тебе'),
+        React.createElement('div',{style:{fontFamily:anton,fontSize:22,letterSpacing:2,textTransform:'uppercase',marginBottom:12,fontWeight:400}},'ОСТАЛИСЬ ВОПРОСЫ? НАПИШИ НАМ'),
+        React.createElement('p',{style:{fontSize:14,color:'var(--muted)',marginBottom:16}},'Оставь контакт, наш менеджер напишет тебе'),
         !contactSaved ? React.createElement('div',{style:{display:'flex',gap:12,justifyContent:'center',alignItems:'center',flexWrap:'wrap'}},
-          React.createElement('input',{style:{maxWidth:450,width:'100%',padding:'16px 24px',fontSize:16,borderRadius:50,border:'1px solid rgba(255,255,255,0.2)',background:'transparent',color:'#fff',outline:'none',fontFamily:libre},placeholder:'@telegram',value:contactTg,onChange:e=>setContactTg(e.target.value)}),
-          React.createElement('button',{style:{background:'#fff',color:'#000',borderRadius:50,padding:'16px 32px',border:'none',fontFamily:anton,fontSize:16,letterSpacing:1,fontWeight:400,cursor:'pointer',transition:'transform 0.2s'},onClick:handleContactSave,onMouseEnter:e=>e.currentTarget.style.transform='translateY(-2px)',onMouseLeave:e=>e.currentTarget.style.transform='translateY(0)'},'СОХРАНИТЬ')
+          React.createElement('input',{style:{maxWidth:450,width:'100%',padding:'16px 24px',fontSize:16,borderRadius:50,border:'1px solid rgba(255,255,255,0.2)',background:'transparent',color:'#fff',outline:'none',fontFamily:libre},placeholder:'@telegram или email',value:contactTg,onChange:e=>setContactTg(e.target.value)}),
+          React.createElement('button',{style:{background:'#fff',color:'#000',borderRadius:50,padding:'16px 32px',border:'none',fontFamily:anton,fontSize:16,letterSpacing:1,fontWeight:400,cursor:'pointer',transition:'transform 0.2s'},onClick:handleContactSave,onMouseEnter:e=>e.currentTarget.style.transform='translateY(-2px)',onMouseLeave:e=>e.currentTarget.style.transform='translateY(0)'},'ОСТАВИТЬ КОНТАКТ')
         ) : React.createElement('p',{style:{fontSize:16,color:'#22c55e'}},'\u2714 Сохранено!'),
         React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginTop:16,cursor:'pointer'},onClick:onRestart},'Начать сначала')
       )
@@ -1075,6 +1029,8 @@ function DnaPage({data, onBack, onStore, onBridge, goHome}) {
   const nameHalf = Math.ceil(userName.length / 2);
   const namePart1 = userName.slice(0, nameHalf);
   const namePart2 = userName.slice(nameHalf);
+
+  useEffect(()=>{window.scrollTo(0,0);},[]);
 
   // use the matching clean version of the cracked image from Summary
   const bgRef = React.useRef(d.dnaBgImage || 'assets/вода.jpeg');
@@ -1310,34 +1266,34 @@ function DnaPage({data, onBack, onStore, onBridge, goHome}) {
       ),
 
       // ========== SECTION 1.5: WHOOP GAUGES ==========
-      React.createElement('div',{style:{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:20,padding:'48px 32px',marginBottom:60}},
-        React.createElement('div',{style:{fontFamily:anton,fontSize:13,letterSpacing:3,textTransform:'uppercase',color:'var(--muted)',textAlign:'center',marginBottom:36}},'ИНДИКАТОРЫ ДНК'),
-        React.createElement('div',{className:'dna-gauges-row',style:{display:'flex',justifyContent:'center',gap:48,flexWrap:'wrap'}},
-          // helper: single gauge
+      React.createElement('div',{style:{position:'relative',background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:20,padding:'64px 32px 48px',marginBottom:60,overflow:'hidden'}},
+        // Giant clipped title — peeks above card top
+        React.createElement('div',{style:{position:'absolute',top:-48,left:0,right:0,textAlign:'center',fontFamily:anton,fontSize:'clamp(48px,6vw,72px)',letterSpacing:8,textTransform:'uppercase',color:'rgba(255,255,255,0.95)',fontWeight:400,lineHeight:1,pointerEvents:'none'}},'ИНДИКАТОРЫ ДНК'),
+        React.createElement('div',{className:'dna-gauges-row',style:{display:'flex',justifyContent:'space-around',gap:32,flexWrap:'wrap',marginTop:24}},
           ...[
-            {val:d.readiness_score||0,max:10,title:'Моральный заряд',lo:'Разряжен',mid:'Заряжается',hi:'Заряжен',loT:3,hiT:7,invert:false},
-            {val:d.barriers_score??0,max:9,title:'Барьеры',lo:'Путь свободен',mid:'Есть сопротивление',hi:'Сильное давление',loT:2,hiT:6,invert:true},
-            {val:d.agency_score??0,max:9,title:'Осознанность',lo:'По течению',mid:'Начинает влиять',hi:'Рулит сам',loT:2,hiT:6,invert:false}
+            {val:d.readiness_score||0,max:10,title:'МОРАЛЬНЫЙ ЗАРЯД',lo:'Разряжен',mid:'Заряжается',hi:'Заряжен',loT:3,hiT:7,invert:false},
+            {val:d.barriers_score??0,max:9,title:'БАРЬЕРЫ',lo:'Путь свободен',mid:'Есть сопротивление',hi:'Сильное давление',loT:2,hiT:6,invert:true},
+            {val:d.agency_score??0,max:9,title:'ОСОЗНАННОСТЬ',lo:'По течению',mid:'Начинает влиять',hi:'Рулит сам',loT:2,hiT:6,invert:false}
           ].map((g,gi)=>{
             const isHi=g.invert?(g.val<=g.loT):(g.val>=g.hiT);
             const isLo=g.invert?(g.val>=g.hiT):(g.val<=g.loT);
-            const gc=isHi?'#06b6d4':isLo?'#a78bfa':'#d97706';
+            const gc1=isHi?'#06b6d4':isLo?'#2d1b69':'#1a56db';
+            const gc2=isHi?'#2563eb':isLo?'#0a0a14':'#6b21a8';
             const gLabel=isHi?g.hi:isLo?g.lo:g.mid;
-            const gDeg=Math.min(g.val/g.max,1)*270;
-            const gShadow=isHi?'0 0 30px rgba(6,182,212,0.35)':isLo?'0 0 30px rgba(167,139,250,0.3)':'0 0 30px rgba(217,119,6,0.3)';
-            return React.createElement('div',{key:gi,style:{textAlign:'center',flex:'0 0 160px'}},
-              React.createElement('div',{style:{fontFamily:anton,fontSize:11,letterSpacing:2,textTransform:'uppercase',color:'rgba(255,255,255,0.5)',marginBottom:16}},g.title),
-              React.createElement('div',{style:{width:140,height:140,borderRadius:'50%',margin:'0 auto 14px',position:'relative',background:'conic-gradient('+gc+' 0deg,'+gc+' '+gDeg+'deg,rgba(255,255,255,0.06) '+gDeg+'deg,rgba(255,255,255,0.06) 270deg,transparent 270deg)',transform:'rotate(135deg)',boxShadow:gShadow}},
-                React.createElement('div',{style:{position:'absolute',inset:12,borderRadius:'50%',background:'#0f0f19',display:'flex',alignItems:'center',justifyContent:'center',transform:'rotate(-135deg)'}},
-                  React.createElement('div',{style:{fontFamily:anton,fontSize:40,color:gc,lineHeight:1}},g.val)
+            const gDeg=Math.round(Math.min(g.val/g.max,1)*270);
+            const gShadow=isHi?'0 0 40px rgba(6,182,212,0.4)':isLo?'0 0 30px rgba(45,27,105,0.4)':'0 0 35px rgba(26,86,219,0.35)';
+            // Use background-size animation for shimmer effect on arc
+            const arcBg='conic-gradient('+gc1+' 0deg,'+gc2+' '+Math.round(gDeg*0.5)+'deg,'+gc1+' '+gDeg+'deg,rgba(255,255,255,0.05) '+gDeg+'deg,rgba(255,255,255,0.05) 270deg,transparent 270deg)';
+            return React.createElement('div',{key:gi,style:{textAlign:'center',flex:'0 0 200px'}},
+              React.createElement('div',{style:{fontFamily:anton,fontSize:18,letterSpacing:2,textTransform:'uppercase',color:'#fff',marginBottom:20,fontWeight:400}},g.title),
+              React.createElement('div',{style:{width:170,height:170,borderRadius:'50%',margin:'0 auto 16px',position:'relative',background:arcBg,transform:'rotate(135deg)',boxShadow:gShadow,transition:'box-shadow 0.5s ease'}},
+                React.createElement('div',{style:{position:'absolute',inset:14,borderRadius:'50%',background:'#0f0f19',display:'flex',alignItems:'center',justifyContent:'center',transform:'rotate(-135deg)'}},
+                  React.createElement('div',{style:{fontFamily:anton,fontSize:48,color:'#fff',lineHeight:1}},g.val)
                 )
               ),
-              React.createElement('div',{style:{fontFamily:anton,fontSize:12,letterSpacing:1,color:gc,textTransform:'uppercase'}},gLabel)
+              React.createElement('div',{style:{fontFamily:anton,fontSize:15,letterSpacing:1,color:isHi?'#06b6d4':isLo?'#a78bfa':'#818cf8',textTransform:'uppercase'}},gLabel)
             );
           })
-        ),
-        (d.readiness_factors&&d.readiness_factors.length>0) && React.createElement('div',{style:{display:'flex',flexWrap:'wrap',gap:8,justifyContent:'center',marginTop:28}},
-          d.readiness_factors.map((f,i)=>React.createElement('div',{key:i,style:{fontSize:13,color:'var(--muted)',padding:'6px 18px',background:'rgba(255,255,255,0.04)',borderRadius:20,border:'1px solid rgba(255,255,255,0.06)'}},f))
         )
       ),
 
