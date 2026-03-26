@@ -17,6 +17,7 @@ body{background:var(--bg);color:var(--text);font-family:'Libre Baskerville',seri
 .page-bg::after{content:'';position:absolute;inset:0;background:rgba(15,15,25,0.7)}
 .landing-bg::after{background:rgba(15,15,25,0.35)}
 .dna-bg::after{background:rgba(15,15,25,0.25)}
+.store-bg::after{background:rgba(10,10,20,0.55)}
 .page-content{position:relative;z-index:1}
 .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;font-family:'Anton','Impact',sans-serif;font-size:22px;letter-spacing:3px;position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background:rgba(15,15,25,0.3);border-bottom:1px solid rgba(255,255,255,0.05)}
 .nav-links{display:flex;gap:8px;position:absolute;left:50%;transform:translateX(-50%)}
@@ -1031,7 +1032,7 @@ function BridgePage({data, onBack, goHome}) {
   );
 }
 
-function DnaPage({data, onBack, onStore, onBridge, goHome}) {
+function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome}) {
   const d = data || DEMO_SUMMARY;
   const userName = d.userName || 'Имя';
   const nameHalf = Math.ceil(userName.length / 2);
@@ -1132,16 +1133,16 @@ function DnaPage({data, onBack, onStore, onBridge, goHome}) {
     )
   );
 
-  // helper: blurred block
+  // helper: blurred block (or open if fullAccess)
   const blurBlock = (key, imgSrc, color, num, name, headingSize, rotated, contentEls, meta, extraStyle) => {
     const hasImg = !!imgSrc;
-    return React.createElement('div',{key,style:{position:'relative',overflow:'hidden',borderRadius:16,border:'1px solid rgba(255,255,255,0.08)',background:hasImg?'#000':'rgba(255,255,255,0.03)',cursor:'pointer',width:'100%',...(extraStyle||{})},onClick:onStore},
-      hasImg && bgImg(imgSrc,0.3),
-      hasImg && React.createElement('div',{style:{position:'absolute',inset:0,background:'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 100%)'}}),
+    const locked = !fullAccess;
+    return React.createElement('div',{key,style:{position:'relative',overflow:'hidden',borderRadius:16,border:'1px solid rgba(255,255,255,0.08)',background:hasImg?'#000':'rgba(255,255,255,0.03)',cursor:locked?'pointer':'default',width:'100%',...(extraStyle||{})},onClick:locked?onStore:undefined},
+      hasImg && bgImg(imgSrc,fullAccess?0.35:0.3),
+      hasImg && React.createElement('div',{style:{position:'absolute',inset:0,background:fullAccess?'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 100%)':'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 100%)'}}),
       !hasImg && React.createElement('div',{style:{position:'absolute',inset:0,background:'linear-gradient(135deg, '+color+'12 0%, rgba(255,255,255,0.02) 100%)'}}),
-      // blurred content
-      React.createElement('div',{style:{position:'relative',zIndex:1,padding:'40px 36px',filter:'blur(8px)',opacity:0.3,pointerEvents:'none',height:'100%',boxSizing:'border-box'}},
-        React.createElement('div',{style:{position:'absolute',top:16,right:28,fontSize:100,fontFamily:anton,color:'rgba(255,255,255,0.04)',lineHeight:1}},num),
+      React.createElement('div',{style:{position:'relative',zIndex:1,padding:'40px 36px',filter:locked?'blur(8px)':'none',opacity:locked?0.3:1,pointerEvents:locked?'none':'auto',height:'100%',boxSizing:'border-box'}},
+        React.createElement('div',{style:{position:'absolute',top:16,right:28,fontSize:100,fontFamily:anton,color:locked?'rgba(255,255,255,0.04)':'rgba(255,255,255,0.06)',lineHeight:1}},num),
         rotated ?
           React.createElement('div',{style:{position:'absolute',left:20,top:0,bottom:0,display:'flex',alignItems:'center'}},
             React.createElement('div',{style:{writingMode:'vertical-rl',transform:'rotate(180deg)',fontFamily:anton,fontSize:headingSize,letterSpacing:4,textTransform:'uppercase',color:'rgba(255,255,255,0.8)',whiteSpace:'nowrap'}},name)
@@ -1152,7 +1153,7 @@ function DnaPage({data, onBack, onStore, onBridge, goHome}) {
         ),
         React.createElement('div',{style:{position:'absolute',bottom:20,left:36,fontSize:11,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.25)'}},meta)
       ),
-      proBadge
+      locked && proBadge
     );
   };
 
@@ -1336,69 +1337,55 @@ function DnaPage({data, onBack, onStore, onBridge, goHome}) {
         ),
         // ROW 5: Block 8 full width — grand finale
         block8,
-        // ROW 6: MYSTERY BLOCKS — future content teasers
+        // ROW 6: MYSTERY BLOCKS — future content teasers (unlock with fullAccess)
         React.createElement('div',{style:{display:'flex',gap:16,alignItems:'stretch'}},
-          // Mystery 1: wide and short
           React.createElement('div',{style:{flex:'0 0 62%',minWidth:0,display:'flex'}},
-            React.createElement('div',{style:{position:'relative',overflow:'hidden',borderRadius:16,border:'1px solid rgba(255,255,255,0.08)',background:'rgba(255,255,255,0.03)',cursor:'pointer',width:'100%',minHeight:200},onClick:onStore},
+            React.createElement('div',{style:{position:'relative',overflow:'hidden',borderRadius:16,border:'1px solid rgba(255,255,255,0.08)',background:'rgba(255,255,255,0.03)',cursor:fullAccess?'default':'pointer',width:'100%',minHeight:200},onClick:fullAccess?undefined:onStore},
               React.createElement('div',{style:{position:'absolute',inset:0,background:'linear-gradient(135deg, rgba(124,92,255,0.06) 0%, rgba(255,255,255,0.02) 100%)'}}),
-              React.createElement('div',{style:{position:'relative',zIndex:1,padding:'40px 36px',filter:'blur(10px)',opacity:0.2,pointerEvents:'none',height:'100%',boxSizing:'border-box'}},
+              React.createElement('div',{style:{position:'relative',zIndex:1,padding:'40px 36px',filter:fullAccess?'none':'blur(10px)',opacity:fullAccess?1:0.2,pointerEvents:fullAccess?'auto':'none',height:'100%',boxSizing:'border-box'}},
                 React.createElement('div',{style:{fontFamily:anton,fontSize:36,letterSpacing:3,textTransform:'uppercase',marginBottom:16,color:'#fff'}},'СКРЫТЫЙ КЛАСТЕР'),
                 React.createElement('div',{style:{display:'flex',gap:24,flexWrap:'wrap'}},
-                  p_('Параметры которые раскрываются только после второго диалога. Углублённый анализ паттернов мышления.'),
+                  p_('Параметры которые раскрываются только после второго диалога. Углубл\u0451нный анализ паттернов мышления.'),
                   p_('Связь между ценностями и реальным поведением. То, что ты не замечаешь за собой.')
                 ),
-                React.createElement('div',{style:{fontSize:11,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.25)',position:'absolute',bottom:20,left:36}},'КЛАСТЕР 9 · ??? · ТРЕБУЕТСЯ ГЛУБОКИЙ ДИАЛОГ')
+                React.createElement('div',{style:{fontSize:11,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.25)',position:'absolute',bottom:20,left:36}},'КЛАСТЕР 9 \u00B7 ТРЕБУЕТСЯ ГЛУБОКИЙ ДИАЛОГ')
               ),
-              React.createElement('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',zIndex:3}},
+              !fullAccess && React.createElement('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',zIndex:3}},
                 React.createElement('div',{style:{fontFamily:anton,fontSize:120,color:'rgba(255,255,255,0.15)',lineHeight:1,userSelect:'none'}},'?'),
-                React.createElement('div',{style:{position:'absolute',bottom:20,left:'50%',transform:'translateX(-50%)'}},
-                  React.createElement('div',{onClick:e=>{e.stopPropagation();onStore();},style:{background:'rgba(124,92,255,0.2)',border:'1px solid rgba(124,92,255,0.4)',borderRadius:24,padding:'10px 28px',cursor:'pointer',backdropFilter:'blur(4px)'}},
-                    React.createElement('span',{style:{color:'#a78bfa',fontSize:15,fontFamily:anton,letterSpacing:1}},'PRO')
-                  )
-                )
+                React.createElement('div',{style:{position:'absolute',bottom:20,left:'50%',transform:'translateX(-50%)'}},proBadge)
               )
             )
           ),
-          // Mystery 2: narrow and tall
           React.createElement('div',{style:{flex:1,minWidth:0,display:'flex'}},
-            React.createElement('div',{style:{position:'relative',overflow:'hidden',borderRadius:16,border:'1px solid rgba(255,255,255,0.08)',background:'rgba(255,255,255,0.03)',cursor:'pointer',width:'100%',minHeight:340},onClick:onStore},
+            React.createElement('div',{style:{position:'relative',overflow:'hidden',borderRadius:16,border:'1px solid rgba(255,255,255,0.08)',background:'rgba(255,255,255,0.03)',cursor:fullAccess?'default':'pointer',width:'100%',minHeight:340},onClick:fullAccess?undefined:onStore},
               React.createElement('div',{style:{position:'absolute',inset:0,background:'linear-gradient(135deg, rgba(6,182,212,0.06) 0%, rgba(255,255,255,0.02) 100%)'}}),
-              React.createElement('div',{style:{position:'relative',zIndex:1,padding:'40px 28px',filter:'blur(10px)',opacity:0.2,pointerEvents:'none',height:'100%',boxSizing:'border-box'}},
+              React.createElement('div',{style:{position:'relative',zIndex:1,padding:'40px 28px',filter:fullAccess?'none':'blur(10px)',opacity:fullAccess?1:0.2,pointerEvents:fullAccess?'auto':'none',height:'100%',boxSizing:'border-box'}},
                 React.createElement('div',{style:{writingMode:'vertical-rl',transform:'rotate(180deg)',fontFamily:anton,fontSize:48,letterSpacing:4,textTransform:'uppercase',color:'rgba(255,255,255,0.8)',whiteSpace:'nowrap',position:'absolute',left:16,top:0,bottom:0,display:'flex',alignItems:'center'}},'ПОТЕНЦИАЛ'),
                 React.createElement('div',{style:{marginLeft:50}},
-                  p_('Скрытые таланты и слепые зоны. То, что раскрывается только при подписке.'),
+                  p_('Скрытые таланты и слепые зоны. То, что раскрывается при подписке.'),
                   p_('Персональная карта развития на 6 месяцев с еженедельными чекпоинтами.'),
                   p_('Матч с менторами и ровесниками по ДНК-совместимости.')
                 ),
-                React.createElement('div',{style:{fontSize:11,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.25)',position:'absolute',bottom:20,left:36}},'КЛАСТЕР 10 · ??? · ПОДПИСКА')
+                React.createElement('div',{style:{fontSize:11,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.25)',position:'absolute',bottom:20,left:36}},'КЛАСТЕР 10 \u00B7 ПОДПИСКА')
               ),
-              React.createElement('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',zIndex:3}},
+              !fullAccess && React.createElement('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',zIndex:3}},
                 React.createElement('div',{style:{fontFamily:anton,fontSize:120,color:'rgba(255,255,255,0.15)',lineHeight:1,userSelect:'none'}},'?'),
-                React.createElement('div',{style:{position:'absolute',bottom:20,left:'50%',transform:'translateX(-50%)'}},
-                  React.createElement('div',{onClick:e=>{e.stopPropagation();onStore();},style:{background:'rgba(124,92,255,0.2)',border:'1px solid rgba(124,92,255,0.4)',borderRadius:24,padding:'10px 28px',cursor:'pointer',backdropFilter:'blur(4px)'}},
-                    React.createElement('span',{style:{color:'#a78bfa',fontSize:15,fontFamily:anton,letterSpacing:1}},'PRO')
-                  )
-                )
+                React.createElement('div',{style:{position:'absolute',bottom:20,left:'50%',transform:'translateX(-50%)'}},proBadge)
               )
             )
           )
         ),
-        // Mystery 3: full width, short
-        React.createElement('div',{style:{position:'relative',overflow:'hidden',borderRadius:16,border:'1px solid rgba(255,255,255,0.08)',background:'rgba(255,255,255,0.03)',cursor:'pointer',minHeight:160},onClick:onStore},
+        // Mystery 3
+        React.createElement('div',{style:{position:'relative',overflow:'hidden',borderRadius:16,border:'1px solid rgba(255,255,255,0.08)',background:'rgba(255,255,255,0.03)',cursor:fullAccess?'default':'pointer',minHeight:160},onClick:fullAccess?undefined:onStore},
           React.createElement('div',{style:{position:'absolute',inset:0,background:'linear-gradient(90deg, rgba(249,115,22,0.04) 0%, rgba(168,85,247,0.04) 50%, rgba(59,130,246,0.04) 100%)'}}),
-          React.createElement('div',{style:{position:'relative',zIndex:1,padding:'32px 48px',filter:'blur(10px)',opacity:0.2,pointerEvents:'none',display:'flex',gap:48,alignItems:'center'}},
+          React.createElement('div',{style:{position:'relative',zIndex:1,padding:'32px 48px',filter:fullAccess?'none':'blur(10px)',opacity:fullAccess?1:0.2,pointerEvents:fullAccess?'auto':'none',display:'flex',gap:48,alignItems:'center'}},
             React.createElement('div',{style:{fontFamily:anton,fontSize:32,letterSpacing:3,textTransform:'uppercase',color:'#fff',whiteSpace:'nowrap'}},'СЕКРЕТНЫЙ УРОВЕНЬ'),
-            p_('Доступ к экспериментам, хакатонам и реальным кейсам от компаний — персонализированные под твоё ДНК.'),
+            p_('Доступ к экспериментам, хакатонам и реальным кейсам от компаний \u2014 персонализированные под тво\u0451 ДНК.'),
             p_('Peer-matching: найди единомышленников среди тысяч подростков с похожим профилем.')
           ),
-          React.createElement('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',zIndex:3}},
+          !fullAccess && React.createElement('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',zIndex:3}},
             React.createElement('div',{style:{fontFamily:anton,fontSize:120,color:'rgba(255,255,255,0.15)',lineHeight:1,userSelect:'none'}},'??'),
-            React.createElement('div',{style:{position:'absolute',bottom:16,left:'50%',transform:'translateX(-50%)'}},
-              React.createElement('div',{onClick:e=>{e.stopPropagation();onStore();},style:{background:'rgba(124,92,255,0.2)',border:'1px solid rgba(124,92,255,0.4)',borderRadius:24,padding:'10px 28px',cursor:'pointer',backdropFilter:'blur(4px)'}},
-                React.createElement('span',{style:{color:'#a78bfa',fontSize:15,fontFamily:anton,letterSpacing:1}},'PRO')
-              )
-            )
+            React.createElement('div',{style:{position:'absolute',bottom:16,left:'50%',transform:'translateX(-50%)'}},proBadge)
           )
         )
       ),
@@ -1415,10 +1402,12 @@ function DnaPage({data, onBack, onStore, onBridge, goHome}) {
   );
 }
 
-function StorePage({data, onBack, onBridge, goHome}) {
+function StorePage({data, onBack, onBridge, onUnlock, goHome}) {
   const d = data || DEMO_SUMMARY;
   const [modal, setModal] = useState(false);
   const [modalType, setModalType] = useState('buy');
+  const [promoStep, setPromoStep] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
   const [tg, setTg] = useState('');
   const [ideaText, setIdeaText] = useState('');
   const [saved, setSaved] = useState(false);
@@ -1442,11 +1431,19 @@ function StorePage({data, onBack, onBridge, goHome}) {
   ];
   const N = valCards.length;
 
-  const resetAuto = () => { clearInterval(autoRef.current); autoRef.current = setInterval(()=>setCarIdx(p=>(p+1)%N),5000); };
+  const resetAuto = () => { clearInterval(autoRef.current); autoRef.current = setInterval(()=>setCarIdx(p=>(p+1)%N),6000); };
   useEffect(()=>{ resetAuto(); return ()=>clearInterval(autoRef.current); },[]);
   const goCarousel = (dir) => { setCarIdx(p=>(p+dir+N)%N); resetAuto(); };
 
-  const openModal = (type) => { setModalType(type); setModal(true); setSaved(false); setTg(''); setIdeaText(''); };
+  const openModal = (type) => {
+    setModalType(type); setSaved(false); setTg(''); setIdeaText(''); setPromoCode('');
+    if(type==='buy'||type==='subscribe'){setPromoStep(true);setModal(true);}
+    else{setPromoStep(false);setModal(true);}
+  };
+  const handlePromo = () => {
+    if(promoCode.trim().toLowerCase().replace(/\s/g,'')==='траектория39'){setModal(false);if(onUnlock)onUnlock();return;}
+    setPromoStep(false); // wrong code or empty → show fakedoor
+  };
   const handleSave = () => {
     const contact = tg.trim(); const idea = ideaText.trim();
     if(!contact && !idea) return;
@@ -1461,7 +1458,7 @@ function StorePage({data, onBack, onBridge, goHome}) {
 
   return React.createElement('div',{className:'page'},
     // Blurred bg image + dark overlay
-    React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg_store.jpeg)',filter:'blur(6px) saturate(1.2)'}}),
+    React.createElement('div',{className:'page-bg store-bg',style:{backgroundImage:'url(assets/bg_store.jpeg)',filter:'blur(4px) saturate(1.2)'}}),
     React.createElement('div',{className:'nav'},
       React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ'),
       React.createElement('span',{style:{fontSize:13,color:'var(--muted)',cursor:'pointer',fontFamily:anton,letterSpacing:2,textTransform:'uppercase'},onClick:onBack},'\u2190 НАЗАД')
@@ -1560,9 +1557,15 @@ function StorePage({data, onBack, onBridge, goHome}) {
         )
       ),
 
-      // UNIVERSAL MODAL (buy/share/idea)
+      // UNIVERSAL MODAL (promo/buy/share/idea)
       modal && React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.75)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20},onClick:()=>setModal(false)},
         React.createElement('div',{style:{background:'#1a1a2e',border:'1px solid rgba(255,255,255,0.1)',borderRadius:20,padding:36,maxWidth:440,width:'100%',textAlign:'center'},onClick:e=>e.stopPropagation()},
+          promoStep ? React.createElement(React.Fragment,null,
+            React.createElement('div',{style:{fontFamily:anton,fontSize:22,letterSpacing:1,textTransform:'uppercase',marginBottom:16,fontWeight:400}},'ЕСТЬ ПРОМОКОД?'),
+            React.createElement('input',{className:'input-field',placeholder:'Промокод, если есть...',value:promoCode,onChange:e=>setPromoCode(e.target.value),onKeyDown:e=>{if(e.key==='Enter')handlePromo()},style:{width:'100%',marginBottom:14,boxSizing:'border-box'}}),
+            React.createElement('button',{className:'btn-main',style:{width:'100%',borderRadius:999,marginBottom:12},onClick:handlePromo},'ПРИМЕНИТЬ'),
+            React.createElement('p',{style:{fontSize:14,color:'var(--muted)',cursor:'pointer'},onClick:()=>setPromoStep(false)},'Пропустить')
+          ) :
           !saved ? React.createElement(React.Fragment,null,
             React.createElement('div',{style:{fontFamily:anton,fontSize:22,letterSpacing:1,textTransform:'uppercase',marginBottom:8,fontWeight:400}},modalType==='idea'?'ПРЕДЛОЖИ УЛУЧШЕНИЕ':'ОПЛАТА СКОРО ЗАРАБОТАЕТ'),
             React.createElement('p',{style:{fontSize:15,color:'var(--muted)',marginBottom:20,lineHeight:1.6}},modalType==='idea'?'Опиши идею: что изменить, зачем, какую цель это решает.':'Оставь Telegram \u2014 напишем первому.'),
@@ -1596,6 +1599,7 @@ function App() {
   const [page, setPage] = useState('landing');
   const [userData, setUserData] = useState({userName:'',copilotName:''});
   const [summaryData, setSummaryData] = useState(null);
+  const [fullAccess, setFullAccess] = useState(false);
 
   const handleOnboard = async (name, copilot) => {
     // Create user in Supabase (blocking — need the id)
@@ -1633,6 +1637,7 @@ function App() {
     }) :
     page === 'dna' ? React.createElement(DnaPage, {
       data: summaryData,
+      fullAccess: fullAccess,
       onBack: () => setPage('summary'),
       onStore: () => setPage('store'),
       onBridge: () => setPage('bridge'),
@@ -1642,6 +1647,7 @@ function App() {
       data: summaryData,
       onBack: () => setPage('summary'),
       onBridge: () => setPage('bridge'),
+      onUnlock: () => { setFullAccess(true); setPage('dna'); },
       goHome
     }) :
     page === 'bridge' ? React.createElement(BridgePage, {
