@@ -313,6 +313,8 @@ const DEMO_SUMMARY = {
   agency_score:8,
   opinion:'Знаешь что? Ты пришёл сюда не потому что потерялся. А потому что тебе не всё равно. Большинство людей живут на автопилоте. А ты задумался. Это уже не мало.\n\nЯ вижу человека, который хочет жить по-своему, но пока не знает, как сказать об этом миру. Твоя мечта — создать что-то своё. Это не фантазия. Это вектор.\n\nДержи этот вектор. Остальное разберём вместе.',
   suggested_feature:'roadmap',
+  store_headline:'Ты уже сделал первый шаг',
+  value_cards_hints:['понять себя глубже','знать что делать','найти своих'],
   dna: 22
 };
 
@@ -376,7 +378,7 @@ ${finishBlock}
 === РАСШИРЕННЫЙ json_dna ДЛЯ ФАЗЫ ВЫХОД ===
 Когда завершаешь диалог (добавляешь [DIALOGUE_COMPLETE]), используй расширенный формат:
 \`\`\`json_dna
-{"dna_percent":число,"phase":"ВЫХОД","emotion":"...","traits":["черта1","черта2"],"clusters_hit":["cluster"],"copilot_note":"заметка","archetype":"2-3 слова НЕ профессия","archetype_desc":"1 предложение из конкретного в диалоге","superpower":"паттерн-глагол","fuel":"конкретный момент энергии","reframe_fear":"боишься [страх] — но [переворот]","growth_edge":"1 конкретное действие на завтра","hidden_insights":[{"quote":"цитата","said_when":"контекст","title":"название","text":"пояснение"}],"readiness_score":число 1-10,"readiness_factors":["фактор1","фактор2"],"barriers_score":число 0-9,"agency_score":число 0-9,"suggested_feature":"roadmap|parents|community|case|ai_clone|deeper"}
+{"dna_percent":число,"phase":"ВЫХОД","emotion":"...","traits":["черта1","черта2"],"clusters_hit":["cluster"],"copilot_note":"заметка","archetype":"2-3 слова НЕ профессия","archetype_desc":"1 предложение из конкретного в диалоге","superpower":"паттерн-глагол","fuel":"конкретный момент энергии","reframe_fear":"боишься [страх] — но [переворот]","growth_edge":"1 конкретное действие на завтра","hidden_insights":[{"quote":"цитата","said_when":"контекст","title":"название","text":"пояснение"}],"readiness_score":число 1-10,"readiness_factors":["фактор1","фактор2"],"barriers_score":число 0-9,"agency_score":число 0-9,"store_headline":"персонализированный заголовок 4-8 слов для страницы магазина","value_cards_hints":["потребность1","потребность2","потребность3"],"suggested_feature":"roadmap|parents|community|case|ai_clone|deeper"}
 \`\`\`
 Пояснения к расширенным полям:
 - archetype: НЕ профессия. Примеры: "Тихий бунтарь", "Хаос-архитектор", "Nurture-builder"
@@ -390,6 +392,8 @@ ${finishBlock}
 - readiness_factors: массив 2-3 строк — что влияет на заряд ("Высокая энергия в теме создания", "Давление родителей снижает заряд")
 - barriers_score: число 0-9 — насколько страхи и барьеры сдерживают юзера прямо сейчас. 0 = почти нет барьеров, свободен действовать. 9 = сильно зажат страхами, давлением родителей, ограничивающими убеждениями. Определяй по: интенсивность страхов, сила внешнего давления, количество limiting beliefs.
 - agency_score: число 0-9 — насколько осознанно юзер управляет своей жизнью. 0 = полностью плывёт по течению, за него решают другие. 9 = осознанные выборы каждый день, сильный внутренний локус контроля, проактивен. Определяй по: agency level, готовность экспериментировать, как говорит о будущем (пассивный vs активный залог).
+- store_headline: персонализированный заголовок 4-8 слов для страницы магазина. Пиши как будто копилот обращается лично к этому юзеру. Ссылайся на что-то конкретное из диалога. Примеры: "[Имя], твой путь начинается здесь", "Ты уже знаешь ответ — осталось увидеть карту", "Хватит сомневаться — вот доказательства". НЕ маркетинговый generic.
+- value_cards_hints: массив 3-4 коротких строк — конкретные потребности/желания которые юзер выразил в диалоге. Примеры: "хочет понять себя", "боится ошибиться с выбором", "ищет единомышленников". Используется для персонализации витрины.
 - suggested_feature: следующий шаг на платформе — одно из: roadmap|parents|community|case|ai_clone|deeper
 
 НАПОМИНАНИЕ: json_dna блок ОБЯЗАТЕЛЕН в конце КАЖДОГО сообщения. traits[] накапливать от сообщения к сообщению.`;
@@ -713,6 +717,8 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
             barriers_score:dnaData.barriers_score??null,
             agency_score:dnaData.agency_score??null,
             suggested_feature:dnaData.suggested_feature||'',
+            store_headline:dnaData.store_headline||'',
+            value_cards_hints:dnaData.value_cards_hints||[],
             opinion:clean.slice(-300),
           };
           // Fire-and-forget save dna_summary to Supabase
@@ -729,7 +735,9 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
             readiness_score:dnaData.readiness_score||null,
             readiness_factors:dnaData.readiness_factors||[],
             barriers_score:dnaData.barriers_score??null,
-            agency_score:dnaData.agency_score??null
+            agency_score:dnaData.agency_score??null,
+            store_headline:dnaData.store_headline||'',
+            value_cards_hints:dnaData.value_cards_hints||[]
           });
         }
         // Update session state in Supabase
@@ -905,7 +913,7 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName
           // marker — text above bar, line extends down through bar
           React.createElement('div',{style:{position:'absolute',left:'15%',top:-24,transform:'translateX(-50%)',fontSize:13,color:'rgba(255,255,255,0.6)',whiteSpace:'nowrap',display:'flex',flexDirection:'column',alignItems:'center'}},
             React.createElement('span',null,'большинство здесь'),
-            React.createElement('div',{style:{width:1,height:52,background:'rgba(255,255,255,0.5)',marginTop:4}})
+            React.createElement('div',{style:{width:1,height:30,background:'rgba(255,255,255,0.4)',marginTop:4}})
           ),
           React.createElement('div',{style:{height:18,background:'rgba(255,255,255,0.1)',borderRadius:9,overflow:'hidden'}},
             React.createElement('div',{style:{height:'100%',borderRadius:9,background:'var(--gradient)',backgroundSize:'200% 100%',animation:'dnaShimmer 3s linear infinite',width:pct+'%',transition:'width 0.8s ease'}})
@@ -1410,7 +1418,9 @@ function DnaPage({data, onBack, onStore, onBridge, goHome}) {
 function StorePage({data, onBack, onBridge, goHome}) {
   const d = data || DEMO_SUMMARY;
   const [modal, setModal] = useState(false);
+  const [modalType, setModalType] = useState('buy');
   const [tg, setTg] = useState('');
+  const [ideaText, setIdeaText] = useState('');
   const [saved, setSaved] = useState(false);
   const [carIdx, setCarIdx] = useState(0);
   const autoRef = useRef(null);
@@ -1420,7 +1430,7 @@ function StorePage({data, onBack, onBridge, goHome}) {
 
   useEffect(()=>{window.scrollTo(0,0);},[]);
 
-  // Value cards — stories carousel
+  // Stories carousel cards
   const traitText = ((d.traits||[]).map(t=>t.text).join(' ')+(d.opinion||'')).toLowerCase();
   const valCards = [
     {quote:traitText.includes('не знаю')?'Я не знаю что мне подходит...':'Я не знаю кем хочу стать...',val:'Полная карта того, кто ты \u2014 без тестов и оценок',feat:'ПОЛНАЯ КАРТА ДНК'},
@@ -1432,15 +1442,15 @@ function StorePage({data, onBack, onBridge, goHome}) {
   ];
   const N = valCards.length;
 
-  // Auto-advance carousel
   const resetAuto = () => { clearInterval(autoRef.current); autoRef.current = setInterval(()=>setCarIdx(p=>(p+1)%N),5000); };
   useEffect(()=>{ resetAuto(); return ()=>clearInterval(autoRef.current); },[]);
   const goCarousel = (dir) => { setCarIdx(p=>(p+dir+N)%N); resetAuto(); };
 
-  const handleBuy = () => setModal(true);
+  const openModal = (type) => { setModalType(type); setModal(true); setSaved(false); setTg(''); setIdeaText(''); };
   const handleSave = () => {
-    if(!tg.trim())return;
-    if(typeof sbPostFaf==='function') sbPostFaf('fakedoor_clicks',{user_id:null,feature_name:'store_purchase',contact:tg.trim()});
+    const contact = tg.trim(); const idea = ideaText.trim();
+    if(!contact && !idea) return;
+    if(typeof sbPostFaf==='function') sbPostFaf('fakedoor_clicks',{user_id:null,feature_name:modalType==='idea'?'methodology_feedback':'store_'+modalType,contact:contact||null,idea:idea||null});
     setSaved(true);
   };
 
@@ -1450,81 +1460,86 @@ function StorePage({data, onBack, onBridge, goHome}) {
   );
 
   return React.createElement('div',{className:'page'},
-    React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg-summary.png)'}}),
+    // Blurred bg image + dark overlay
+    React.createElement('div',{className:'page-bg',style:{backgroundImage:'url(assets/bg_store.jpeg)',filter:'blur(6px) brightness(0.4) saturate(1.2)'}}),
     React.createElement('div',{className:'nav'},
       React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ'),
       React.createElement('span',{style:{fontSize:13,color:'var(--muted)',cursor:'pointer',fontFamily:anton,letterSpacing:2,textTransform:'uppercase'},onClick:onBack},'\u2190 НАЗАД')
     ),
     React.createElement('div',{className:'page-content resp-pad zoomable',style:{padding:'0 40px 60px',maxWidth:1100,width:'92%',margin:'0 auto'}},
 
-      // HERO
+      // HERO — personalized
       React.createElement('div',{style:{textAlign:'center',margin:'56px auto 48px',maxWidth:800}},
-        React.createElement('h1',{style:{fontFamily:anton,fontSize:'clamp(32px,5vw,48px)',letterSpacing:3,textTransform:'uppercase',marginBottom:12,fontWeight:400}},'ТВО\u0401 ПОЛНОЕ ДНК ЖД\u0401Т'),
-        React.createElement('p',{style:{fontFamily:libre,fontSize:17,color:'var(--muted)'}},'Один диалог \u2014 '+(d.dna||22)+'%. Это только начало.')
+        React.createElement('h1',{style:{fontFamily:anton,fontSize:'clamp(32px,5vw,48px)',letterSpacing:3,textTransform:'uppercase',marginBottom:16,fontWeight:400}},d.store_headline||'ТВО\u0401 ПОЛНОЕ ДНК ЖД\u0401Т'),
+        React.createElement('p',{style:{fontFamily:libre,fontSize:20,color:'var(--muted)',lineHeight:1.7}},'Один диалог \u2014 '+(d.dna||22)+'%. Чем глубже копаешь \u2014 тем сложнее заполнять. Но именно поэтому каждый следующий процент делает картину точнее.')
       ),
 
       // STORIES CAROUSEL
       React.createElement('div',{style:{position:'relative',marginBottom:56,height:260,display:'flex',alignItems:'center',justifyContent:'center'}},
-        // Left nav
         React.createElement('button',{onClick:()=>goCarousel(-1),style:{position:'absolute',left:'clamp(4px,3vw,40px)',zIndex:5,width:44,height:44,borderRadius:'50%',background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.15)',color:'#fff',fontSize:20,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',backdropFilter:'blur(4px)',transition:'background 0.2s'},onMouseEnter:e=>e.currentTarget.style.background='rgba(255,255,255,0.15)',onMouseLeave:e=>e.currentTarget.style.background='rgba(255,255,255,0.08)'},'\u25C0'),
-        // Cards container
         React.createElement('div',{style:{position:'relative',width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center'}},
           valCards.map((c,i)=>{
-            const off = ((i-carIdx+N)%N);
-            const pos = off > N/2 ? off-N : off;
-            if(Math.abs(pos)>2) return null;
-            const isCenter = pos===0;
-            const sc = isCenter?1:0.7;
-            const tx = pos*280;
-            const op = isCenter?1:0.5;
-            const bl = isCenter?0:3;
-            const z = isCenter?10:5-Math.abs(pos);
-            return React.createElement('div',{key:i,style:{position:'absolute',width:320,padding:'28px 24px',background:'#1a1a2e',borderRadius:18,border:'1px solid rgba(255,255,255,0.1)',boxSizing:'border-box',transform:'translateX('+tx+'px) scale('+sc+')',opacity:op,filter:'blur('+bl+'px)',zIndex:z,transition:'all 0.5s cubic-bezier(0.4,0,0.2,1)',display:'flex',flexDirection:'column',gap:14,backgroundImage:'linear-gradient(135deg,rgba(124,92,255,0.06),rgba(6,182,212,0.06))',boxShadow:isCenter?'0 0 40px rgba(124,92,255,0.15)':'none'}},
+            const off=((i-carIdx+N)%N); const pos=off>N/2?off-N:off;
+            if(Math.abs(pos)>2)return null;
+            const isC=pos===0;
+            return React.createElement('div',{key:i,style:{position:'absolute',width:320,padding:'28px 24px',background:'#1a1a2e',borderRadius:18,border:'1px solid rgba(255,255,255,0.1)',boxSizing:'border-box',transform:'translateX('+(pos*280)+'px) scale('+(isC?1:0.7)+')',opacity:isC?1:0.5,filter:'blur('+(isC?0:3)+'px)',zIndex:isC?10:5-Math.abs(pos),transition:'all 0.5s cubic-bezier(0.4,0,0.2,1)',display:'flex',flexDirection:'column',gap:14,backgroundImage:'linear-gradient(135deg,rgba(124,92,255,0.06),rgba(6,182,212,0.06))',boxShadow:isC?'0 0 40px rgba(124,92,255,0.15)':'none'}},
               React.createElement('p',{style:{fontFamily:caveat,fontSize:15,fontStyle:'italic',color:'rgba(255,255,255,0.6)',lineHeight:1.4}},'\u00AB'+c.quote+'\u00BB'),
               React.createElement('p',{style:{fontFamily:libre,fontSize:15,color:'#fff',lineHeight:1.5}},c.val),
               React.createElement('div',{style:{fontFamily:anton,fontSize:12,letterSpacing:2,color:'rgba(255,255,255,0.35)',textTransform:'uppercase',fontWeight:400}},c.feat)
             );
           })
         ),
-        // Right nav
         React.createElement('button',{onClick:()=>goCarousel(1),style:{position:'absolute',right:'clamp(4px,3vw,40px)',zIndex:5,width:44,height:44,borderRadius:'50%',background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.15)',color:'#fff',fontSize:20,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',backdropFilter:'blur(4px)',transition:'background 0.2s'},onMouseEnter:e=>e.currentTarget.style.background='rgba(255,255,255,0.15)',onMouseLeave:e=>e.currentTarget.style.background='rgba(255,255,255,0.08)'},'\u25B6'),
-        // Dots
-        React.createElement('div',{style:{position:'absolute',bottom:0,display:'flex',gap:8,justifyContent:'center'}},
+        React.createElement('div',{style:{position:'absolute',bottom:0,display:'flex',gap:8}},
           valCards.map((_,i)=>React.createElement('div',{key:i,style:{width:i===carIdx?20:6,height:6,borderRadius:3,background:i===carIdx?'var(--accent)':'rgba(255,255,255,0.2)',transition:'all 0.3s',cursor:'pointer'},onClick:()=>{setCarIdx(i);resetAuto();}}))
         )
       ),
 
       // PRICING — 3 cards
       React.createElement('div',{style:{display:'flex',gap:20,marginBottom:56,flexWrap:'wrap',justifyContent:'center',alignItems:'stretch'}},
-        // Card 1: SHARE (free)
-        React.createElement('div',{style:{flex:'1 1 280px',maxWidth:340,background:'rgba(255,255,255,0.03)',border:'1px solid rgba(91,189,114,0.3)',borderRadius:20,padding:'32px 28px',display:'flex',flexDirection:'column'}},
-          React.createElement('div',{style:{fontFamily:anton,fontSize:26,letterSpacing:1,textTransform:'uppercase',fontWeight:400,marginBottom:4}},'ПОДЕЛИСЬ С БЛИЗКИМИ'),
-          React.createElement('div',{style:{fontFamily:anton,fontSize:20,color:'rgba(255,255,255,0.5)',marginBottom:24,fontWeight:400}},'Бесплатно'),
-          React.createElement('div',{style:{flex:1}},
-            check('Полная карта ДНК открывается бесплатно'),
-            check('Скидка 35% на план \u00ABРазовая покупка\u00BB'),
-            check('Родитель получает свой инструмент')
+        // Card 1: ПОЛУЧИ БЕСПЛАТНО (combined share+feedback)
+        React.createElement('div',{style:{flex:'1 1 280px',maxWidth:360,background:'rgba(255,255,255,0.03)',border:'1px solid rgba(91,189,114,0.3)',borderRadius:20,padding:'32px 24px',display:'flex',flexDirection:'column'}},
+          React.createElement('div',{style:{fontFamily:anton,fontSize:24,letterSpacing:1,textTransform:'uppercase',fontWeight:400,marginBottom:4}},'ПОЛУЧИ БЕСПЛАТНО'),
+          React.createElement('div',{style:{fontFamily:anton,fontSize:18,color:'rgba(255,255,255,0.4)',marginBottom:20,fontWeight:400}},'0 \u20BD за разовый план'),
+          React.createElement('p',{style:{fontSize:13,color:'var(--muted)',marginBottom:20,lineHeight:1.5}},'Выполни оба условия \u2014 и разовая покупка твоя бесплатно'),
+          // Condition 1: Share
+          React.createElement('div',{style:{background:'rgba(91,189,114,0.05)',border:'1px solid rgba(91,189,114,0.15)',borderRadius:12,padding:'16px 14px',marginBottom:12}},
+            React.createElement('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:8}},
+              React.createElement('div',{style:{width:20,height:20,borderRadius:4,border:'2px solid rgba(91,189,114,0.5)',flexShrink:0}}),
+              React.createElement('span',{style:{fontFamily:anton,fontSize:14,letterSpacing:1,fontWeight:400}},'ПОДЕЛИСЬ С БЛИЗКИМИ')
+            ),
+            React.createElement('p',{style:{fontSize:13,color:'var(--muted)',lineHeight:1.5,marginBottom:10}},'Отправь ссылку родителю или другу. Когда они зайдут \u2014 скидка 35% и полное ДНК бесплатно.'),
+            React.createElement('button',{style:{fontSize:12,color:'#5bbd72',background:'transparent',border:'1px solid rgba(91,189,114,0.4)',borderRadius:999,padding:'6px 16px',cursor:'pointer',fontFamily:anton,letterSpacing:1,fontWeight:400},onClick:()=>openModal('share')},'Отправить ссылку')
           ),
-          React.createElement('button',{style:{width:'100%',marginTop:20,background:'transparent',color:'#5bbd72',borderRadius:999,padding:'14px',border:'1px solid #5bbd72',fontFamily:anton,fontSize:15,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'all 0.2s'},onClick:handleBuy,onMouseEnter:e=>e.currentTarget.style.background='rgba(91,189,114,0.1)',onMouseLeave:e=>e.currentTarget.style.background='transparent'},'ОТПРАВИТЬ ССЫЛКУ')
+          // Condition 2: Feedback
+          React.createElement('div',{style:{background:'rgba(124,92,255,0.05)',border:'1px solid rgba(124,92,255,0.15)',borderRadius:12,padding:'16px 14px',marginBottom:12}},
+            React.createElement('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:8}},
+              React.createElement('div',{style:{width:20,height:20,borderRadius:4,border:'2px solid rgba(124,92,255,0.5)',flexShrink:0}}),
+              React.createElement('span',{style:{fontFamily:anton,fontSize:14,letterSpacing:1,fontWeight:400}},'ПОМОГИ НАМ СТАТЬ ЛУЧШЕ')
+            ),
+            React.createElement('p',{style:{fontSize:13,color:'var(--muted)',lineHeight:1.5,marginBottom:10}},'Предложи идею: как улучшить методологию, какую фичу добавить. Лучшие идеи \u2014 в продукт, а тебе скидка 35%.'),
+            React.createElement('button',{style:{fontSize:12,color:'#a78bfa',background:'transparent',border:'1px solid rgba(124,92,255,0.4)',borderRadius:999,padding:'6px 16px',cursor:'pointer',fontFamily:anton,letterSpacing:1,fontWeight:400},onClick:()=>openModal('idea')},'Предложить идею')
+          ),
+          React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:'auto',textAlign:'center'}},'Одно условие = скидка 35%. Оба = бесплатно.')
         ),
-        // Card 2: ONE-TIME (popular)
-        React.createElement('div',{style:{flex:'1 1 280px',maxWidth:340,background:'rgba(255,255,255,0.03)',border:'2px solid rgba(124,92,255,0.5)',borderRadius:20,padding:'32px 28px',position:'relative',boxShadow:'0 0 40px rgba(124,92,255,0.12)',display:'flex',flexDirection:'column'}},
+        // Card 2: РАЗОВАЯ ПОКУПКА 299₽
+        React.createElement('div',{style:{flex:'1 1 280px',maxWidth:360,background:'rgba(255,255,255,0.03)',border:'2px solid rgba(124,92,255,0.5)',borderRadius:20,padding:'32px 28px',position:'relative',boxShadow:'0 0 40px rgba(124,92,255,0.12)',display:'flex',flexDirection:'column'}},
           React.createElement('div',{style:{position:'absolute',top:-13,left:'50%',transform:'translateX(-50%)',background:'rgba(124,92,255,0.25)',color:'#c4b5fd',fontSize:11,padding:'5px 16px',borderRadius:20,fontFamily:anton,letterSpacing:2,textTransform:'uppercase',fontWeight:400}},'ПОПУЛЯРНЫЙ'),
           React.createElement('div',{style:{fontFamily:anton,fontSize:26,letterSpacing:1,textTransform:'uppercase',fontWeight:400,marginTop:8,marginBottom:4}},'РАЗОВАЯ ПОКУПКА'),
-          React.createElement('div',{style:{fontFamily:anton,fontSize:20,color:'rgba(255,255,255,0.5)',marginBottom:24,fontWeight:400}},'349 \u20BD'),
+          React.createElement('div',{style:{fontFamily:anton,fontSize:20,color:'rgba(255,255,255,0.5)',marginBottom:24,fontWeight:400}},'299 \u20BD'),
           React.createElement('div',{style:{flex:1}},
             check('Полная карта ДНК \u2014 все 15 параметров'),
             check('Персональный план на 1 месяц'),
             check('Подборка мероприятий под тво\u0439 профиль'),
             check('Скрытые инсайты \u2014 что ты не замечаешь в себе')
           ),
-          React.createElement('button',{style:{width:'100%',marginTop:20,background:'#fff',color:'#000',borderRadius:999,padding:'14px',border:'none',fontFamily:anton,fontSize:15,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'transform 0.2s'},onClick:handleBuy,onMouseEnter:e=>e.currentTarget.style.transform='translateY(-2px)',onMouseLeave:e=>e.currentTarget.style.transform='translateY(0)'},'ВЫБРАТЬ')
+          React.createElement('button',{style:{width:'100%',marginTop:20,background:'#fff',color:'#000',borderRadius:999,padding:'14px',border:'none',fontFamily:anton,fontSize:15,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'transform 0.2s'},onClick:()=>openModal('buy'),onMouseEnter:e=>e.currentTarget.style.transform='translateY(-2px)',onMouseLeave:e=>e.currentTarget.style.transform='translateY(0)'},'ВЫБРАТЬ')
         ),
-        // Card 3: SUBSCRIPTION (recommended)
-        React.createElement('div',{style:{flex:'1 1 280px',maxWidth:340,background:'rgba(255,255,255,0.03)',border:'1px solid rgba(6,182,212,0.3)',borderRadius:20,padding:'32px 28px',position:'relative',display:'flex',flexDirection:'column'}},
+        // Card 3: ПОДПИСКА 349₽/мес
+        React.createElement('div',{style:{flex:'1 1 280px',maxWidth:360,background:'rgba(255,255,255,0.03)',border:'1px solid rgba(6,182,212,0.3)',borderRadius:20,padding:'32px 28px',position:'relative',display:'flex',flexDirection:'column'}},
           React.createElement('div',{style:{position:'absolute',top:-13,left:'50%',transform:'translateX(-50%)',background:'rgba(6,182,212,0.2)',color:'#67e8f9',fontSize:11,padding:'5px 16px',borderRadius:20,fontFamily:anton,letterSpacing:2,textTransform:'uppercase',fontWeight:400}},'ЛУЧШИЙ ДЛЯ ТЕБЯ'),
           React.createElement('div',{style:{fontFamily:anton,fontSize:26,letterSpacing:1,textTransform:'uppercase',fontWeight:400,marginTop:8,marginBottom:4}},'ПОДПИСКА'),
-          React.createElement('div',{style:{fontFamily:anton,fontSize:20,color:'rgba(255,255,255,0.5)',marginBottom:24,fontWeight:400}},'449 \u20BD/мес'),
+          React.createElement('div',{style:{fontFamily:anton,fontSize:20,color:'rgba(255,255,255,0.5)',marginBottom:24,fontWeight:400}},'349 \u20BD/мес'),
           React.createElement('div',{style:{flex:1}},
             check('Вс\u0451 из разовой покупки'),
             check('Копилот без лимитов'),
@@ -1532,32 +1547,34 @@ function StorePage({data, onBack, onBridge, goHome}) {
             check('Peer-чат с единомышленниками'),
             check('ДНК обновляется с каждым диалогом')
           ),
-          React.createElement('button',{style:{width:'100%',marginTop:20,background:'transparent',color:'#fff',borderRadius:999,padding:'14px',border:'1px solid rgba(255,255,255,0.3)',fontFamily:anton,fontSize:15,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'all 0.2s'},onClick:handleBuy,onMouseEnter:e=>{e.currentTarget.style.borderColor='#fff';e.currentTarget.style.transform='translateY(-2px)'},onMouseLeave:e=>{e.currentTarget.style.borderColor='rgba(255,255,255,0.3)';e.currentTarget.style.transform='translateY(0)'}},'ВЫБРАТЬ')
+          React.createElement('button',{style:{width:'100%',marginTop:20,background:'transparent',color:'#fff',borderRadius:999,padding:'14px',border:'1px solid rgba(255,255,255,0.3)',fontFamily:anton,fontSize:15,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'all 0.2s'},onClick:()=>openModal('subscribe'),onMouseEnter:e=>{e.currentTarget.style.borderColor='#fff';e.currentTarget.style.transform='translateY(-2px)'},onMouseLeave:e=>{e.currentTarget.style.borderColor='rgba(255,255,255,0.3)';e.currentTarget.style.transform='translateY(0)'}},'ВЫБРАТЬ')
         )
       ),
 
-      // FAKEDOOR MODAL
+      // UNIVERSAL MODAL (buy/share/idea)
       modal && React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.75)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20},onClick:()=>setModal(false)},
-        React.createElement('div',{style:{background:'#1a1a2e',border:'1px solid rgba(255,255,255,0.1)',borderRadius:20,padding:36,maxWidth:420,width:'100%',textAlign:'center'},onClick:e=>e.stopPropagation()},
+        React.createElement('div',{style:{background:'#1a1a2e',border:'1px solid rgba(255,255,255,0.1)',borderRadius:20,padding:36,maxWidth:440,width:'100%',textAlign:'center'},onClick:e=>e.stopPropagation()},
           !saved ? React.createElement(React.Fragment,null,
-            React.createElement('div',{style:{fontFamily:anton,fontSize:22,letterSpacing:1,textTransform:'uppercase',marginBottom:8,fontWeight:400}},'ОПЛАТА СКОРО ЗАРАБОТАЕТ'),
-            React.createElement('p',{style:{fontSize:15,color:'var(--muted)',marginBottom:24,lineHeight:1.6}},'Оставь Telegram \u2014 напишем первому.'),
-            React.createElement('input',{className:'input-field',placeholder:'@username',value:tg,onChange:e=>setTg(e.target.value),style:{width:'100%',marginBottom:14,boxSizing:'border-box'}}),
-            React.createElement('button',{className:'btn-main',style:{width:'100%',borderRadius:999},onClick:handleSave},'ОТПРАВИТЬ')
+            React.createElement('div',{style:{fontFamily:anton,fontSize:22,letterSpacing:1,textTransform:'uppercase',marginBottom:8,fontWeight:400}},modalType==='idea'?'ПРЕДЛОЖИ УЛУЧШЕНИЕ':'ОПЛАТА СКОРО ЗАРАБОТАЕТ'),
+            React.createElement('p',{style:{fontSize:15,color:'var(--muted)',marginBottom:20,lineHeight:1.6}},modalType==='idea'?'Опиши идею: что изменить, зачем, какую цель это решает.':'Оставь Telegram \u2014 напишем первому.'),
+            modalType==='idea' && React.createElement('textarea',{className:'input-field',placeholder:'Что бы ты изменил/добавил? Объясни зачем и какую цель это решает...',value:ideaText,onChange:e=>setIdeaText(e.target.value),style:{width:'100%',minHeight:100,resize:'vertical',boxSizing:'border-box',marginBottom:12}}),
+            React.createElement('input',{className:'input-field',placeholder:'@telegram',value:tg,onChange:e=>setTg(e.target.value),style:{width:'100%',marginBottom:14,boxSizing:'border-box'}}),
+            React.createElement('button',{className:'btn-main',style:{width:'100%',borderRadius:999},onClick:handleSave},'ОТПРАВИТЬ'),
+            modalType==='idea' && React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:12,lineHeight:1.4}},'Мы читаем каждое предложение. Лучшие идеи попадают в продукт.')
           ) : React.createElement('div',null,
             React.createElement('div',{style:{fontSize:40,marginBottom:12}},'\u2705'),
             React.createElement('p',{style:{fontSize:17,color:'#22c55e'}},'Сохранено! Напишем.')
           ),
-          React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:16,cursor:'pointer'},onClick:()=>{setModal(false);setSaved(false);}},'Закрыть')
+          React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:16,cursor:'pointer'},onClick:()=>setModal(false)},'Закрыть')
         )
       ),
 
-      // PARENT BRIDGE — reframed around student benefits
+      // PARENT BRIDGE
       React.createElement('div',{style:{textAlign:'center',marginBottom:48,padding:'36px 0'}},
         React.createElement('div',{style:{fontFamily:anton,fontSize:'clamp(20px,3vw,28px)',letterSpacing:1,textTransform:'uppercase',fontWeight:400,marginBottom:16}},'ПОДКЛЮЧИ РОДИТЕЛЯ \u2014 ПОЛУЧИ БОЛЬШЕ'),
-        React.createElement('p',{style:{fontFamily:libre,fontSize:15,color:'var(--muted)',maxWidth:620,margin:'0 auto 28px',lineHeight:1.8}},'Когда родитель видит тво\u0451 ДНК с цитатами из диалога \u2014 он начинает понимать тебя по-настоящему. А ты получаешь полную карту бесплатно + скидку 35% на любой план. Это не контроль \u2014 это мост.'),
+        React.createElement('p',{style:{fontFamily:libre,fontSize:15,color:'var(--muted)',maxWidth:620,margin:'0 auto 28px',lineHeight:1.8}},'Когда родитель видит тво\u0451 ДНК с цитатами из диалога \u2014 он начинает понимать тебя по-настоящему. Не контролировать, а понимать. А ты получаешь скидку 35% на любой план. Выполни оба условия \u2014 и разовый план бесплатно.'),
         React.createElement('button',{style:{background:'transparent',color:'#5bbd72',border:'1px solid #5bbd72',borderRadius:999,padding:'14px 36px',fontFamily:anton,fontSize:16,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'all 0.2s'},onClick:onBridge,onMouseEnter:e=>e.currentTarget.style.background='rgba(91,189,114,0.1)',onMouseLeave:e=>e.currentTarget.style.background='transparent'},'ОТПРАВИТЬ МОСТ'),
-        React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:12}},'Для родителя: разовая 499\u20BD или подписка 449\u20BD/мес')
+        React.createElement('p',{style:{fontSize:12,color:'var(--muted)',marginTop:12}},'Для родителя: разовая 499\u20BD или подписка 349\u20BD/мес')
       ),
 
       // BACK LINK
