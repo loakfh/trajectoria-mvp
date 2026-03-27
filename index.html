@@ -1084,6 +1084,11 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome}) {
       React.createElement('span',{style:{color:'#a78bfa',fontSize:15,fontFamily:"'Anton','Impact','Arial Black',sans-serif",letterSpacing:1}},'PRO')
     )
   );
+  const futureBadge = React.createElement('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',zIndex:3}},
+    React.createElement('div',{style:{background:'rgba(255,255,255,0.04)',border:'2px dashed rgba(255,255,255,0.2)',borderRadius:16,padding:'14px 28px',backdropFilter:'blur(4px)',textAlign:'center',maxWidth:260}},
+      React.createElement('span',{style:{color:'rgba(255,255,255,0.55)',fontSize:14,fontFamily:"'Libre Baskerville',serif",lineHeight:1.5}},'Заполнится после следующих диалогов')
+    )
+  );
 
   const anton = "'Anton','Impact','Arial Black',sans-serif";
   const libre = "'Libre Baskerville',serif";
@@ -1134,10 +1139,11 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome}) {
   );
 
   // helper: blurred block (or open if fullAccess)
-  const blurBlock = (key, imgSrc, color, num, name, headingSize, rotated, contentEls, meta, extraStyle) => {
+  const blurBlock = (key, imgSrc, color, num, name, headingSize, rotated, contentEls, meta, extraStyle, futureContent) => {
     const hasImg = !!imgSrc;
-    const locked = !fullAccess;
-    return React.createElement('div',{key,style:{position:'relative',overflow:'hidden',borderRadius:16,border:'1px solid rgba(255,255,255,0.08)',background:hasImg?'#000':'rgba(255,255,255,0.03)',cursor:locked?'pointer':'default',width:'100%',...(extraStyle||{})},onClick:locked?onStore:undefined},
+    const locked = futureContent ? true : !fullAccess;
+    const isFutureLocked = futureContent && fullAccess;
+    return React.createElement('div',{key,style:{position:'relative',overflow:'hidden',borderRadius:16,border:isFutureLocked?'1px dashed rgba(255,255,255,0.15)':'1px solid rgba(255,255,255,0.08)',background:hasImg?'#000':'rgba(255,255,255,0.03)',cursor:locked&&!isFutureLocked?'pointer':'default',width:'100%',...(extraStyle||{})},onClick:locked&&!isFutureLocked?onStore:undefined},
       hasImg && bgImg(imgSrc,fullAccess?0.35:0.3),
       hasImg && React.createElement('div',{style:{position:'absolute',inset:0,background:fullAccess?'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 100%)':'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 100%)'}}),
       !hasImg && React.createElement('div',{style:{position:'absolute',inset:0,background:'linear-gradient(135deg, '+color+'12 0%, rgba(255,255,255,0.02) 100%)'}}),
@@ -1153,7 +1159,7 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome}) {
         ),
         React.createElement('div',{style:{position:'absolute',bottom:20,left:36,fontSize:11,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.25)'}},meta)
       ),
-      locked && proBadge
+      locked && (isFutureLocked ? futureBadge : proBadge)
     );
   };
 
@@ -1216,14 +1222,14 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome}) {
     p_('Community Need: острая потребность в людях с похожими амбициями. Ищет трайб \u2014 пока не нашёл.'),
     p_('Family Dynamic: поддержка есть, но с оговорками. \u00ABМы за тебя, но выбери что-нибудь стабильное.\u00BB'),
     p_('Influence Map: 70% решений принимает сам. 20% \u2014 влияние контента (YouTube, подкасты). 10% \u2014 семья.')
-  ],'КЛАСТЕР 6 \u00B7 ВЕС 5% \u00B7 4 ПАРАМЕТРА',{minHeight:480});
+  ],'КЛАСТЕР 6 \u00B7 ВЕС 5% \u00B7 4 ПАРАМЕТРА',{minHeight:480},true);
 
   // ===== BLOCK 7: МАТЕРИАЛЬНЫЕ — short and wide =====
   const block7 = blurBlock('b7',null,'#f97316','07','МАТЕРИАЛЬНЫЕ ОРИЕНТИРЫ',36,false,[
     q_('\u00ABДеньги \u2014 средство. Свобода перемещения \u2014 вот что важно.\u00BB','#f97316'),
     p_('Lifestyle Vision: удалённая работа, свобода перемещения, минимум обязательств перед системой.'),
     p_('Money Mindset: деньги \u2014 инструмент, не цель. Материальные амбиции подчинены ценностным. Готов зарабатывать меньше, если работа даёт свободу.')
-  ],'КЛАСТЕР 7 \u00B7 ВЕС 5% \u00B7 2 ПАРАМЕТРА',{minHeight:240});
+  ],'КЛАСТЕР 7 \u00B7 ВЕС 5% \u00B7 2 ПАРАМЕТРА',{minHeight:240},true);
 
   // ===== BLOCK 8: AI — full width, grand =====
   const block8 = blurBlock('b8','assets/афиша_8.jpeg','#06b6d4','08','AI-ГРАМОТНОСТЬ',72,false,[
@@ -1238,7 +1244,7 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome}) {
         p_('Future Readiness: готов к миру, где AI \u2014 базовый навык. Уже строит на нём, пока сверстники только начинают пробовать.')
       )
     )
-  ],'КЛАСТЕР 8 \u00B7 ВЕС 5% \u00B7 4 ПАРАМЕТРА \u00B7 AI USAGE \u00B7 AI WORLDVIEW \u00B7 LITERACY SCORE \u00B7 FUTURE READINESS',{minHeight:480});
+  ],'КЛАСТЕР 8 \u00B7 ВЕС 5% \u00B7 4 ПАРАМЕТРА \u00B7 AI USAGE \u00B7 AI WORLDVIEW \u00B7 LITERACY SCORE \u00B7 FUTURE READINESS',{minHeight:480},true);
 
   return React.createElement('div',{className:'page'},
     // blurred dimmed bg
@@ -1458,7 +1464,8 @@ function StorePage({data, onBack, onBridge, onUnlock, goHome}) {
 
   return React.createElement('div',{className:'page'},
     // Blurred bg image + dark overlay
-    React.createElement('div',{className:'page-bg store-bg',style:{backgroundImage:'url(assets/bg_store.jpeg)',filter:'blur(4px) saturate(1.2)'}}),
+    React.createElement('img',{src:'assets/bg_store.jpeg',alt:'',style:{position:'fixed',top:0,left:0,width:'100%',height:'100vh',objectFit:'cover',zIndex:0,filter:'blur(3px)',pointerEvents:'none'}}),
+    React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(10,10,20,0.5)',zIndex:0,pointerEvents:'none'}}),
     React.createElement('div',{className:'nav'},
       React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ'),
       React.createElement('span',{style:{fontSize:13,color:'var(--muted)',cursor:'pointer',fontFamily:anton,letterSpacing:2,textTransform:'uppercase'},onClick:onBack},'\u2190 НАЗАД')
