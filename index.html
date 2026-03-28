@@ -1142,11 +1142,12 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome, copilotNa
   // helper: blurred block (or open if fullAccess)
   const blurBlock = (key, imgSrc, color, num, name, headingSize, rotated, contentEls, meta, extraStyle, futureContent, imgPosition) => {
     const hasImg = !!imgSrc;
+    const hasBg = hasImg || !!(extraStyle && extraStyle.backgroundImage);
     const locked = futureContent ? true : !fullAccess;
     const isFutureLocked = futureContent && fullAccess;
-    return React.createElement('div',{key,style:{position:'relative',overflow:'hidden',borderRadius:16,border:isFutureLocked?'1px dashed rgba(255,255,255,0.15)':'1px solid rgba(255,255,255,0.08)',background:hasImg?'#000':'rgba(255,255,255,0.03)',cursor:locked&&!isFutureLocked?'pointer':'default',width:'100%',...(extraStyle||{})},onClick:locked&&!isFutureLocked?onStore:undefined},
+    return React.createElement('div',{key,style:{position:'relative',overflow:'hidden',borderRadius:16,border:isFutureLocked?'1px dashed rgba(255,255,255,0.15)':'1px solid rgba(255,255,255,0.08)',backgroundColor:hasBg?'#000':'rgba(255,255,255,0.03)',cursor:locked&&!isFutureLocked?'pointer':'default',width:'100%',...(extraStyle||{})},onClick:locked&&!isFutureLocked?onStore:undefined},
       hasImg && bgImg(imgSrc,fullAccess?0.35:0.3,imgPosition),
-      hasImg && React.createElement('div',{style:{position:'absolute',inset:0,background:fullAccess?'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 100%)':'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 100%)'}}),
+      hasBg && React.createElement('div',{style:{position:'absolute',inset:0,background:hasBg&&!hasImg?(fullAccess?'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.55) 100%)':'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.65) 100%)'):(fullAccess?'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 100%)':'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 100%)')}}),
       !hasImg && React.createElement('div',{style:{position:'absolute',inset:0,background:'linear-gradient(135deg, '+color+'12 0%, rgba(255,255,255,0.02) 100%)'}}),
       React.createElement('div',{style:{position:'relative',zIndex:1,padding:'40px 36px',filter:locked?'blur(8px)':'none',opacity:locked?0.3:1,pointerEvents:locked?'none':'auto',height:'100%',boxSizing:'border-box'}},
         React.createElement('div',{style:{position:'absolute',top:16,right:28,fontSize:100,fontFamily:anton,color:locked?'rgba(255,255,255,0.04)':'rgba(255,255,255,0.06)',lineHeight:1}},num),
@@ -1217,13 +1218,13 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome, copilotNa
   ],'КЛАСТЕР 5 \u00B7 ВЕС 10% \u00B7 4 ПАРАМЕТРА',{minHeight:520});
 
   // ===== BLOCK 6: СОЦИАЛЬНЫЙ — medium, rotated =====
-  const block6 = blurBlock('b6','assets/\u0430\u0444\u0438\u0448\u0430_6.jpeg','#a855f7','06','СОЦИАЛЬНЫЙ КОНТЕКСТ',42,true,[
+  const block6 = blurBlock('b6',null,'#a855f7','06','СОЦИАЛЬНЫЙ КОНТЕКСТ',42,true,[
     q_('\u00ABДрузья пока не определились. Мне не хватает единомышленников.\u00BB','#a855f7'),
     p_('Peer Environment: давление среды минимальное, но и поддержки мало. Одиночество визионера в обычной школе.'),
     p_('Community Need: острая потребность в людях с похожими амбициями. Ищет трайб \u2014 пока не нашёл.'),
     p_('Family Dynamic: поддержка есть, но с оговорками. \u00ABМы за тебя, но выбери что-нибудь стабильное.\u00BB'),
     p_('Influence Map: 70% решений принимает сам. 20% \u2014 влияние контента (YouTube, подкасты). 10% \u2014 семья.')
-  ],'КЛАСТЕР 6 \u00B7 ВЕС 5% \u00B7 4 ПАРАМЕТРА',{minHeight:480},undefined,'center center');
+  ],'КЛАСТЕР 6 \u00B7 ВЕС 5% \u00B7 4 ПАРАМЕТРА',{minHeight:480,backgroundImage:"url('assets/\u0430\u0444\u0438\u0448\u0430_6.jpeg')",backgroundSize:'cover',backgroundPosition:'center center',backgroundRepeat:'no-repeat'});
 
   // ===== BLOCK 7: МАТЕРИАЛЬНЫЕ — short and wide =====
   const block7 = blurBlock('b7','assets/\u0430\u0444\u0438\u0448\u0430_7.jpeg','#f97316','07','МАТЕРИАЛЬНЫЕ ОРИЕНТИРЫ',36,false,[
@@ -1406,7 +1407,7 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome, copilotNa
       // ========== SECTION 4: BOTTOM CTA BAR ==========
       React.createElement('div',{style:{backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',background:'rgba(15,15,25,0.6)',padding:'40px 5%',borderRadius:20,marginBottom:60,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:24}},
         React.createElement('div',null,
-          React.createElement('div',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:28,fontWeight:400,textTransform:'uppercase',letterSpacing:2,color:'#fff'}},'\u041E\u0442\u043A\u0440\u043E\u0439 \u043F\u043E\u043B\u043D\u043E\u0435 \u0414\u041D\u041A \u0438 \u0441\u043E\u0432\u0435\u0442\u044B \u043E\u0442 '+(copilotName||'\u043A\u043E\u043F\u0438\u043B\u043E\u0442\u0430')+' \u2014 \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0438 \u043F\u043E\u0433\u0440\u0443\u0436\u0430\u0442\u044C\u0441\u044F \u0432 \u0441\u0435\u0431\u044F')
+          React.createElement('div',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:'26px',fontWeight:400,textTransform:'uppercase',letterSpacing:'2px',color:'#fff',lineHeight:1.2}},'\u041E\u0442\u043A\u0440\u043E\u0439 \u043F\u043E\u043B\u043D\u043E\u0435 \u0414\u041D\u041A \u0438 \u0441\u043E\u0432\u0435\u0442\u044B \u043E\u0442 '+(copilotName||'\u043A\u043E\u043F\u0438\u043B\u043E\u0442\u0430')+' \u2014 \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0438 \u043F\u043E\u0433\u0440\u0443\u0436\u0430\u0442\u044C\u0441\u044F \u0432 \u0441\u0435\u0431\u044F')
         ),
         React.createElement('button',{onClick:onStore,style:{background:'#fff',color:'#000',fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:18,padding:'16px 48px',borderRadius:999,border:'none',cursor:'pointer',letterSpacing:1,flexShrink:0}},'\u041E\u0422\u041A\u0420\u042B\u0422\u042C')
       )
