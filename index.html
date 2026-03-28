@@ -310,7 +310,9 @@ const DEMO_SUMMARY = {
     {quote:'Один я не успею всё это сделать',context:'Обронил, когда говорил про мечту',title:'Это не слабость. Это точный диагноз.',text:'Ты видишь масштаб задачи. Люди годами не могут сформулировать чего не хватает. Ты уже знаешь.'}
   ],
   readiness_score:2,
-  readiness_factors:[],
+  copilot_note:'Ты знаешь о себе больше чем думаешь. Держи вектор.',
+  growth_edge:'Запишись на один бесплатный хакатон в ближайшие 7 дней. Не для победы — чтобы проверить как это ощущается.',
+  readiness_factors:['\u0412\u044B\u0441\u043E\u043A\u0430\u044F \u044D\u043D\u0435\u0440\u0433\u0438\u044F \u0432 \u0442\u0435\u043C\u0435 \u0441\u043E\u0437\u0434\u0430\u043D\u0438\u044F','\u0414\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u0440\u043E\u0434\u0438\u0442\u0435\u043B\u0435\u0439 \u0441\u043D\u0438\u0436\u0430\u0435\u0442 \u0437\u0430\u0440\u044F\u0434','\u041D\u0443\u0436\u043D\u0430 \u043A\u043E\u043C\u0430\u043D\u0434\u0430 \u0435\u0434\u0438\u043D\u043E\u043C\u044B\u0448\u043B\u0435\u043D\u043D\u0438\u043A\u043E\u0432'],
   barriers_score:4,
   agency_score:8,
   opinion:'Знаешь что? Ты пришёл сюда не потому что потерялся. А потому что тебе не всё равно. Большинство людей живут на автопилоте. А ты задумался. Это уже не мало.\n\nЯ вижу человека, который хочет жить по-своему, но пока не знает, как сказать об этом миру. Твоя мечта — создать что-то своё. Это не фантазия. Это вектор.\n\nДержи этот вектор. Остальное разберём вместе.',
@@ -442,7 +444,7 @@ function stripDnaBlock(raw) {
 async function callGPT(messages, retries=2) {
   for (let i=0; i<=retries; i++) {
     try {
-      const r = await fetch(EDGE_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({messages})});
+      const r = await fetch(EDGE_URL, {method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY}, body:JSON.stringify({messages})});
       if (!r.ok) { const t=await r.text(); throw new Error(t.slice(0,200)); }
       const d = await r.json();
       if (d.content) return d.content;
@@ -728,6 +730,7 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
             suggested_feature:dnaData.suggested_feature||'',
             store_headline:dnaData.store_headline||'',
             value_cards_hints:dnaData.value_cards_hints||[],
+            bridge_timelines:dnaData.bridge_timelines||null,
             opinion:clean.slice(-300),
           };
           // Fire-and-forget save dna_summary to Supabase
@@ -746,7 +749,8 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
             barriers_score:dnaData.barriers_score??null,
             agency_score:dnaData.agency_score??null,
             store_headline:dnaData.store_headline||'',
-            value_cards_hints:dnaData.value_cards_hints||[]
+            value_cards_hints:dnaData.value_cards_hints||[],
+            suggested_feature:dnaData.suggested_feature||''
           });
         }
         // Update session state in Supabase
