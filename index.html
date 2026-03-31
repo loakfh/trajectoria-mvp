@@ -206,6 +206,32 @@ h1.hero{font-size:clamp(24px,7vw,48px)}
 .bridge-layout{gap:24px!important}
 .resp-pad{padding-left:16px!important;padding-right:16px!important}
 .btn-main,.btn-outline,.skip-btn,.tone-btn,.mic-btn{min-height:44px}
+/* 5A: Sidebar overlay НАФИГ visible */
+.sidebar-overlay{overflow:auto!important}
+.sidebar-overlay .nafig-card{display:block!important;overflow:visible!important}
+/* 5B: Summary image card text */
+.summary-name-overlay{padding:16px!important}
+.summary-name-overlay>div:first-child span{font-size:clamp(20px,6vw,40px)!important}
+.summary-name-overlay>div:nth-child(4) span:first-child{font-size:14px!important}
+.summary-name-overlay>div:nth-child(4) span:last-child{font-size:20px!important}
+.summary-name-overlay>p{font-size:14px!important}
+/* 5C: DNA clusters + gauges */
+.dna-blocks-section>div{overflow:visible!important}
+.dna-blocks-section>div>div{padding:20px 16px!important}
+.dna-gauges-row{flex-direction:column!important;align-items:center!important;gap:24px!important}
+.dna-gauges-row>div{flex:0 0 auto!important}
+.dna-gauges-row>div>div:nth-child(2){width:120px!important;height:120px!important}
+.dna-gauges-row>div>div:nth-child(2)>div{inset:10px!important}
+/* 5D: Bridge timelines */
+.bridge-columns{flex-direction:column!important}
+.bridge-columns>div{border-radius:14px!important}
+.bridge-columns>div:first-child{border-radius:14px 14px 0 0!important}
+.bridge-columns>div:last-child{border-radius:0 0 14px 14px!important}
+/* 5E: Store pricing + carousel */
+.store-pricing{flex-direction:column!important}
+.store-pricing>div{max-width:100%!important;flex:1 1 100%!important}
+/* 5F: General */
+.nav-logo{font-size:16px!important;letter-spacing:3px!important}
 }
 @media(max-width:480px){
 .nav-logo{font-size:16px!important;letter-spacing:3px!important}
@@ -340,7 +366,31 @@ function buildSystemPrompt(userName, copilotName, tone, msgCount, skipCount) {
   const toneBlocks = {
     direct: `РЕЖИМ: ПРЯМО. Умный друг без сахара. Короткие предложения, юмор, 2-5 предложений. Больше предположений, меньше вопросов. "Ты боишься облажаться. Прав?" Называй вещи своими именами. ЗАПРЕЩЕНО: мягкие подводки, "я тебя понимаю", избыточная эмпатия.`,
     friendly: `РЕЖИМ: МЯГКО. Старший брат/сестра. Тепло, эмпатия, 3-6 предложений. Валидация ПЕРЕД вопросом. "Это круто что ты чувствуешь. Когда впервые заметил?" ЗАПРЕЩЕНО: быть слащавым, терять суть.`,
-    provocative: `РЕЖИМ: ПРОВОКАЦИЯ. Сократ с юмором. Переворачиваешь убеждения, 2-4 предложения. Переворачивай ответы: "хочу стабильность" → "Может ты хочешь КОНТРОЛЬ? Разные вещи." ЗАПРЕЩЕНО: грубость, задевать личное.`,
+    provocative: `РЕЖИМ: ДЕРЗКО. Ты — тот друг, который говорит в лицо то, что другие боятся сказать. Не злой, не токсичный, но дерзкий и уверенный.
+
+Стиль: 2-4 предложения МАКСИМУМ. Короткие. Уверенные. Как будто ты точно знаешь что-то о юзере что он сам не хочет признавать.
+
+ГЛУБИНА:
+- Не спрашивай — утверждай. Потом проверяй реакцию. "Ты не боишься ошибиться. Ты боишься что окажешься обычным. Скажи что я не прав."
+- Переворачивай КАЖДЫЙ ответ. Юзер: "хочу стабильность" → "Стабильность? Или ты просто хочешь чтобы мама перестала нервничать? Это разное."
+- Используй юмор — не сарказм (сарказм = токсичность), а иронию и неожиданные сравнения.
+- Будь конкретным в предположениях. Не "ты боишься" а "ты боишься что скажут 'я же говорил' если не получится".
+
+ПРИМЕРЫ (адаптируй, не копируй дословно):
+"Забавно. Ты только что описал свою мечту голосом человека который извиняется за то что мечтает. Зачем?"
+"Три минуты назад ты сказал [цитата]. Сейчас говоришь обратное. Какой из двух ты настоящий?"
+"Ладно, вот что я думаю. Ты знаешь чего хочешь. Давно знаешь. Просто не разрешаешь себе это хотеть. Почему?"
+"Хз — это не ответ. Хз — это страховка. Если скажешь 'хз' — никто не обвинит если не получится. Удобно, но тупиково."
+"Ты сейчас описал жизнь которую хочет твоя мама. А ты? Ты-то чего хочешь? Только без 'ну типа...' — чётко."
+
+ЗАПРЕЩЕНО:
+- Обзываться, унижать, переходить на личности
+- Шутки про внешность, семью, здоровье
+- Менторский тон сверху ("послушай меня, я знаю лучше")
+- Кринжовые фразы типа "ну ты понял, бро" или попытки говорить на молодёжном сленге (это фальшиво и подростки чувствуют)
+- Обесценивать страхи ("да ладно, чего тут бояться")
+
+Ключ: дерзость = уверенность в своих предположениях + уважение к собеседнику. Ты бросаешь вызов мышлению, не человеку.`,
     chill: `РЕЖИМ: ЧИЛЛ. Умный приятель в мессенджере. 1-3 предложения. Минимум давления. "Ок. А если бы ограничений не было?" ЗАПРЕЩЕНО: длинные тексты, менторский тон.`
   };
   const skipBlock = skipCount === 0 ? '' : skipCount === 1 ? '\nСКИП: 1 скип. Проехали, другая тема. Копилот УГАДЫВАЕТ причину и реагирует НЕПРЕДСКАЗУЕМО: смена темы на противоположную, секретный вопрос, "обида" с юмором, ускорение темпа.' : skipCount === 2 ? '\nСКИПЫ: 2 скипа. "Два скипа. Либо я тупо спрашиваю, либо ты чего-то избегаешь. Чё из двух?"' : '\nСКИПЫ: 3+ скипов. "Скажи одно слово, которое описывает тебя прямо сейчас. Одно. Любое."';
@@ -361,6 +411,14 @@ function buildSystemPrompt(userName, copilotName, tone, msgCount, skipCount) {
 - ПРАВИЛО МЕТАФОР: когда юзер говорит образами ("люблю выращивать растения") — ищи ПАТТЕРН (nurture, терпение, создание из ничего), НЕ профессию (агроном). Формула: "[цитата]. Знаешь что я вижу? Ты не про [буквальное], ты про [глубинный паттерн]."
 - СТРОГИЙ ЗАПРЕТ: никаких профессий как рекомендаций, никаких зарплатных вилок как реакции на мечту, никаких "тебе подойдёт / стоит стать"
 
+ДОПОЛНЕНИЕ К ФИЛОСОФИИ (из документа Траектория):
+- Мы НЕ профориентация. Профориентация даёт рыбу (профессию). Мы учим ловить (понимать себя и делать выбор).
+- Умение делать выбор это навык. Как чтение. Школа этому не учит. Мы учим.
+- Каждый вывод в ДНК подкреплён цитатой из диалога. Это зеркало, не чёрный ящик.
+- Если школьник не согласен с результатом — это ХОРОШО. Значит он думает. Предложи аргументировать.
+- Ловить то что "между строк": вскользь сказанное часто важнее прямых ответов.
+- Подростки не могут определиться не из-за лени — а из-за истощения (11 класс), давления, страха ошибиться. Помни это.
+
 === СТИЛЬ ===
 ${toneBlocks[tone] || toneBlocks.direct}
 
@@ -372,6 +430,14 @@ ${toneBlocks[tone] || toneBlocks.direct}
 ФАЗА 5 ДОБОР (msg 10-12, DNA 20-25%): Лёгкие быстрые вопросы, "X или Y?". + "Как себя обычно чувствуешь — хватает сил?"
 ФАЗА 6 ВЫХОД (msg 12+ или DNA≥19%): Портрет 3-4 черты + DNA% + зацепка + [DIALOGUE_COMPLETE]. Заполни ВСЕ расширенные поля json_dna.
 ${finishBlock}
+
+ЖЁСТКИЕ ЛИМИТЫ (НЕ НАРУШАТЬ):
+- DNA НИКОГДА не превышает 25%. Если по твоим подсчётам DNA > 25%, ставь 25%.
+- После 15 минут: начни мягко подводить к завершению ("Последний вопрос...")
+- После 18 минут: заверши ОБЯЗАТЕЛЬНО в следующем сообщении. Скажи портрет + DNA% + [DIALOGUE_COMPLETE]
+- После 20 минут: НЕМЕДЛЕННО заверши. Без ещё одного вопроса.
+- Если DNA >= 19% И прошло >= 10 минут: можно завершать в любой момент.
+- Если юзер сам просит завершить ("хватит", "устал", "давай закончим", "стоп") — завершай НЕМЕДЛЕННО, даже если DNA низкий. Выдай портрет + DNA% + [DIALOGUE_COMPLETE] со всеми расширенными полями. Если данных не хватает — честно пиши "недостаточно данных" в тех полях где мало информации.
 
 === МЕХАНИКА "НАФИГ" ===
 Нафиг = НЕ "пропустить". Это сигнал "что-то пошло не так" (слишком личное / борщишь / скучно). Копилот УГАДЫВАЕТ причину и реагирует НЕПРЕДСКАЗУЕМО: смена темы на противоположную, секретный вопрос, "обида" с юмором, ускорение темпа, рандом, философский ход.
@@ -622,7 +688,7 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
 
   useEffect(()=>{
     const timer=setTimeout(()=>{
-      const greeting=`${userName}, я ${copilotName}. Один вопрос перед стартом: зачем ты сюда пришёл? Что надеешься получить от этого разговора? И кстати — хочешь аккуратно и вежливо, или разрешаешь быть прямым? Я не грублю, но не сахарю.`;
+      const greeting=`${userName}, я ${copilotName}. Один вопрос перед стартом: зачем ты сюда пришёл? Что надеешься получить от этого разговора? И кстати — хочешь аккуратно и вежливо, или разрешаешь быть прямым? Я не грублю, но не сахарю.\n\nКстати, если хочешь посмотреть как выглядят результаты без прохождения диалога — напиши "траектория39", и я покажу заготовленный пример.`;
       setMessages([{role:'assistant',content:greeting}]);
       historyRef.current=[{role:'assistant',content:greeting}];
     },1500);
@@ -690,16 +756,21 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
     setMessages(prev=>[...prev,userMsg]);
     historyRef.current.push(userMsg);
     setIsTyping(true);
+    const stopWords=['хватит','стоп','закончим','устал','всё'];
+    const isStopRequest=stopWords.some(w=>text.toLowerCase().includes(w));
     try {
       const sys={role:'system',content:buildSystemPrompt(userName,copilotName,tone,msgCountRef.current,skipCountRef.current)};
       const apiMessages=[sys,...historyRef.current];
+      const elapsedMin=Math.floor((Date.now()-startTime.current)/60000);
+      if(isStopRequest)apiMessages.push({role:'system',content:'[USER_WANTS_TO_STOP] Юзер хочет завершить диалог. Заверши НЕМЕДЛЕННО: выдай портрет + DNA% + [DIALOGUE_COMPLETE] со всеми расширенными полями json_dna.'});
+      if(elapsedMin>=15)apiMessages.push({role:'system',content:'[ВРЕМЯ: '+elapsedMin+' мин] '+(elapsedMin>=20?'НЕМЕДЛЕННО ЗАВЕРШИ БЕЗ ВОПРОСОВ. Портрет + DNA% + [DIALOGUE_COMPLETE].':elapsedMin>=18?'Заверши ОБЯЗАТЕЛЬНО в этом сообщении. Портрет + DNA% + [DIALOGUE_COMPLETE].':'Начни подводить к завершению. Последний вопрос...')});
       const raw=await callGPT(apiMessages);
       console.log('GPT raw (last 500):', raw ? raw.slice(-500) : 'EMPTY');
       const dnaData=parseDnaBlock(raw);
       const clean=stripDnaBlock(raw);
       const complete=raw.includes('[DIALOGUE_COMPLETE]');
       if(dnaData){
-        const newDna=dnaData.dna_percent??dna;
+        const newDna=Math.min(dnaData.dna_percent??dna,25);
         const delta=newDna-prevDnaRef.current;
         if(dnaData.traits) traitsRef.current=[...new Set([...traitsRef.current,...dnaData.traits])];
         if(delta>0){
@@ -757,6 +828,8 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
         sbPatch('sessions','id',sessionId,{dna_percentage:dnaData.dna_percent||0,dialogue_phase:dnaData.phase||'',emotional_state:dnaData.emotion||''});
       }
       if(complete)setDialogueComplete(true);
+      const elapsedNow=Date.now()-startTime.current;
+      if(elapsedNow>1200000&&!complete)setDialogueComplete(true);
       const asstMsg={role:'assistant',content:clean};
       setMessages(prev=>[...prev,asstMsg]);
       historyRef.current.push({role:'assistant',content:raw});
@@ -784,7 +857,7 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
         console.log('GPT skip raw (last 500):', raw ? raw.slice(-500) : 'EMPTY');
         const clean=stripDnaBlock(raw);
         const dnaData=parseDnaBlock(raw);
-        if(dnaData){const nd=dnaData.dna_percent??dna;setDna(nd);prevDnaRef.current=nd;sbPatch('sessions','id',sessionId,{dna_percentage:nd,dialogue_phase:dnaData.phase||'',emotional_state:dnaData.emotion||''});}
+        if(dnaData){const nd=Math.min(dnaData.dna_percent??dna,25);setDna(nd);prevDnaRef.current=nd;sbPatch('sessions','id',sessionId,{dna_percentage:nd,dialogue_phase:dnaData.phase||'',emotional_state:dnaData.emotion||''});}
         setMessages(prev=>[...prev,{role:'assistant',content:clean}]);
         historyRef.current.push({role:'assistant',content:raw});
         sbPostFaf('messages',{user_id:userId,session_id:sessionId,role:'user',content:'[SKIP]'});
@@ -857,9 +930,9 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
           React.createElement('div',{style:{padding:'12px 24px',borderTop:'1px solid var(--border)',display:'flex',gap:8,alignItems:'center'}},
             React.createElement('button',{className:'skip-btn',onClick:handleSkip,disabled:isTyping},'НАФИГ'),
             React.createElement('button',{className:'mic-btn'+(recording?' recording':''),onClick:toggleMic},'🎤'),
-            React.createElement('input',{className:'input-field',style:{flex:1,fontSize:18,padding:'16px 22px'},placeholder:'Напиши что-нибудь...',value:input,onChange:e=>setInput(e.target.value),onKeyDown:e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend()}},disabled:isTyping}),
+            React.createElement('input',{className:'input-field',style:{flex:1,fontSize:18,padding:'16px 22px'},placeholder:dialogueComplete&&elapsed>=1200?'Диалог завершён':'Напиши что-нибудь...',value:input,onChange:e=>setInput(e.target.value),onKeyDown:e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend()}},disabled:isTyping||(dialogueComplete&&elapsed>=1200)}),
             React.createElement('button',{style:{width:44,height:44,borderRadius:'50%',background:'var(--accent)',border:'none',color:'#fff',cursor:'pointer',fontSize:18,flexShrink:0,opacity:input.trim()?1:0.4},onClick:handleSend,disabled:!input.trim()||isTyping},'➤'),
-            dialogueComplete && React.createElement('button',{className:'btn-main',style:{fontSize:13,padding:'10px 20px',marginLeft:8},onClick:handleResult},'DNA 🧬')
+            (dialogueComplete||(dna>=19&&elapsed>=600)||elapsed>=1200) && React.createElement('button',{className:'btn-main',style:{fontSize:13,padding:'10px 20px',marginLeft:8},onClick:handleResult},'Посмотреть ДНК')
           )
         )
       ),
@@ -871,7 +944,12 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
         TONES.map(t=>React.createElement('button',{key:'m'+t.id,className:'tone-btn'+(tone===t.id?' active':''),style:{color:t.color,background:tone===t.id?toneBgActive[t.id]:toneBg[t.id],borderColor:t.color,transform:tone===t.id?'scale(1.05)':'scale(1)',boxShadow:tone===t.id?'0 0 15px '+t.color+'4d':'none',minHeight:72,display:'flex',flexDirection:'column',justifyContent:'center'},onClick:()=>{setTone(t.id);setSidebarOpen(false);}},
           React.createElement('div',{className:'tone-name'},t.icon,' ',React.createElement('span',{style:{background:toneGradients[t.id],backgroundClip:'text',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundSize:'200%',animation:'shimmer 3s linear infinite'}},t.name)),
           React.createElement('div',{className:'tone-desc'},t.desc)
-        ))
+        )),
+        React.createElement('div',{className:'nafig-card',style:{position:'relative',background:'rgba(255,100,100,0.08)',border:'1px solid rgba(255,100,100,0.15)',borderRadius:10,padding:16,marginTop:16,overflow:'visible',minHeight:100}},
+          React.createElement('div',{style:{fontSize:24,marginBottom:6}},'🎲'),
+          React.createElement('p',{style:{marginBottom:4}},React.createElement('span',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:16,color:'rgba(255,150,100,0.9)'}},'НАФИГ')),
+          React.createElement('p',{style:{fontSize:14,color:'rgba(255,180,120,0.85)',lineHeight:1.4}},'Копилот борщит? Тема слишком личная? Или просто скучно? Кинь кубик — Копилот сам решит что делать.')
+        )
       ),
       React.createElement('button',{className:'sidebar-toggle',onClick:()=>setSidebarOpen(o=>!o)},TONES.find(t=>t.id===tone)?.icon||'\u26A1')
     )
@@ -949,7 +1027,7 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName
             React.createElement('span',{style:{fontFamily:libre,fontSize:18,color:'var(--muted)',letterSpacing:2,textTransform:'uppercase'}},'АРХЕТИП:'),
             React.createElement('span',{style:{fontFamily:libre,fontSize:28,color:'#fff',letterSpacing:1}},d.archetype||'Искатель')
           ),
-          d.superpower && React.createElement('p',{style:{fontFamily:caveat,fontSize:22,color:'rgba(255,255,255,0.7)',fontStyle:'italic',marginTop:4}},d.superpower)
+          React.createElement('p',{style:{fontFamily:caveat,fontSize:22,color:d.superpower?'rgba(255,255,255,0.7)':'rgba(255,255,255,0.4)',fontStyle:'italic',marginTop:4}},d.superpower||'Недостаточно данных — нужен более глубокий диалог')
         )
       ),
       React.createElement('p',{style:{textAlign:'center',fontSize:14,color:'rgba(255,255,255,0.4)',fontFamily:anton,letterSpacing:2,textTransform:'uppercase',marginBottom:48,cursor:'pointer'},onClick:handleImageClick},'Нажми чтобы открыть карту ДНК \u2192'),
@@ -965,10 +1043,10 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName
           React.createElement('div',{style:{fontFamily:libre,fontSize:17,color:'rgba(255,255,255,0.8)',lineHeight:1.8,marginBottom:24}},
             (d.opinion||d.title||'').split('\n').filter(l=>l.trim()).map((line,i)=>React.createElement('p',{key:i,style:{marginBottom:12}},line))
           ),
-          insightQuote && React.createElement('div',{style:{borderLeft:'3px solid var(--accent)',paddingLeft:16,marginTop:8}},
+          React.createElement('div',{style:{borderLeft:'3px solid var(--accent)',paddingLeft:16,marginTop:8}},
             React.createElement('div',{style:{fontSize:14,color:'var(--accent)',fontFamily:anton,letterSpacing:1,textTransform:'uppercase',marginBottom:8,fontWeight:400}},'МЕЖДУ СТРОК'),
-            React.createElement('p',{style:{fontFamily:caveat,fontSize:20,fontStyle:'italic',color:'rgba(255,255,255,0.8)',margin:'10px 0'}},'\u00AB',insightQuote.quote,'\u00BB'),
-            React.createElement('p',{style:{fontSize:15,color:'var(--muted)'}},insightQuote.text)
+            insightQuote?React.createElement('p',{style:{fontFamily:caveat,fontSize:20,fontStyle:'italic',color:'rgba(255,255,255,0.8)',margin:'10px 0'}},'\u00AB',insightQuote.quote,'\u00BB'):React.createElement('p',{style:{fontStyle:'italic',color:'rgba(255,255,255,0.4)',fontSize:15}},'Для скрытых инсайтов нужно больше разговора — попробуй ещё раз'),
+            insightQuote?React.createElement('p',{style:{fontSize:15,color:'var(--muted)'}},insightQuote.text):null
           )
         ),
         // RIGHT — disagree
@@ -1094,7 +1172,7 @@ function BridgePage({data, onBack, goHome, copilotName}) {
       ),
 
       // SECTION 2: TWO TIMELINES
-      React.createElement('div',{style:{display:'flex',gap:0,marginBottom:48}},
+      React.createElement('div',{className:'bridge-columns',style:{display:'flex',gap:0,marginBottom:48}},
         // LEFT: ПРОМОЛЧИШЬ
         React.createElement('div',{style:{flex:1,background:'rgba(255,50,50,0.03)',borderRadius:'14px 0 0 14px',padding:'36px 32px',borderRight:'1px solid rgba(255,255,255,0.08)'}},
           React.createElement('div',{style:{fontFamily:anton,fontSize:15,fontWeight:400,letterSpacing:3,textTransform:'uppercase',color:'rgba(255,100,100,0.5)',marginBottom:24}},'\u041F\u0420\u041E\u041C\u041E\u041B\u0427\u0418\u0428\u042C'),
@@ -1622,7 +1700,7 @@ function StorePage({data, onBack, onBridge, onUnlock, goHome}) {
       ),
 
       // PRICING — 3 cards
-      React.createElement('div',{style:{display:'flex',gap:20,marginBottom:56,flexWrap:'wrap',justifyContent:'center',alignItems:'stretch'}},
+      React.createElement('div',{className:'store-pricing',style:{display:'flex',gap:20,marginBottom:56,flexWrap:'wrap',justifyContent:'center',alignItems:'stretch'}},
         // Card 1: ПОЛУЧИ БЕСПЛАТНО (combined share+feedback)
         React.createElement('div',{style:{flex:'1 1 280px',maxWidth:360,background:'rgba(255,255,255,0.03)',border:'1px solid rgba(91,189,114,0.3)',borderRadius:20,padding:'32px 24px',display:'flex',flexDirection:'column'}},
           React.createElement('div',{style:{fontFamily:anton,fontSize:24,letterSpacing:1,textTransform:'uppercase',fontWeight:400,marginBottom:4}},'ПОЛУЧИ БЕСПЛАТНО'),
@@ -1696,8 +1774,8 @@ function StorePage({data, onBack, onBridge, onUnlock, goHome}) {
             React.createElement('p',{style:{fontSize:14,color:'var(--muted)',cursor:'pointer'},onClick:()=>setPromoStep(false)},'Пропустить')
           ) :
           !saved ? React.createElement(React.Fragment,null,
-            React.createElement('div',{style:{fontFamily:anton,fontSize:22,letterSpacing:1,textTransform:'uppercase',marginBottom:8,fontWeight:400}},modalType==='idea'?'ПРЕДЛОЖИ УЛУЧШЕНИЕ':'ОПЛАТА СКОРО ЗАРАБОТАЕТ'),
-            React.createElement('p',{style:{fontSize:15,color:'var(--muted)',marginBottom:20,lineHeight:1.6}},modalType==='idea'?'Опиши идею: что изменить, зачем, какую цель это решает.':'Оставь Telegram \u2014 напишем первому.'),
+            React.createElement('div',{style:{fontFamily:anton,fontSize:22,letterSpacing:1,textTransform:'uppercase',marginBottom:8,fontWeight:400}},modalType==='idea'?'ПРЕДЛОЖИ УЛУЧШЕНИЕ':modalType==='share'?'ФУНКЦИЯ В РАЗРАБОТКЕ':'ОПЛАТА СКОРО ЗАРАБОТАЕТ'),
+            React.createElement('p',{style:{fontSize:15,color:'var(--muted)',marginBottom:20,lineHeight:1.6}},modalType==='idea'?'Опиши идею: что изменить, зачем, какую цель это решает.':modalType==='share'?'Функция в разработке. Оставь Telegram \u2014 напишем когда запустим.':'Оставь Telegram \u2014 напишем первому.'),
             modalType==='idea' && React.createElement('textarea',{className:'input-field',placeholder:'Что бы ты изменил/добавил? Объясни зачем и какую цель это решает...',value:ideaText,onChange:e=>setIdeaText(e.target.value),style:{width:'100%',minHeight:100,resize:'vertical',boxSizing:'border-box',marginBottom:12}}),
             React.createElement('input',{className:'input-field',placeholder:'@telegram',value:tg,onChange:e=>setTg(e.target.value),style:{width:'100%',marginBottom:14,boxSizing:'border-box'}}),
             React.createElement('button',{className:'btn-main',style:{width:'100%',borderRadius:999},onClick:handleSave},'ОТПРАВИТЬ'),
