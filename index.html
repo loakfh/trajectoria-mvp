@@ -250,6 +250,43 @@ html{overflow-x:hidden!important}
 .fakedoor{min-width:0!important;flex:1 1 100%!important}
 /* 6F: Store carousel clipping */
 .store-carousel{overflow:hidden!important}
+/* M7: PERF — static backgrounds, reduced blur */
+.page-bg{background-attachment:scroll!important;will-change:auto!important}
+.page-bg::after{backdrop-filter:blur(2px)!important;-webkit-backdrop-filter:blur(2px)!important}
+.landing-bg::after{background:rgba(15,15,25,0.45)!important}
+.summary-hero-img{animation:none!important}
+/* M8: ANTON FONT — enforce on mobile */
+[style*="Anton"]{font-family:'Anton','Impact','Arial Black',sans-serif!important}
+h1.hero{font-family:'Anton','Impact','Arial Black',sans-serif!important;font-weight:400!important;text-transform:uppercase!important}
+/* M9: LANDING — title lower, ticker cards wider */
+.hero-left{padding-top:18vh!important}
+.marquee-inner span{padding:10px 28px!important;margin-right:20px!important;background:rgba(255,255,255,0.04)!important;border:1px solid rgba(255,255,255,0.06)!important;border-radius:8px!important;display:inline-block!important}
+/* M10: CHAT — input bar fixed at bottom */
+.chat-main>div:last-child{position:fixed!important;bottom:0!important;left:0!important;right:0!important;z-index:50!important;background:rgba(15,15,25,0.95)!important;backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important;padding:10px 16px!important}
+.chat-main>div:nth-child(2){padding-bottom:80px!important}
+/* M11: SUMMARY — pill button, archetype text, gradient */
+.summary-opinion-row .btn-outline{border-radius:25px!important}
+.summary-name-overlay>div:nth-child(3){flex-wrap:wrap!important;gap:4px!important}
+.summary-name-overlay>div:nth-child(3) span{font-size:16px!important}
+.summary-hero-img>div:first-of-type{background:linear-gradient(to top,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.5) 60%,rgba(0,0,0,0.15) 100%)!important}
+/* M12: DNA — cluster blocks single-column mobile */
+.dna-blocks-section{overflow:hidden!important}
+.dna-blocks-section *{column-count:1!important;-webkit-column-count:1!important}
+.dna-blocks-section>div:first-child{flex-direction:column!important}
+.dna-blocks-section>div:first-child>[style*="width: 100px"]{width:auto!important;border-right:none!important}
+.dna-blocks-section div:has(>[style*="writing-mode"]){position:static!important;width:auto!important;display:block!important}
+.dna-blocks-section [style*="writing-mode"]{writing-mode:horizontal-tb!important;transform:none!important;font-size:28px!important;white-space:normal!important}
+.dna-blocks-section [style*="margin-left: 60px"]{margin-left:0!important}
+.dna-blocks-section [style*="min-width"]{min-width:0!important}
+.dna-blocks-section [style*="flex: 0 0 180px"]{flex:1 1 100%!important}
+.dna-blocks-section [style*="padding: 44px 48px"]{padding:20px 16px!important}
+.dna-blocks-section [style*="padding: 40px 36px"]{padding:20px 16px!important}
+.dna-blocks-section [style*="padding: 40px 28px"]{padding:20px 16px!important}
+.dna-blocks-section [style*="font-size: 220px"]{font-size:80px!important}
+.dna-blocks-section>div,.dna-row-stagger>div,.dna-row-triple>div{max-width:100%!important;overflow:hidden!important}
+.dna-blocks-section [style*="gap: 36px"],.dna-blocks-section [style*="gap: 32px"],.dna-blocks-section [style*="gap: 48px"]{flex-direction:column!important}
+/* M13: STORE — carousel cards fit */
+.store-carousel [style*="width: 360"]{width:min(300px,85vw)!important}
 }
 @media(max-width:480px){
 .nav-logo{font-size:16px!important;letter-spacing:3px!important}
@@ -737,9 +774,10 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
 
   useEffect(()=>{
     const timer=setTimeout(()=>{
-      const greeting=`${userName}, я ${copilotName}. Один вопрос перед стартом: зачем ты сюда пришёл? Что надеешься получить от этого разговора? И кстати — хочешь аккуратно и вежливо, или разрешаешь быть прямым? Я не грублю, но не сахарю.\n\nКстати, если хочешь посмотреть как выглядят результаты без прохождения диалога — напиши "траектория39", и я покажу заготовленный пример.`;
-      setMessages([{role:'assistant',content:greeting}]);
-      historyRef.current=[{role:'assistant',content:greeting}];
+      const greeting=`${userName}, я ${copilotName}. Один вопрос перед стартом: зачем ты сюда пришёл? Что надеешься получить от этого разговора?`;
+      const greetingMuted='Ты можешь менять мне стиль общения, посылать меня нафиг и говорить голосом. А чтобы посмотреть заранее заготовленные результаты, пропустив стадию диалога, пропиши траектория39';
+      setMessages([{role:'assistant',content:greeting,muted:greetingMuted}]);
+      historyRef.current=[{role:'assistant',content:greeting+'\n\n'+greetingMuted}];
     },1500);
     return ()=>clearTimeout(timer);
   },[]);
@@ -974,7 +1012,8 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
             diceRolling && React.createElement('div',{style:{position:'absolute',top:'50%',left:'50%',fontSize:60,animation:'diceRoll 1.5s ease-out forwards',zIndex:10,pointerEvents:'none'}},'🎲'),
             messages.map((m,i)=>React.createElement('div',{key:i,className:'chat-msg '+m.role,style:m.role==='user'?{fontFamily:"'Caveat',cursive",fontSize:'22px',fontWeight:700}:{}},
               m.role==='assistant' && React.createElement('div',{className:'sender',style:{color:toneColors[tone]}},copilotName),
-              React.createElement('div',null,m.content)
+              React.createElement('div',null,m.content),
+              m.muted && React.createElement('div',{style:{color:'rgba(255,255,255,0.4)',fontSize:14,marginTop:12,lineHeight:1.5}},m.muted)
             )),
             isTyping && React.createElement('div',{style:{display:'flex',alignItems:'center',gap:8,padding:'14px 18px'}},
               React.createElement('div',{className:'typing-dots',style:{padding:0}},React.createElement('span'),React.createElement('span'),React.createElement('span')),
@@ -999,7 +1038,7 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
           React.createElement('div',{className:'tone-name'},t.icon,' ',React.createElement('span',{style:{background:toneGradients[t.id],backgroundClip:'text',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundSize:'200%',animation:'shimmer 3s linear infinite'}},t.name)),
           React.createElement('div',{className:'tone-desc'},t.desc)
         )),
-        React.createElement('div',{className:'nafig-card',style:{position:'relative',background:'rgba(255,100,100,0.08)',border:'1px solid rgba(255,100,100,0.15)',borderRadius:10,padding:16,marginTop:16,overflow:'visible',minHeight:100}},
+        React.createElement('div',{className:'nafig-card',style:{position:'relative',background:'rgba(255,100,100,0.08)',border:'1px solid rgba(255,100,100,0.15)',borderRadius:10,padding:16,marginTop:32,overflow:'visible',minHeight:100}},
           React.createElement('div',{style:{fontSize:24,marginBottom:6}},'🎲'),
           React.createElement('p',{style:{marginBottom:4}},React.createElement('span',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:16,color:'rgba(255,150,100,0.9)'}},'НАФИГ')),
           React.createElement('p',{style:{fontSize:14,color:'rgba(255,180,120,0.85)',lineHeight:1.4}},'Копилот борщит? Тема слишком личная? Или просто скучно? Кинь кубик — Копилот сам решит что делать.')
@@ -1056,7 +1095,7 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName
         ),
         React.createElement('div',{style:{position:'relative',marginTop:28}},
           // marker — text above bar, line extends down through bar
-          React.createElement('div',{style:{position:'absolute',left:'15%',top:-24,transform:'translateX(-50%)',fontSize:13,color:'rgba(255,255,255,0.6)',whiteSpace:'nowrap',display:'flex',flexDirection:'column',alignItems:'center'}},
+          React.createElement('div',{style:{position:'absolute',left:window.innerWidth<=768?'35%':'15%',top:-24,transform:'translateX(-50%)',fontSize:13,color:'rgba(255,255,255,0.6)',whiteSpace:'nowrap',display:'flex',flexDirection:'column',alignItems:'center'}},
             React.createElement('span',null,'большинство здесь'),
             React.createElement('div',{style:{width:1,height:30,background:'rgba(255,255,255,0.4)',marginTop:4}})
           ),
@@ -1064,7 +1103,7 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName
             React.createElement('div',{style:{height:'100%',borderRadius:9,background:'var(--gradient)',backgroundSize:'200% 100%',animation:'dnaShimmer 3s linear infinite',width:pct+'%',transition:'width 0.8s ease'}})
           )
         ),
-        React.createElement('p',{style:{fontSize:16,color:'rgba(255,255,255,0.6)',marginTop:8}},'Тво\u0451 цифровое ДНК заполнено на '+pct+'%, это ещ\u0451 не конец')
+        React.createElement('p',{style:{fontSize:16,color:'rgba(255,255,255,0.6)',marginTop:window.innerWidth<=768?24:8}},'Тво\u0451 цифровое ДНК заполнено на '+pct+'%, это ещ\u0451 не конец')
       ),
 
       // 3. ABSTRACT IMAGE CARD — clickable, with overlay
@@ -1220,7 +1259,7 @@ function BridgePage({data, onBack, goHome, copilotName}) {
 
       // SECTION 1: HERO
       React.createElement('div',{style:{marginTop:72,marginBottom:64,textAlign:'center'}},
-        React.createElement('div',{style:{fontSize:12,letterSpacing:4,textTransform:'uppercase',color:'rgba(124,92,255,0.5)',marginBottom:16,fontFamily:libre}},userName+', \u0443 \u0442\u0435\u0431\u044F \u0441\u0435\u0439\u0447\u0430\u0441 \u0440\u0430\u0437\u0432\u0438\u043B\u043A\u0430'),
+        React.createElement('div',{style:{fontSize:window.innerWidth<=768?18:12,letterSpacing:4,textTransform:'uppercase',color:window.innerWidth<=768?'#fff':'rgba(124,92,255,0.5)',marginBottom:16,fontFamily:libre,fontWeight:window.innerWidth<=768?700:400}},userName+', \u0443 \u0442\u0435\u0431\u044F \u0441\u0435\u0439\u0447\u0430\u0441 \u0440\u0430\u0437\u0432\u0438\u043B\u043A\u0430'),
         React.createElement('div',{style:{fontFamily:anton,fontSize:'clamp(28px,5vw,42px)',fontWeight:400,textTransform:'uppercase',letterSpacing:3,color:'#fff',lineHeight:1.3}},'\u0427\u0422\u041E \u041C\u041E\u0416\u0415\u0422 \u041F\u0420\u041E\u0418\u0417\u041E\u0419\u0422\u0418,'),
         React.createElement('div',{style:{fontFamily:anton,fontSize:'clamp(28px,5vw,42px)',fontWeight:400,textTransform:'uppercase',letterSpacing:3,color:'rgba(124,92,255,0.8)',lineHeight:1.3}},'\u0415\u0421\u041B\u0418 \u041E\u041D\u0418 \u0423\u0412\u0418\u0414\u042F\u0422 \u0422\u0412\u041E\u0401 \u0414\u041D\u041A')
       ),
@@ -1497,7 +1536,7 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome, copilotNa
 
   return React.createElement('div',{className:'page'},
     // blurred dimmed bg
-    React.createElement('div',{className:'page-bg dna-bg',style:{backgroundImage:'url('+bgRef.current+')',filter:'blur(14px) brightness(0.85) saturate(1.3)'}}),
+    React.createElement('div',{className:'page-bg dna-bg',style:{backgroundImage:'url('+bgRef.current+')',filter:window.innerWidth<=768?'blur(6px) brightness(0.7) saturate(1.2)':'blur(14px) brightness(0.85) saturate(1.3)'}}),
     // NAV
     React.createElement('div',{className:'nav',style:{display:'flex',justifyContent:'space-between',alignItems:'center'}},
       React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ'),
@@ -1510,7 +1549,7 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome, copilotNa
         // LEFT (40%)
         React.createElement('div',{style:{flex:'0 0 40%',display:'flex',flexDirection:'column',justifyContent:'center',paddingRight:48}},
           React.createElement('div',{style:{fontSize:11,textTransform:'uppercase',letterSpacing:4,color:'var(--muted)',marginBottom:40}},'ДНК УЧАСТНИКА \u00B7 ТРАЕКТОРИЯ \u00B7 2026'),
-          React.createElement('div',{style:{fontSize:'clamp(40px,8vw,120px)',lineHeight:1,marginBottom:36,whiteSpace:'nowrap',overflow:'hidden'}},
+          React.createElement('div',{style:{fontSize:window.innerWidth<=768?'clamp(60px,18vw,120px)':'clamp(40px,8vw,120px)',lineHeight:1,marginBottom:36,whiteSpace:window.innerWidth<=768?'normal':'nowrap',overflow:'hidden'}},
             React.createElement('span',{style:{fontFamily:"'Libre Baskerville',serif",fontWeight:300}},namePart1),
             React.createElement('span',{style:{fontFamily:"'Caveat',cursive",color:'#c4b5fd'}},namePart2)
           ),
@@ -1767,7 +1806,7 @@ function StorePage({data, onBack, onBridge, onUnlock, goHome}) {
               React.createElement('span',{style:{fontFamily:anton,fontSize:14,letterSpacing:1,fontWeight:400}},'ПОДЕЛИСЬ С БЛИЗКИМИ')
             ),
             React.createElement('p',{style:{fontSize:13,color:'var(--muted)',lineHeight:1.5,marginBottom:10}},'Отправь ссылку родителю или другу. Когда они зайдут \u2014 скидка 35% и полное ДНК бесплатно.'),
-            React.createElement('button',{style:{fontSize:12,color:'#5bbd72',background:'transparent',border:'1px solid rgba(91,189,114,0.4)',borderRadius:999,padding:'6px 16px',cursor:'pointer',fontFamily:anton,letterSpacing:1,fontWeight:400},onClick:()=>openModal('share')},'Отправить ссылку')
+            React.createElement('button',{style:{fontSize:12,color:'#5bbd72',background:'transparent',border:'1px solid rgba(91,189,114,0.4)',borderRadius:999,padding:'6px 16px',cursor:'pointer',fontFamily:anton,letterSpacing:1,fontWeight:400},onClick:onBridge},'Отправить ссылку')
           ),
           // Condition 2: Feedback
           React.createElement('div',{style:{background:'rgba(124,92,255,0.05)',border:'1px solid rgba(124,92,255,0.15)',borderRadius:12,padding:'16px 14px',marginBottom:12}},
