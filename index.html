@@ -7,7 +7,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Anton:wght@400&family=Caveat:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#0f0f19;--card:rgba(255,255,255,0.05);--border:rgba(255,255,255,0.1);--text:#fff;--muted:rgba(255,255,255,0.6);--accent:#7c5cff;--gradient:linear-gradient(90deg,#e0e7ff,#a5b4fc,#818cf8,#6366f1,#c4b5fd,#e0e7ff)}
@@ -255,12 +257,23 @@ html{overflow-x:hidden!important}
 .page-bg::after{backdrop-filter:blur(2px)!important;-webkit-backdrop-filter:blur(2px)!important}
 .landing-bg::after{background:rgba(15,15,25,0.45)!important}
 .summary-hero-img{animation:none!important}
-/* M8: ANTON FONT — enforce on mobile */
-[style*="Anton"]{font-family:'Anton','Impact','Arial Black',sans-serif!important}
-h1.hero{font-family:'Anton','Impact','Arial Black',sans-serif!important;font-weight:400!important;text-transform:uppercase!important}
-/* M9: LANDING — title lower, ticker cards wider */
+/* M8: ANTON FONT — comprehensive mobile enforcement + preconnect in <head> */
+h1.hero,.btn-main,.btn-outline,.timeline-item h4,.fakedoor h4,.section-title,
+.tabs button,.skip-btn,.tone-btn .tone-name,.chat-msg .sender,.reframe-side .label,
+[style*="Anton"]{font-family:'Anton',Impact,'Arial Black','Trebuchet MS',sans-serif!important;-webkit-font-smoothing:antialiased!important}
+h1.hero{font-weight:400!important;text-transform:uppercase!important}
+/* M9: LANDING — title lower, ticker floating text (no borders/frames) */
 .hero-left{padding-top:18vh!important}
-.marquee-inner span{padding:10px 28px!important;margin-right:20px!important;background:rgba(255,255,255,0.04)!important;border:1px solid rgba(255,255,255,0.06)!important;border-radius:8px!important;display:inline-block!important}
+.marquee-inner span{padding:0!important;margin-right:40px!important;background:none!important;border:none!important;border-radius:0!important;display:inline!important}
+/* M9b: LANDING — timeline full-width + spacious */
+.hero-right>div:first-child{padding:16px 12px!important;border-radius:16px!important}
+.timeline{gap:4px!important}
+.timeline-item{min-height:64px!important;padding:12px 0!important}
+.timeline-item h4{font-size:15px!important}
+.timeline-item p{font-size:13px!important;margin-top:4px!important;line-height:1.5!important}
+.tl-left{padding-right:16px!important}
+.tl-right{padding-left:16px!important}
+.tabs button{font-size:14px!important;padding:12px 16px!important}
 /* M10: CHAT — input bar fixed at bottom */
 .chat-main>div:last-child{position:fixed!important;bottom:0!important;left:0!important;right:0!important;z-index:50!important;background:rgba(15,15,25,0.95)!important;backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important;padding:10px 16px!important}
 .chat-main>div:nth-child(2){padding-bottom:80px!important}
