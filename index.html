@@ -511,6 +511,40 @@ function buildSystemPrompt(userName, copilotName, tone, msgCount, skipCount) {
 - Ловить то что "между строк": вскользь сказанное часто важнее прямых ответов.
 - Подростки не могут определиться не из-за лени — а из-за истощения (11 класс), давления, страха ошибиться. Помни это.
 
+=== ЦЕЛЬ КАЖДОГО ВОПРОСА (ОБЯЗАТЕЛЬНО) ===
+Каждый вопрос имеет ЦЕЛЬ — заполнить конкретные параметры ДНК. Вот карта:
+- Мечты/стремления → заполняет: Aspirational Identity, Impact Vision
+- Что зажигает/энергия → заполняет: Intrinsic Drivers
+- Ценности/компромиссы → заполняет: Core Values, Work-Life Philosophy
+- Страхи/сомнения → заполняет: Fear Profile, Limiting Beliefs
+- Давление родителей/учителей/друзей → заполняет: External Pressures, Friend Circle Influence
+- Реакция на провал → заполняет: Growth vs Fixed Mindset
+- Инициатива/агентность → заполняет: Agency Level, Experimentation Willingness
+- Горизонт планирования → заполняет: Time Horizon
+- Хобби/контент → заполняет: Current Interests, Learning Style
+- Потребность в сообществе → заполняет: Community Need
+- Стиль жизни/деньги → заполняет: Lifestyle Dreams, Money Mindset
+- AI/технологии → заполняет: AI Usage, AI Adaptability
+
+ПРАВИЛО: НИКОГДА не задавай случайный вопрос. Каждый вопрос ОБЯЗАН целиться хотя бы в один параметр ДНК. После каждого ответа юзера внутренне отмечай:
+1. Какие параметры получили данные → пиши в clusters_hit
+2. Какие параметры ещё пустые → следующий вопрос целится в них
+ПОКРЫТИЕ: следи за охватом кластеров. В copilot_note пиши: "Покрыл кластеры 1,2,3. Не тронуты: 5,6,7. Следующий вопрос → кластер 5 или 6."
+
+=== ПЕРСОНАЛИЗАЦИЯ В РЕАЛЬНОМ ВРЕМЕНИ (ОБЯЗАТЕЛЬНО) ===
+Копилот ОБЯЗАН использовать то, что уже узнал о юзере, НЕМЕДЛЕННО в том же разговоре. Не просто собирать данные — а строить живой диалог.
+
+ПРАВИЛА:
+- Если юзер рассказал о мечте/страсти 2-3 сообщения назад → ССЫЛАЙСЯ на неё по имени: "Ты говорил что тебя зажигает [конкретная вещь]. А когда последний раз ты это делал?"
+- Если юзер показал страх → СВЯЗЫВАЙ новые темы с ним: "Интересно — ты боишься [страх], но при этом хочешь [мечта]. Как эти два уживаются?"
+- Если юзер противоречит себе → ЛОВИТЬ: "Подожди. Раньше ты сказал [X]. Сейчас — [Y]. Что из этого правда?"
+- Если юзер использовал яркое слово/метафору → ПОВТОРЯЙ ЕГО в следующих сообщениях, чтобы показать что слышишь
+- К сообщению 5 копилот ОБЯЗАН делать КОНКРЕТНЫЕ предположения: "Мне кажется ты из тех, кто [предположение на основе паттернов]. Прав?"
+
+copilot_note ОБЯЗАН отражать эту бегущую модель — НЕ "интересный человек", а конкретно: "мечтатель-строитель, боится осуждения родителей, высокая агентность но низкая уверенность в творческих навыках, нуждается в сообществе, избегает конкретных таймлайнов"
+
+ОБЯЗАТЕЛЬНО: после 3-го сообщения КАЖДЫЙ ответ копилота ДОЛЖЕН ссылаться на что-то, что юзер сказал ранее. Копилот без ссылок на предыдущие ответы ощущается как анкета, а не разговор.
+
 === СТИЛЬ ===
 ${toneBlocks[tone] || toneBlocks.direct}
 
@@ -1161,7 +1195,7 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName
           React.createElement('div',{style:{fontFamily:anton,fontSize:18,letterSpacing:1,textTransform:'uppercase',fontWeight:400,marginBottom:4}},'НЕ СОГЛАСЕН?'),
           React.createElement('p',{style:{fontSize:14,color:'var(--muted)',marginBottom:12}},'Результат можно изменить'),
           React.createElement('textarea',{className:'input-field',placeholder:'Напиши что хочешь изменить...',style:{width:'100%',flex:1,minHeight:100,resize:'vertical',boxSizing:'border-box',marginBottom:12}}),
-          React.createElement('button',{className:'btn-outline',style:{borderColor:'#f7c948',color:'#f7c948',width:'100%',fontFamily:anton,fontWeight:400,padding:'12px 0'}},'ИЗМЕНИТЬ')
+          React.createElement('button',{className:'btn-outline',style:{borderColor:'#f7c948',color:'#f7c948',width:'100%',fontFamily:anton,fontWeight:400,padding:'12px 0'},onClick:()=>{console.log('[Fakedoor] Clicked: disagree_edit on summary');sbPostFaf('fakedoor_clicks',{user_id:userId||null,feature:'disagree_edit',page_source:'summary',plan_name:null,contact:null});}},'ИЗМЕНИТЬ')
         )
       ),
 
@@ -1179,7 +1213,7 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName
   );
 }
 
-function BridgePage({data, onBack, goHome, copilotName}) {
+function BridgePage({data, onBack, goHome, copilotName, userId}) {
   const d = data || DEMO_SUMMARY;
   const userName = d.userName || 'Имя';
   const pilot = (copilotName || 'копилот').toUpperCase();
@@ -1317,10 +1351,10 @@ function BridgePage({data, onBack, goHome, copilotName}) {
 
       // SECTION 7: MESSENGER BUTTONS
       React.createElement('div',{style:{display:'flex',gap:12,marginBottom:48}},
-        React.createElement('button',{onClick:function(){window.open('https://t.me/share/url?url='+enc(shareLink)+'&text='+enc(curMsg),'_blank')},style:{flex:1,padding:16,background:'rgba(0,136,204,0.1)',border:'1px solid rgba(0,136,204,0.2)',borderRadius:10,color:'rgba(0,136,204,0.8)',fontFamily:anton,fontSize:15,fontWeight:400,letterSpacing:1,textTransform:'uppercase',cursor:'pointer',textAlign:'center'}},'TELEGRAM'),
-        React.createElement('button',{onClick:function(){window.open('https://wa.me/?text='+enc(curMsg+' '+shareLink),'_blank')},style:{flex:1,padding:16,background:'rgba(37,211,102,0.07)',border:'1px solid rgba(37,211,102,0.15)',borderRadius:10,color:'rgba(37,211,102,0.8)',fontFamily:anton,fontSize:15,fontWeight:400,letterSpacing:1,textTransform:'uppercase',cursor:'pointer',textAlign:'center'}},'WHATSAPP'),
-        React.createElement('button',{onClick:function(){window.open('mailto:?subject='+enc('\u041C\u043E\u0451 \u0414\u041D\u041A')+'&body='+enc(curMsg),'_blank')},style:{flex:1,padding:16,background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:10,color:'rgba(255,255,255,0.5)',fontFamily:anton,fontSize:15,fontWeight:400,letterSpacing:1,textTransform:'uppercase',cursor:'pointer',textAlign:'center'}},'EMAIL'),
-        React.createElement('button',{onClick:function(){handleCopy();setMaxTip(true);setTimeout(function(){setMaxTip(false)},3000);},style:{flex:1,padding:16,background:'rgba(124,92,255,0.08)',border:'1px solid rgba(124,92,255,0.15)',borderRadius:10,color:'rgba(124,92,255,0.7)',fontFamily:anton,fontSize:15,fontWeight:400,letterSpacing:1,textTransform:'uppercase',cursor:'pointer',textAlign:'center',position:'relative'}},
+        React.createElement('button',{onClick:function(){console.log('[Fakedoor] Clicked: bridge_telegram on bridge');sbPostFaf('fakedoor_clicks',{user_id:userId||null,feature:'bridge_telegram',page_source:'bridge',plan_name:null,contact:null});window.open('https://t.me/share/url?url='+enc(shareLink)+'&text='+enc(curMsg),'_blank')},style:{flex:1,padding:16,background:'rgba(0,136,204,0.1)',border:'1px solid rgba(0,136,204,0.2)',borderRadius:10,color:'rgba(0,136,204,0.8)',fontFamily:anton,fontSize:15,fontWeight:400,letterSpacing:1,textTransform:'uppercase',cursor:'pointer',textAlign:'center'}},'TELEGRAM'),
+        React.createElement('button',{onClick:function(){console.log('[Fakedoor] Clicked: bridge_whatsapp on bridge');sbPostFaf('fakedoor_clicks',{user_id:userId||null,feature:'bridge_whatsapp',page_source:'bridge',plan_name:null,contact:null});window.open('https://wa.me/?text='+enc(curMsg+' '+shareLink),'_blank')},style:{flex:1,padding:16,background:'rgba(37,211,102,0.07)',border:'1px solid rgba(37,211,102,0.15)',borderRadius:10,color:'rgba(37,211,102,0.8)',fontFamily:anton,fontSize:15,fontWeight:400,letterSpacing:1,textTransform:'uppercase',cursor:'pointer',textAlign:'center'}},'WHATSAPP'),
+        React.createElement('button',{onClick:function(){console.log('[Fakedoor] Clicked: bridge_email on bridge');sbPostFaf('fakedoor_clicks',{user_id:userId||null,feature:'bridge_email',page_source:'bridge',plan_name:null,contact:null});window.open('mailto:?subject='+enc('\u041C\u043E\u0451 \u0414\u041D\u041A')+'&body='+enc(curMsg),'_blank')},style:{flex:1,padding:16,background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:10,color:'rgba(255,255,255,0.5)',fontFamily:anton,fontSize:15,fontWeight:400,letterSpacing:1,textTransform:'uppercase',cursor:'pointer',textAlign:'center'}},'EMAIL'),
+        React.createElement('button',{onClick:function(){console.log('[Fakedoor] Clicked: bridge_copy on bridge');sbPostFaf('fakedoor_clicks',{user_id:userId||null,feature:'bridge_copy',page_source:'bridge',plan_name:null,contact:null});handleCopy();setMaxTip(true);setTimeout(function(){setMaxTip(false)},3000);},style:{flex:1,padding:16,background:'rgba(124,92,255,0.08)',border:'1px solid rgba(124,92,255,0.15)',borderRadius:10,color:'rgba(124,92,255,0.7)',fontFamily:anton,fontSize:15,fontWeight:400,letterSpacing:1,textTransform:'uppercase',cursor:'pointer',textAlign:'center',position:'relative'}},
           'MAX',
           maxTip && React.createElement('div',{style:{position:'absolute',bottom:'100%',left:'50%',transform:'translateX(-50%)',marginBottom:8,background:'rgba(15,15,25,0.95)',border:'1px solid rgba(124,92,255,0.3)',borderRadius:8,padding:'8px 12px',fontSize:11,color:'rgba(255,255,255,0.7)',whiteSpace:'nowrap',fontFamily:libre,fontWeight:400,letterSpacing:0,textTransform:'none'}},'\u0421\u043A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u043D\u043E! \u041E\u0442\u043F\u0440\u0430\u0432\u044C \u0432 MAX')
         )
@@ -1715,7 +1749,7 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome, copilotNa
   );
 }
 
-function StorePage({data, onBack, onBridge, onUnlock, goHome}) {
+function StorePage({data, onBack, onBridge, onUnlock, goHome, userId}) {
   const d = data || DEMO_SUMMARY;
   const [modal, setModal] = useState(false);
   const [modalType, setModalType] = useState('buy');
@@ -1750,8 +1784,18 @@ function StorePage({data, onBack, onBridge, onUnlock, goHome}) {
 
   const openModal = (type) => {
     setModalType(type); setSaved(false); setTg(''); setIdeaText(''); setPromoCode('');
+    const featureMap = {buy:'plan_onetime',subscribe:'plan_subscription',idea:'suggest_idea',share:'share_link'};
+    const planMap = {buy:'onetime_299',subscribe:'subscription_349'};
+    const feat = featureMap[type]||type;
+    console.log('[Fakedoor] Clicked:',feat,'on store');
+    sbPostFaf('fakedoor_clicks',{user_id:userId||null,feature:feat,page_source:'store',plan_name:planMap[type]||null,contact:null});
     if(type==='buy'||type==='subscribe'){setPromoStep(true);setModal(true);}
     else{setPromoStep(false);setModal(true);}
+  };
+  const handleBridge = () => {
+    console.log('[Fakedoor] Clicked: share_link on store');
+    sbPostFaf('fakedoor_clicks',{user_id:userId||null,feature:'share_link',page_source:'store',plan_name:null,contact:null});
+    onBridge();
   };
   const handlePromo = () => {
     if(promoCode.trim().toLowerCase().replace(/\s/g,'')==='траектория39'){setModal(false);if(onUnlock)onUnlock();return;}
@@ -1760,7 +1804,10 @@ function StorePage({data, onBack, onBridge, onUnlock, goHome}) {
   const handleSave = () => {
     const contact = tg.trim(); const idea = ideaText.trim();
     if(!contact && !idea) return;
-    if(typeof sbPostFaf==='function') sbPostFaf('fakedoor_clicks',{user_id:null,feature_name:modalType==='idea'?'methodology_feedback':'store_'+modalType,contact:contact||null,idea:idea||null});
+    const featureMap = {buy:'plan_onetime',subscribe:'plan_subscription',idea:'suggest_idea',share:'share_link'};
+    const planMap = {buy:'onetime_299',subscribe:'subscription_349'};
+    console.log('[Fakedoor] Clicked:',(featureMap[modalType]||modalType)+'_submit','on store');
+    sbPostFaf('fakedoor_clicks',{user_id:userId||null,feature:(featureMap[modalType]||modalType)+'_submit',page_source:'store',plan_name:planMap[modalType]||null,contact:contact||null});
     setSaved(true);
   };
 
@@ -1820,7 +1867,7 @@ function StorePage({data, onBack, onBridge, onUnlock, goHome}) {
               React.createElement('span',{style:{fontFamily:anton,fontSize:14,letterSpacing:1,fontWeight:400}},'ПОДЕЛИСЬ С БЛИЗКИМИ')
             ),
             React.createElement('p',{style:{fontSize:13,color:'var(--muted)',lineHeight:1.5,marginBottom:10}},'Отправь ссылку родителю или другу. Когда они зайдут \u2014 скидка 35% и полное ДНК бесплатно.'),
-            React.createElement('button',{style:{fontSize:12,color:'#5bbd72',background:'transparent',border:'1px solid rgba(91,189,114,0.4)',borderRadius:999,padding:'6px 16px',cursor:'pointer',fontFamily:anton,letterSpacing:1,fontWeight:400},onClick:onBridge},'Отправить ссылку')
+            React.createElement('button',{style:{fontSize:12,color:'#5bbd72',background:'transparent',border:'1px solid rgba(91,189,114,0.4)',borderRadius:999,padding:'6px 16px',cursor:'pointer',fontFamily:anton,letterSpacing:1,fontWeight:400},onClick:handleBridge},'Отправить ссылку')
           ),
           // Condition 2: Feedback
           React.createElement('div',{style:{background:'rgba(124,92,255,0.05)',border:'1px solid rgba(124,92,255,0.15)',borderRadius:12,padding:'16px 14px',marginBottom:12}},
@@ -1898,7 +1945,7 @@ function StorePage({data, onBack, onBridge, onUnlock, goHome}) {
       // INVITE FRIEND/PARENT
       React.createElement('div',{style:{textAlign:'center',marginBottom:48,padding:'36px 0'}},
         React.createElement('div',{style:{fontFamily:anton,fontSize:'clamp(20px,3vw,28px)',letterSpacing:1,textTransform:'uppercase',fontWeight:400,marginBottom:24}},'ПРИГЛАСИ ДРУГА ИЛИ РОДИТЕЛЯ'),
-        React.createElement('button',{style:{background:'transparent',color:'#5bbd72',border:'1px solid #5bbd72',borderRadius:999,padding:'14px 36px',fontFamily:anton,fontSize:16,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'all 0.2s'},onClick:onBridge,onMouseEnter:e=>e.currentTarget.style.background='rgba(91,189,114,0.1)',onMouseLeave:e=>e.currentTarget.style.background='transparent'},'ОТПРАВИТЬ ССЫЛКУ')
+        React.createElement('button',{style:{background:'transparent',color:'#5bbd72',border:'1px solid #5bbd72',borderRadius:999,padding:'14px 36px',fontFamily:anton,fontSize:16,letterSpacing:1,cursor:'pointer',fontWeight:400,transition:'all 0.2s'},onClick:handleBridge,onMouseEnter:e=>e.currentTarget.style.background='rgba(91,189,114,0.1)',onMouseLeave:e=>e.currentTarget.style.background='transparent'},'ОТПРАВИТЬ ССЫЛКУ')
       ),
 
       // BACK LINK
@@ -1964,13 +2011,15 @@ function App() {
       onBack: () => setPage('summary'),
       onBridge: () => setPage('bridge'),
       onUnlock: () => { setFullAccess(true); setPage('dna'); },
-      goHome
+      goHome,
+      userId: userData.userId
     }) :
     page === 'bridge' ? React.createElement(BridgePage, {
       data: summaryData,
       onBack: () => setPage('summary'),
       goHome,
-      copilotName: userData.copilotName
+      copilotName: userData.copilotName,
+      userId: userData.userId
     }) : null
   );
 }
