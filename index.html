@@ -793,12 +793,13 @@ Msg 3: органично упомяни "ДНК начинает собират
 
   "hidden_insights": [
     {
-      "quote": "близкая к дословной цитата юзера",
-      "said_when": "контекст когда прозвучало",
+      "quote": "ОБЯЗАТЕЛЬНО близкая к дословной цитата юзера из этого диалога. НЕ парафраз. НЕ выдумка. Если ни одной запоминающейся фразы — возьми любую содержательную фразу из его ответов",
+      "said_when": "контекст когда прозвучало (например 'когда говорил про учёбу')",
       "title": "1-2 слова, заголовок",
       "text": "2-3 предложения, наблюдение для юзера без интерпретации 'ты такой' — формат 'вот что интересно в том что ты сказал'"
     }
   ],
+  // ВАЖНО: в ВЫХОД hidden_insights ОБЯЗАТЕЛЕН минимум 1 элемент с непустым quote из РЕАЛЬНЫХ слов юзера. Пустой массив в финальной фазе = ошибка.
 
   "readiness_score": "1-10, уровень энергии/готовности. Из его слов про усталость/драйв. Не касался темы — поставь 6.",
   "barriers_score": "0-9, вес барьеров и limiting_beliefs. Из реального содержания.",
@@ -807,8 +808,8 @@ Msg 3: органично упомяни "ДНК начинает собират
 
   "copilot_note": "3-5 предложений от первого лица. Обязательно с цитатами. Формат: что увидел + что зацепило + что юзер возможно не замечает в себе. 'Я заметил, когда ты сказал [цитата]...'",
 
-  "store_headline": "1 фраза — с чем юзер уходит, его словами. Пример: 'Тебе ясно что кайфуешь от создания руками — не ясно где применять.'",
-  "value_cards_hints": ["2-3 хинта для follow-up карточек"],
+  "store_headline": "ОДНА полная грамматическая фраза, 8-14 слов, формат 'Тебе [что ясно из диалога] — [что ещё неясно или куда двигаться]'. Конкретно, без метафор, со ссылкой на реальное содержание диалога. ХОРОШО: 'Тебе ясно что кайфуешь от процесса создания руками — пока не ясно в какой области.' ХОРОШО: 'Тебе ясно что хочешь свободы выбора — пока не ясно как объяснить это маме.' ПЛОХО: 'Креатив пульсирует в направлении поиска.' (абстракция). ПЛОХО: 'Двигайся вперёд и доверяй себе.' (мотивационная пустышка).",
+  "value_cards_hints": ["МАССИВ из РОВНО 3 хинтов. Каждый хинт: 6-12 слов, формат '[что юзер получит] — [конкретика из его диалога]'. Каждый ссылается на то что юзер реально говорил. ХОРОШО: 'План на 3 месяца под твою идею с подкастом.' ХОРОШО: 'Хакатоны и курсы по UX, который ты упомянул дважды.' ПЛОХО: 'Развитие и рост.' (генерик). Если юзер не дал контекст для слота — используй шаблон 'Роадмап на месяц на основе [archetype]' с подстановкой реального archetype."],
   "bridge_timelines": [
     {"when":"без моста","text":"что может случиться если промолчит — из его контекста"},
     {"when":"с мостом","text":"что может случиться если отправит родителю/другу"}
@@ -1488,6 +1489,13 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
   );
 }
 
+function firstSentence(s){
+  if(!s) return '';
+  const txt = String(s).trim();
+  const m = txt.match(/[^.!?\n]+[.!?]/);
+  return m ? m[0].trim() : (txt.length>100 ? txt.slice(0,97).trim()+'…' : txt);
+}
+
 function mapDnaSummaryRow(row, userName){
   if(!row) return null;
   const traitsArr=Array.isArray(row.traits)?row.traits:[];
@@ -1570,9 +1578,9 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName
     React.createElement('div',{className:'nav'},React.createElement('span',{className:'nav-logo',onClick:goHome},'ТРАЕКТОРИЯ')),
     React.createElement('div',{className:'page-content resp-pad zoomable',style:{padding:'0 40px 60px',maxWidth:1500,width:'95%',margin:'0 auto'}},
 
-      // 1. TITLE
+      // 1. TITLE — short punchline from store_headline; fallback to first sentence of copilot_note
       React.createElement('h1',{className:'hero',style:{fontFamily:anton,fontSize:'clamp(28px,4.5vw,56px)',textTransform:'uppercase',marginTop:40,marginBottom:48,fontWeight:400}},
-        userName+', ',d.title||'ты знаешь о себе больше, чем думаешь'
+        userName+', ',d.store_headline||firstSentence(d.title)||'ты знаешь о себе больше, чем думаешь'
       ),
 
       // 2. DNA BAR — full width
@@ -1622,7 +1630,7 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName
             React.createElement('div',{style:{fontFamily:anton,fontSize:20,letterSpacing:1,textTransform:'uppercase',fontWeight:400}},'МНЕНИЕ '+pilot.toUpperCase())
           ),
           React.createElement('div',{style:{fontFamily:libre,fontSize:17,color:'rgba(255,255,255,0.8)',lineHeight:1.8,marginBottom:24}},
-            (d.opinion||d.title||'').split('\n').filter(l=>l.trim()).map((line,i)=>React.createElement('p',{key:i,style:{marginBottom:12}},line))
+            (d.title||d.opinion||'').split('\n').filter(l=>l.trim()).map((line,i)=>React.createElement('p',{key:i,style:{marginBottom:12}},line))
           ),
           React.createElement('div',{style:{borderLeft:'3px solid var(--accent)',paddingLeft:16,marginTop:8}},
             React.createElement('div',{style:{fontSize:14,color:'var(--accent)',fontFamily:anton,letterSpacing:1,textTransform:'uppercase',marginBottom:8,fontWeight:400}},'МЕЖДУ СТРОК'),
@@ -1880,47 +1888,40 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome, copilotNa
   const libre = "'Libre Baskerville',serif";
   const caveat = "'Caveat',cursive";
 
-  // ===== BLOCK 1: БАРЬЕРЫ — OPEN =====
+  // ===== BLOCK 1: ОТКРЫТИЕ — OPEN, wired to AI hidden_insights + copilot_note =====
+  const insight0 = (d.insights && d.insights[0]) ? d.insights[0] : null;
+  const noteText = d.title || '';
+  const noteParas = noteText
+    ? noteText.split(/(?<=[.!?])\s+(?=[А-ЯA-ZЁ«"])/).map(s=>s.trim()).filter(Boolean)
+    : [];
   const block1 = React.createElement('div',{key:'b1',style:{position:'relative',overflow:'hidden',borderRadius:16,border:'1px solid rgba(255,255,255,0.08)',minHeight:620,background:'#000',display:'flex'}},
     bgImg('assets/афиша_1.jpeg',0.4),
     React.createElement('div',{style:{position:'absolute',inset:0,background:'linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 100%)'}}),
     // rotated heading — left edge, wide panel
     React.createElement('div',{style:{position:'relative',width:100,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',zIndex:2,borderRight:'1px solid rgba(255,255,255,0.06)'}},
-      React.createElement('div',{style:{writingMode:'vertical-rl',transform:'rotate(180deg)',fontFamily:anton,fontSize:90,letterSpacing:10,textTransform:'uppercase',color:'rgba(255,255,255,0.15)',whiteSpace:'nowrap'}},'БАРЬЕРЫ')
+      React.createElement('div',{style:{writingMode:'vertical-rl',transform:'rotate(180deg)',fontFamily:anton,fontSize:90,letterSpacing:10,textTransform:'uppercase',color:'rgba(255,255,255,0.15)',whiteSpace:'nowrap'}},'ОТКРЫТИЕ')
     ),
     // giant faded number
     React.createElement('div',{style:{position:'absolute',top:20,right:40,fontSize:220,fontFamily:anton,color:'rgba(255,255,255,0.07)',lineHeight:1,zIndex:1}},'01'),
     // main content area
     React.createElement('div',{style:{position:'relative',zIndex:2,flex:1,padding:'44px 48px',display:'flex',flexDirection:'column',gap:24}},
-      React.createElement('div',{style:{fontSize:12,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.4)'}},'ВЕС 25% \u00B7 САМЫЙ КРИТИЧНЫЙ КЛАСТЕР'),
-      // pull quote — large
-      React.createElement('div',{style:{borderLeft:'4px solid #ff4081',paddingLeft:24,maxWidth:650}},
-        React.createElement('p',{style:{fontFamily:caveat,fontSize:28,fontStyle:'italic',color:'rgba(255,255,255,0.9)',lineHeight:1.4}},'\u00ABБоюсь не оправдать ожидания. А вдруг выбрал не то?\u00BB')
-      ),
-      // stat callout + body in 2 columns
-      React.createElement('div',{style:{display:'flex',gap:36,alignItems:'flex-start',flexWrap:'wrap'}},
-        // sidebar stat
-        React.createElement('div',{style:{flex:'0 0 180px',background:'rgba(255,64,129,0.08)',border:'1px solid rgba(255,64,129,0.15)',borderRadius:12,padding:'24px 20px',textAlign:'center'}},
-          React.createElement('div',{style:{fontFamily:anton,fontSize:56,color:'#ff4081',lineHeight:1}},'72%'),
-          React.createElement('div',{style:{fontFamily:anton,fontSize:12,letterSpacing:2,textTransform:'uppercase',color:'rgba(255,255,255,0.5)',marginTop:8}},'GROWTH MINDSET'),
-          React.createElement('div',{style:{fontSize:12,color:'rgba(255,255,255,0.4)',marginTop:8,fontFamily:libre,lineHeight:1.4}},'Шкала от 0 до 100. Выше 60 \u2014 уже зона роста. Ты на границе.')
-        ),
-        // body — 2 columns
-        React.createElement('div',{style:{flex:1,columnCount:2,columnGap:32,minWidth:300}},
-          React.createElement('p',{style:{fontFamily:libre,fontSize:15,lineHeight:1.8,color:'rgba(255,255,255,0.8)',marginBottom:14}},'Самый критичный кластер. Здесь \u2014 причина почему школьники не двигаются.'),
-          React.createElement('p',{style:{fontFamily:libre,fontSize:15,lineHeight:1.8,color:'rgba(255,255,255,0.8)',marginBottom:14}},'Growth vs Fixed Mindset \u2014 не бинарно, а шкала. Ты ближе к growth: готов пробовать, но тормозишь когда результат не виден сразу.'),
-          React.createElement('p',{style:{fontFamily:libre,fontSize:15,lineHeight:1.8,color:'rgba(255,255,255,0.8)',marginBottom:14}},'Страх ошибки у тебя \u2014 не про саму ошибку. Это про разочарование. Маму. Себя. Ты боишься не провала \u2014 а того, что провал подтвердит сомнения.'),
-          React.createElement('p',{style:{fontFamily:libre,fontSize:15,lineHeight:1.8,color:'rgba(255,255,255,0.8)',marginBottom:14}},'External Pressures: мама хочет стабильности, друзья не понимают выбор, учителя говорят \u00ABрано ещё\u00BB. Карта давления \u2014 вот что мы фиксируем.'),
-          React.createElement('p',{style:{fontFamily:libre,fontSize:15,lineHeight:1.8,color:'rgba(255,255,255,0.8)'}},'Limiting Beliefs: \u00ABЯ ещё слишком молод\u00BB. \u00ABНужен диплом чтобы начинать\u00BB. \u00ABВсе уже впереди\u00BB. Каждое убеждение \u2014 стена. AI помогает увидеть дверь в этой стене.')
-        )
-      ),
-      // bold callout strip at bottom
-      React.createElement('div',{style:{background:'rgba(255,64,129,0.06)',borderRadius:10,padding:'16px 24px',display:'flex',alignItems:'center',gap:16,marginTop:'auto'}},
+      React.createElement('div',{style:{fontSize:12,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.4)'}},'\u0418\u0417 \u0422\u0412\u041E\u0415\u0413\u041E \u0414\u0418\u0410\u041B\u041E\u0413\u0410'),
+      // pull quote — only if real user quote exists
+      insight0 && insight0.quote ? React.createElement('div',{style:{borderLeft:'4px solid #ff4081',paddingLeft:24,maxWidth:650}},
+        React.createElement('p',{style:{fontFamily:caveat,fontSize:28,fontStyle:'italic',color:'rgba(255,255,255,0.9)',lineHeight:1.4,marginBottom:8}},'\u00AB',insight0.quote,'\u00BB'),
+        insight0.context ? React.createElement('p',{style:{fontFamily:anton,fontSize:11,letterSpacing:2,textTransform:'uppercase',color:'rgba(255,255,255,0.4)'}},'\u2014 ',insight0.context) : null
+      ) : null,
+      // copilot reflective text — only if copilot_note exists
+      noteParas.length ? React.createElement('div',{style:{flex:1,columnCount:noteParas.length>2?2:1,columnGap:32,minWidth:300}},
+        noteParas.map(function(line,i){return React.createElement('p',{key:'np'+i,style:{fontFamily:libre,fontSize:15,lineHeight:1.8,color:'rgba(255,255,255,0.8)',marginBottom:14}},line);})
+      ) : null,
+      // bottom callout — only if hidden_insight has a deeper text
+      insight0 && insight0.text ? React.createElement('div',{style:{background:'rgba(255,64,129,0.06)',borderRadius:10,padding:'16px 24px',display:'flex',alignItems:'center',gap:16,marginTop:'auto'}},
         React.createElement('div',{style:{width:4,height:40,background:'#ff4081',borderRadius:2,flexShrink:0}}),
-        React.createElement('p',{style:{fontFamily:caveat,fontSize:22,color:'rgba(255,255,255,0.85)',fontStyle:'italic',lineHeight:1.3}},'\u00ABТы боишься не провала. Ты боишься что провал подтвердит сомнения.\u00BB'),
-        React.createElement('div',{style:{marginLeft:'auto',fontFamily:anton,fontSize:11,letterSpacing:2,color:'rgba(255,255,255,0.3)',whiteSpace:'nowrap'}},'FEAR PROFILE')
-      ),
-      React.createElement('div',{style:{fontSize:11,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.3)'}},'КЛАСТЕР 1 \u00B7 4 ПАРАМЕТРА \u00B7 GROWTH MINDSET \u00B7 FEAR PROFILE \u00B7 EXTERNAL PRESSURES \u00B7 LIMITING BELIEFS')
+        React.createElement('p',{style:{fontFamily:caveat,fontSize:22,color:'rgba(255,255,255,0.85)',fontStyle:'italic',lineHeight:1.3}},insight0.text),
+        insight0.title ? React.createElement('div',{style:{marginLeft:'auto',fontFamily:anton,fontSize:11,letterSpacing:2,color:'rgba(255,255,255,0.3)',whiteSpace:'nowrap',textTransform:'uppercase'}},insight0.title) : null
+      ) : null,
+      React.createElement('div',{style:{fontSize:11,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.3)'}},'\u041D\u0430 \u043E\u0441\u043D\u043E\u0432\u0435 \u0442\u0432\u043E\u0438\u0445 \u0441\u043B\u043E\u0432 \u00B7 ',(d.archetype||'\u0410\u0440\u0445\u0435\u0442\u0438\u043F'),' \u00B7 DNA ',(d.dna||0),'%')
     )
   );
 
@@ -2217,12 +2218,14 @@ function StorePage({data, onBack, onBridge, onUnlock, goHome, userId}) {
 
   useEffect(()=>{window.scrollTo(0,0);},[]);
 
-  // Stories carousel cards
+  // Stories carousel cards — first 3 personalized via value_cards_hints from dna_summary
   const traitText = ((d.traits||[]).map(t=>t.text).join(' ')+(d.opinion||'')).toLowerCase();
+  const hints = Array.isArray(d.value_cards_hints) ? d.value_cards_hints.filter(function(h){return h && String(h).trim();}) : [];
+  const archetypeFallback = d.archetype || 'твоему профилю';
   const valCards = [
-    {quote:traitText.includes('не знаю')?'Я не знаю что мне подходит...':'Я не знаю кем хочу стать...',val:'Полная карта того, кто ты \u2014 без тестов и оценок',feat:'ПОЛНАЯ КАРТА ДНК'},
-    {quote:traitText.includes('дальше')?'Что мне делать после школы?':'Хочу понять что делать дальше',val:'Конкретные шаги на месяц \u2014 не абстракция, а действия',feat:'ПЕРСОНАЛЬНЫЙ ПЛАН'},
-    {quote:traitText.includes('хаос')?'У меня слишком много интересов':'Столько всего, не знаю за что хвататься',val:'Хакатоны, курсы, олимпиады \u2014 отфильтрованные под тебя',feat:'ПОДБОРКА МЕРОПРИЯТИЙ'},
+    {quote:traitText.includes('не знаю')?'Я не знаю что мне подходит...':'Я не знаю кем хочу стать...',val: hints[0] || ('Полная карта того, кто ты \u2014 на основе ' + archetypeFallback),feat:'ПОЛНАЯ КАРТА ДНК'},
+    {quote:traitText.includes('дальше')?'Что мне делать после школы?':'Хочу понять что делать дальше',val: hints[1] || ('Конкретные шаги на месяц для ' + archetypeFallback),feat:'ПЕРСОНАЛЬНЫЙ ПЛАН'},
+    {quote:traitText.includes('хаос')?'У меня слишком много интересов':'Столько всего, не знаю за что хвататься',val: hints[2] || ('Хакатоны, курсы, олимпиады \u2014 отфильтрованные под ' + archetypeFallback),feat:'ПОДБОРКА МЕРОПРИЯТИЙ'},
     {quote:traitText.includes('понимает')?'Впервые кто-то реально слышит':'Наконец кто-то слушает',val:'Копилот, который помнит вс\u0451 и всегда на связи',feat:'КОПИЛОТ БЕЗ ЛИМИТОВ'},
     {quote:traitText.includes('прогресс')?'Мне важно видеть результат':'Хочу видеть что двигаюсь',val:'Смотри как раст\u0451шь \u2014 ДНК обновляется с каждым шагом',feat:'ТРЕКИНГ ПРОГРЕССА'},
     {quote:traitText.includes('один')?'Кажется я один такой':'Чувствую что один с этим',val:'Чат с теми, кто тоже ищет свой путь',feat:'PEER-ЧАТ'}
