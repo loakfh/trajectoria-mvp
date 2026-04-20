@@ -130,6 +130,12 @@ h1.hero{font-family:'Anton','Impact',sans-serif!important;font-weight:400!import
 .sidebar-overlay{position:fixed;left:0;top:0;bottom:0;width:260px;background:rgba(15,15,25,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:100;padding:20px 16px;overflow-y:auto;animation:slideIn .2s ease-out;border-right:1px solid var(--border)}
 .sidebar-close{position:absolute;top:12px;right:12px;background:transparent;border:none;color:rgba(255,255,255,0.6);font-size:20px;cursor:pointer;padding:4px}
 .sidebar-close:hover{color:#fff}
+.tone-fab{display:none;position:fixed;width:56px;height:56px;border-radius:50%;background:rgba(15,15,25,0.85);border:2px solid rgba(255,255,255,0.25);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font-size:24px;cursor:grab;z-index:60;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,0.45);touch-action:none;user-select:none;-webkit-user-select:none;padding:0;line-height:1}
+.tone-fab:active{cursor:grabbing}
+.tone-fab-scrim{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99}
+.tone-fab-sheet{position:fixed;left:0;right:0;bottom:0;background:rgba(15,15,25,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);border-radius:20px 20px 0 0;padding:14px 16px calc(20px + env(safe-area-inset-bottom)) 16px;z-index:100;animation:fabSheetUp .25s ease-out;max-height:80vh;overflow-y:auto}
+.tone-fab-handle{width:42px;height:4px;background:rgba(255,255,255,0.3);border-radius:2px;margin:0 auto 12px}
+@keyframes fabSheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 h1.hero{font-family:'Anton','Impact','Arial Black',sans-serif!important}
 .timeline-item h4,.fakedoor h4,.section-title,.tabs button,.skip-btn,.tone-btn .tone-name{font-family:'Anton','Impact','Arial Black',sans-serif}
 @media(min-width:769px){
@@ -301,6 +307,16 @@ html{overflow-x:hidden!important}
 .dna-blocks-section [style*="gap: 36px"],.dna-blocks-section [style*="gap: 32px"],.dna-blocks-section [style*="gap: 48px"]{flex-direction:column!important}
 /* M13: STORE — carousel cards fit */
 .store-carousel [style*="width: 360"]{width:min(300px,85vw)!important}
+}
+@media(max-width:639px){
+.chat-dna-header{padding:6px 14px!important}
+.dna-bar-wrap{height:6px!important}
+.chat-dna-percent-label{display:none!important}
+.chat-dna-timer-time{font-size:20px!important}
+.chat-dna-timer-label{font-size:10px!important}
+.chat-msg .sender{font-size:12px!important}
+.sidebar-toggle{display:none!important}
+.tone-fab{display:flex}
 }
 @media(max-width:480px){
 .nav-logo{font-size:16px!important;letter-spacing:3px!important}
@@ -800,7 +816,21 @@ Msg 3: органично упомяни "ДНК начинает собират
 
 Каждое твоё сообщение заканчивается блоком \`\`\`json_dna. Без него ломается всё. traits[] накапливай из подтверждённых наблюдений. limiting_beliefs, blind_spots, contradictions — тоже накапливай. Юзер поправил интерпретацию — убери из traits. Юзер отрицает то что демонстрировал — черта в traits остаётся, заметка в blind_spots.
 
-=== END OF PROMPT ===`;
+=== ФИНАЛЬНОЕ ТРЕБОВАНИЕ ФОРМАТА ===
+
+Твой ответ ОБЯЗАТЕЛЬНО состоит из ДВУХ частей:
+
+ЧАСТЬ 1: текст сообщения юзеру (1-5 предложений по тону).
+
+ЧАСТЬ 2 (СРАЗУ ПОСЛЕ ТЕКСТА, НА НОВОЙ СТРОКЕ): блок в тройных кавычках с меткой json_dna.
+
+Пример полного ответа:
+Слышу — тебе важно творчество. А что именно в нём цепляет?
+\`\`\`json_dna
+{"dna_percent":3,"phase":"ЗАХВАТ","emotion":"opening_up","traits":["тянется к творчеству"],"clusters_hit":["intrinsic_drivers"],"limiting_beliefs":[],"blind_spots":[],"contradictions":[],"copilot_note":"открыт, не performs"}
+\`\`\`
+
+Если ты отправишь ответ БЕЗ json_dna блока — пользователь увидит ошибку и потеряет доверие к платформе. Это критичнее любого содержания ответа. ВСЕГДА заканчивай json_dna.`;
 }
 
 function parseDnaBlock(raw) {
@@ -841,7 +871,7 @@ async function callGPT(messages, onRetry) {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       console.log('[GPT] Attempt', attempt, 'of', maxAttempts);
-      const r = await fetch(EDGE_URL, {method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY}, body:JSON.stringify({messages, model:'gpt-5', temperature:0.75, max_tokens:2000})});
+      const r = await fetch(EDGE_URL, {method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY}, body:JSON.stringify({messages, model:'gpt-4o', temperature:0.75, max_tokens:2000})});
       console.log('[GPT] Response status:', r.status);
       if (!r.ok) { const t=await r.text(); console.error('[GPT] Error body:', t.slice(0,200)); throw new Error('HTTP '+r.status+': '+t.slice(0,200)); }
       const d = await r.json();
@@ -999,6 +1029,9 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
   const [isTyping, setIsTyping] = useState(false);
   const [tone, setTone] = useState('direct');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [fabSheetOpen, setFabSheetOpen] = useState(false);
+  const [fabPos, setFabPos] = useState(null);
+  const fabDragRef = useRef({startX:0,startY:0,offsetX:0,offsetY:0,dragging:false,downAt:0});
   const [dna, setDna] = useState(0);
   const [dialogueComplete, setDialogueComplete] = useState(false);
   const [butterfly, setButterfly] = useState(null);
@@ -1045,6 +1078,68 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
     r.maxAlternatives = 1;
     recognitionRef.current = r;
   },[]);
+
+  useEffect(()=>{
+    const FAB=56;
+    const w=window.innerWidth, h=window.innerHeight;
+    let initial=null;
+    try{
+      const stored=JSON.parse(localStorage.getItem('trajectoria_fab_pos_v1')||'null');
+      if(stored && typeof stored.x==='number' && typeof stored.y==='number'
+         && stored.x>=0 && stored.x<=w-FAB && stored.y>=0 && stored.y<=h-FAB){
+        initial=stored;
+      }
+    }catch(e){}
+    if(!initial) initial={x:Math.max(0,w-FAB-20), y:Math.max(0,h-FAB-100)};
+    setFabPos(initial);
+    function onResize(){
+      const W=window.innerWidth, H=window.innerHeight;
+      setFabPos(p=>{
+        if(!p) return p;
+        return {x:Math.max(0,Math.min(W-FAB,p.x)), y:Math.max(0,Math.min(H-FAB,p.y))};
+      });
+    }
+    window.addEventListener('resize',onResize);
+    window.addEventListener('orientationchange',onResize);
+    return ()=>{window.removeEventListener('resize',onResize);window.removeEventListener('orientationchange',onResize);};
+  },[]);
+
+  const onFabPointerDown=(e)=>{
+    const cur=fabPos||{x:0,y:0};
+    fabDragRef.current={
+      startX:e.clientX, startY:e.clientY,
+      offsetX:e.clientX-cur.x, offsetY:e.clientY-cur.y,
+      dragging:false, downAt:Date.now()
+    };
+    try{e.target.setPointerCapture(e.pointerId);}catch(err){}
+  };
+  const onFabPointerMove=(e)=>{
+    const d=fabDragRef.current;
+    if(!d.downAt) return;
+    if(!d.dragging){
+      const dx=Math.abs(e.clientX-d.startX), dy=Math.abs(e.clientY-d.startY);
+      if(dx>6||dy>6) d.dragging=true;
+    }
+    if(d.dragging){
+      const FAB=56, W=window.innerWidth, H=window.innerHeight;
+      const nx=Math.max(0,Math.min(W-FAB, e.clientX-d.offsetX));
+      const ny=Math.max(0,Math.min(H-FAB, e.clientY-d.offsetY));
+      setFabPos({x:nx,y:ny});
+    }
+  };
+  const onFabPointerUp=(e)=>{
+    const d=fabDragRef.current;
+    if(!d.downAt) return;
+    if(d.dragging){
+      setFabPos(p=>{
+        if(p) try{localStorage.setItem('trajectoria_fab_pos_v1',JSON.stringify(p));}catch(err){}
+        return p;
+      });
+    } else {
+      setFabSheetOpen(true);
+    }
+    fabDragRef.current={startX:0,startY:0,offsetX:0,offsetY:0,dragging:false,downAt:0};
+  };
 
   const toggleMic = useCallback(()=>{
     const r = recognitionRef.current;
@@ -1107,7 +1202,10 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
       console.log('GPT raw (last 500):', raw ? raw.slice(-500) : 'EMPTY');
       const dnaData=parseDnaBlock(raw);
       const clean=stripDnaBlock(raw);
-      const complete=raw.includes('[DIALOGUE_COMPLETE]');
+      const markerComplete=raw.includes('[DIALOGUE_COMPLETE]');
+      const phaseComplete=!!(dnaData && dnaData.phase==='ВЫХОД' && (dnaData.dna_percent??0)>=20);
+      const complete=markerComplete||phaseComplete;
+      console.log('[Complete] Detection: marker='+markerComplete+', phase+percent='+phaseComplete);
       if(dnaData){
         const newDna=Math.min(dnaData.dna_percent??dna,25);
         const delta=newDna-prevDnaRef.current;
@@ -1143,15 +1241,20 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
             bridge_timelines:dnaData.bridge_timelines||null,
             opinion:clean.slice(-300),
           };
-          // Fire-and-forget save dna_summary to Supabase
-          sbPostFaf('dna_summary',{
+          // Save dna_summary to Supabase (explicit fetch for exact status logging)
+          const dnaSummaryPayload={
             user_id:userId,session_id:sessionId,
             archetype:dnaData.archetype||'',archetype_desc:dnaData.archetype_desc||'',
             superpower:dnaData.superpower||'',fuel:dnaData.fuel||'',
             reframe_fear:dnaData.core_fear||'',growth_edge:dnaData.growth_edge||'',
             hidden_insights:Array.isArray(dnaData.hidden_insights)?dnaData.hidden_insights:[],
             copilot_note:dnaData.copilot_note||'',traits:traitsRef.current,
-            final_dna_percent:newDna,
+            limiting_beliefs:Array.isArray(dnaData.limiting_beliefs)?dnaData.limiting_beliefs:[],
+            blind_spots:Array.isArray(dnaData.blind_spots)?dnaData.blind_spots:[],
+            contradictions:Array.isArray(dnaData.contradictions)?dnaData.contradictions:[],
+            clusters_hit:Array.isArray(dnaData.clusters_hit)?dnaData.clusters_hit:[],
+            bridge_timelines:dnaData.bridge_timelines||null,
+            final_dna_percent:newDna,dna_percent_final:newDna,
             dialogue_duration_sec:Math.floor((Date.now()-startTime.current)/1000),
             total_messages:msgCountRef.current,tone_used:tone,
             readiness_score:dnaData.readiness_score||null,
@@ -1161,7 +1264,21 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
             store_headline:dnaData.store_headline||'',
             value_cards_hints:dnaData.value_cards_hints||[],
             suggested_feature:dnaData.suggested_feature||''
-          });
+          };
+          if(sbOk()){
+            fetch(SUPABASE_URL+'/rest/v1/dna_summary',{method:'POST',headers:{...SB_HEADERS,'Prefer':'return=minimal'},body:JSON.stringify(dnaSummaryPayload)})
+              .then(r=>{console.log('[Supabase] POST dna_summary status='+r.status);if(!r.ok)r.text().then(t=>console.error('[Supabase] dna_summary error body:',t));})
+              .catch(e=>console.error('[Supabase] POST dna_summary failed:',e));
+          } else {
+            console.warn('[Supabase] POST dna_summary skipped — anon key is placeholder');
+          }
+          // Auto-navigate to summary after the assistant message renders
+          setTimeout(()=>{
+            if(summaryDataRef.current){
+              localStorage.setItem('traj_summary',JSON.stringify(summaryDataRef.current));
+              onFinish(summaryDataRef.current);
+            }
+          },2000);
         }
         // Update session state in Supabase
         sbPatch('sessions','id',sessionId,{dna_percentage:dnaData.dna_percent||0,dialogue_phase:dnaData.phase||'',emotional_state:dnaData.emotion||''});
@@ -1244,18 +1361,18 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
           )
         ),
         React.createElement('div',{className:'chat-main',style:{flex:1,display:'flex',flexDirection:'column',minWidth:0}},
-          React.createElement('div',{style:{padding:'12px 24px',borderBottom:'1px solid var(--border)'}},
+          React.createElement('div',{className:'chat-dna-header',style:{padding:'12px 24px',borderBottom:'1px solid var(--border)'}},
             React.createElement('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}},
               React.createElement('div',{style:{position:'relative',flex:1,marginRight:16}},
                 React.createElement('div',{className:'dna-bar-wrap'},
                   React.createElement('div',{className:'dna-bar'+(butterfly?' glow':''),style:{width:dna+'%'}})
                 ),
-                React.createElement('div',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:13,letterSpacing:1,color:'var(--muted)',marginTop:4}},dna+'% DNA'),
+                React.createElement('div',{className:'chat-dna-percent-label',style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:13,letterSpacing:1,color:'var(--muted)',marginTop:4}},dna+'% DNA'),
                 butterfly && React.createElement('div',{className:'butterfly-text'},butterfly)
               ),
               React.createElement('div',{style:{textAlign:'right',flexShrink:0,marginTop:'-4px'}},
-                React.createElement('div',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:36}},String(mins).padStart(1,'0')+':'+String(secs).padStart(2,'0')),
-                React.createElement('div',{style:{fontSize:13,color:'var(--muted)'}},'из ~15 мин')
+                React.createElement('div',{className:'chat-dna-timer-time',style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:36}},String(mins).padStart(1,'0')+':'+String(secs).padStart(2,'0')),
+                React.createElement('div',{className:'chat-dna-timer-label',style:{fontSize:13,color:'var(--muted)'}},'из ~15 мин')
               )
             )
           ),
@@ -1295,13 +1412,85 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
           React.createElement('p',{style:{fontSize:14,color:'rgba(255,180,120,0.85)',lineHeight:1.4}},'Копилот борщит? Тема слишком личная? Или просто скучно? Кинь кубик — Копилот сам решит что делать.')
         )
       ),
-      React.createElement('button',{className:'sidebar-toggle',onClick:()=>setSidebarOpen(o=>!o)},TONES.find(t=>t.id===tone)?.icon||'\u26A1')
+      React.createElement('button',{className:'sidebar-toggle',onClick:()=>setSidebarOpen(o=>!o)},TONES.find(t=>t.id===tone)?.icon||'\u26A1'),
+      fabPos && React.createElement('button',{
+        className:'tone-fab',
+        style:{left:fabPos.x+'px',top:fabPos.y+'px',color:toneColors[tone],borderColor:toneColors[tone]},
+        onPointerDown:onFabPointerDown,
+        onPointerMove:onFabPointerMove,
+        onPointerUp:onFabPointerUp,
+        onPointerCancel:onFabPointerUp,
+        'aria-label':'Сменить тон'
+      }, TONES.find(t=>t.id===tone)?.icon || '\u26A1'),
+      fabSheetOpen && React.createElement('div',{className:'tone-fab-scrim',onClick:()=>setFabSheetOpen(false)}),
+      fabSheetOpen && React.createElement('div',{className:'tone-fab-sheet'},
+        React.createElement('div',{className:'tone-fab-handle'}),
+        React.createElement('p',{style:{fontFamily:"'Anton','Impact','Arial Black',sans-serif",fontSize:18,letterSpacing:2,textTransform:'uppercase',fontWeight:400,marginBottom:10,color:'#fff',textAlign:'center'}},'Настрой тон'),
+        TONES.map(t=>React.createElement('button',{
+          key:'fab'+t.id,
+          className:'tone-btn'+(tone===t.id?' active':''),
+          style:{color:t.color,background:tone===t.id?toneBgActive[t.id]:toneBg[t.id],borderColor:t.color,minHeight:64,display:'flex',flexDirection:'column',justifyContent:'center'},
+          onClick:()=>{setTone(t.id);setFabSheetOpen(false);}
+        },
+          React.createElement('div',{className:'tone-name'},t.icon,' ',React.createElement('span',{style:{background:toneGradients[t.id],backgroundClip:'text',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundSize:'200%',animation:'shimmer 3s linear infinite'}},t.name)),
+          React.createElement('div',{className:'tone-desc'},t.desc)
+        ))
+      )
     )
   );
 }
 
-function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName, userId}) {
-  const d = data || DEMO_SUMMARY;
+function mapDnaSummaryRow(row, userName){
+  if(!row) return null;
+  const traitsArr=Array.isArray(row.traits)?row.traits:[];
+  const insArr=Array.isArray(row.hidden_insights)?row.hidden_insights:[];
+  const finalDna=row.final_dna_percent??row.dna_percent_final??0;
+  return {
+    userName:userName||'',
+    dna:finalDna,
+    title:row.copilot_note||'Ты знаешь о себе больше, чем думаешь',
+    archetype:row.archetype||'',
+    archetype_desc:row.archetype_desc||'',
+    superpower:row.superpower||'',
+    fuel:row.fuel||'',
+    traits:traitsArr.map(function(t,i){return {name:['Мечта','Что цепляет','Ценности','Барьеры','Установка'][i]||'Черта',text:t,color:['#ff6b35','#f7c948','#5bbd72','#ff4081','#7c5cff'][i]||'#7c5cff',reason:''};}),
+    reframe:{fear:row.reframe_fear||row.core_fear||'',growth:row.growth_edge||''},
+    insights:insArr.map(function(h){return {quote:h.quote||'',context:h.said_when||'Из диалога',title:h.title||'',text:h.text||''};}),
+    readiness_score:row.readiness_score||0,
+    readiness_factors:Array.isArray(row.readiness_factors)?row.readiness_factors:[],
+    barriers_score:row.barriers_score??null,
+    agency_score:row.agency_score??null,
+    suggested_feature:row.suggested_feature||'',
+    store_headline:row.store_headline||'',
+    value_cards_hints:Array.isArray(row.value_cards_hints)?row.value_cards_hints:[],
+    bridge_timelines:row.bridge_timelines||null,
+    opinion:''
+  };
+}
+
+async function fetchDnaSummary(sessionId){
+  if(!sessionId||!sbOk()) return null;
+  try{
+    const r=await fetch(SUPABASE_URL+'/rest/v1/dna_summary?session_id=eq.'+encodeURIComponent(sessionId)+'&order=created_at.desc&limit=1',{headers:SB_HEADERS});
+    if(!r.ok){console.warn('[Supabase] GET dna_summary status='+r.status);return null;}
+    const rows=await r.json();
+    return (rows&&rows.length)?rows[0]:null;
+  }catch(e){console.error('[Supabase] GET dna_summary failed:',e);return null;}
+}
+
+function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName, userId, sessionId}) {
+  const [loadedData, setLoadedData] = useState(null);
+  useEffect(()=>{
+    if(!sessionId) return;
+    fetchDnaSummary(sessionId).then(row=>{
+      if(row){
+        const mapped=mapDnaSummaryRow(row, data&&data.userName);
+        setLoadedData(mapped);
+        console.log('[Summary] Loaded from Supabase: archetype='+row.archetype);
+      }
+    });
+  },[sessionId]);
+  const d = loadedData || data || DEMO_SUMMARY;
   const abstractImages = ['assets/дверь_разлом_цветы.png','assets/парень_комп_разлом.png','assets/дверь_размлом.png','assets/дыра_разломы.png','assets/вода_разломы.png'];
   const randomImgRef = useRef(abstractImages[Math.floor(Math.random()*abstractImages.length)]);
   if (d) d.dnaBgImage = CRACK_TO_CLEAN[randomImgRef.current] || 'assets/вода.jpeg';
@@ -1570,8 +1759,19 @@ function BridgePage({data, onBack, goHome, copilotName, userId}) {
   );
 }
 
-function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome, copilotName}) {
-  const d = data || DEMO_SUMMARY;
+function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome, copilotName, sessionId}) {
+  const [loadedData, setLoadedData] = useState(null);
+  useEffect(()=>{
+    if(!sessionId) return;
+    fetchDnaSummary(sessionId).then(row=>{
+      if(row){
+        const mapped=mapDnaSummaryRow(row, data&&data.userName);
+        setLoadedData(mapped);
+        console.log('[DNA Page] Loaded from Supabase: archetype='+row.archetype);
+      }
+    });
+  },[sessionId]);
+  const d = loadedData || data || DEMO_SUMMARY;
   const userName = d.userName || 'Имя';
   const nameHalf = Math.ceil(userName.length / 2);
   const namePart1 = userName.slice(0, nameHalf);
@@ -2194,6 +2394,7 @@ function App() {
       data: summaryData,
       copilotName: userData.copilotName,
       userId: userData.userId,
+      sessionId: userData.sessionId,
       onBridge: () => setPage('bridge'),
       onDna: () => setPage('dna'),
       onStore: () => setPage('store'),
@@ -2203,6 +2404,7 @@ function App() {
     page === 'dna' ? React.createElement(DnaPage, {
       data: summaryData,
       fullAccess: fullAccess,
+      sessionId: userData.sessionId,
       onBack: () => setPage('summary'),
       onStore: () => setPage('store'),
       onBridge: () => setPage('bridge'),
