@@ -311,7 +311,7 @@ html{overflow-x:hidden!important}
 @media(max-width:639px){
 .chat-dna-header{padding:6px 14px!important}
 .dna-bar-wrap{height:10px!important}
-.chat-dna-percent-label{display:none!important}
+.chat-dna-percent-label{font-size:11px!important;margin-top:2px!important}
 .chat-dna-timer-time{font-size:20px!important}
 .chat-dna-timer-label{font-size:10px!important}
 .chat-msg .sender{font-size:12px!important}
@@ -655,16 +655,22 @@ copilot_note заземляй:
 Не делаешь: давление, срочность, "надо", терапевтический тон.
 
 Если tone = "дерзко":
-РЕЖИМ ДЕРЗКО. Уверенный друг который палит твои отмазки и requires настоящего ответа. 1-3 предложения, максимально коротко. Делаешь смелые догадки (юзер может опровергнуть). Ловишь когда юзер performs и просишь настоящий ответ. Ирония (не сарказм), которая заставляет думать. Разрешены: чёрт, блин, хрень. Запрещены: оскорбления, мат, личные нападки, попытки переубедить.
+РЕЖИМ ДЕРЗКО. Уличный друг который видит насквозь и не даёт юлить. МАКСИМУМ 1-2 предложения, часто одно слово или короткий тычок. Никаких смягчений, никаких вступлений. Рубишь правду в лоб — но без морали. Делаешь СМЕЛЫЕ догадки которые могут зацепить (юзер может опровергнуть, ок). Ловишь когда юзер performs, выдаёт книжное, прячется за общими словами — и сразу режешь. Ирония, лёгкое подкалывание, иногда сухое "и?". Разрешены: чёрт, блин, хрень, фигня, лажа, бред. Запрещены: оскорбления, мат, личные нападки, попытки переубедить, "правильные" советы.
 Примеры:
-— "Звучит книжно. А от тебя?"
-— "Спорю, ты про это думал в последний месяц. Прав?"
-— "Эм. Ок. И?"
-— "Две противоположные штуки подряд. Обе настоящие или какая-то не твоя?"
+— "Скучно. Дальше."
+— "И?"
+— "Это не ответ, это пресс-релиз."
+— "Спорю, ты это придумал три секунды назад."
+— "Стоп. Это твоё или мамино?"
+— "Звучит как с собеседования. На вопрос ответь."
+— "Хрень. Попробуй ещё."
+— "Что прячешь за этой фразой?"
+— "Серьёзно? Это весь твой ответ?"
+— "Ты сейчас performs. Я вижу. Скажи как есть."
+— "Две противоположные штуки подряд. Какая настоящая?"
 — "Ты знаешь ответ. Скажи."
-— "Это ответ на вопрос или защита?"
-Суть дерзко: провокация к настоящему ответу, не к смене убеждения. Ты не убеждаешь юзера что он не прав про себя — ты отказываешься принимать фальшь.
-ВАЖНО: в дерзко НЕЛЬЗЯ делать reframe ("на самом деле ты способен"), разрушать убеждения фактами, читать мораль. Дерзко = стиль сбора, не трансформация.
+Суть дерзко: провокация к настоящему ответу, не к смене убеждения. Ты не убеждаешь юзера что он не прав про себя — ты отказываешься принимать фальшь и заставляешь его докопаться до своего. Чем меньше слов — тем сильнее удар.
+ВАЖНО: в дерзко НЕЛЬЗЯ делать reframe ("на самом деле ты способен"), разрушать убеждения фактами, читать мораль. Дерзко = стиль сбора через провокацию, не трансформация.
 
 Если tone = "чилл":
 РЕЖИМ ЧИЛЛ. Минимум давления, дзен. СТРОГО 1-3 предложения. Разговорно, без структуры "вопрос-ответ".
@@ -1075,11 +1081,12 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
     if (!SR) { console.log('No SpeechRecognition'); return; }
     const r = new SR();
     r.lang = 'ru-RU';
-    r.continuous = false;
+    r.continuous = true;
     r.interimResults = false;
     r.maxAlternatives = 1;
     recognitionRef.current = r;
   },[]);
+  const userStoppedMicRef = useRef(false);
 
   useEffect(()=>{
     const FAB=56;
@@ -1160,22 +1167,41 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
     const r = recognitionRef.current;
     if (!r) { alert('Голосовой ввод не поддерживается в этом браузере'); return; }
     if (recording) {
-      try { r.abort(); } catch(e) {}
+      userStoppedMicRef.current = true;
+      try { r.stop(); } catch(e) {}
       setRecording(false);
       return;
     }
+    let processedCount = 0;
     r.onresult = function(event) {
-      const text = event.results[0][0].transcript;
-      setInput(function(prev) { return prev + text; });
-      setRecording(false);
+      let chunk = '';
+      for (let i = processedCount; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          chunk += event.results[i][0].transcript;
+        }
+      }
+      processedCount = event.results.length;
+      if (chunk) setInput(function(prev) { return prev + chunk; });
     };
     r.onerror = function(event) {
       console.log('Speech error:', event.error);
+      if (event.error === 'no-speech' || event.error === 'aborted') return;
+      userStoppedMicRef.current = true;
       setRecording(false);
     };
     r.onend = function() {
-      setRecording(false);
+      if (userStoppedMicRef.current) {
+        userStoppedMicRef.current = false;
+        setRecording(false);
+        return;
+      }
+      try { r.start(); } catch(e) {
+        console.log('Mic auto-restart failed:', e);
+        setRecording(false);
+      }
     };
+    userStoppedMicRef.current = false;
+    processedCount = 0;
     try { r.abort(); } catch(e) {}
     setTimeout(function() {
       try {
