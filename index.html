@@ -130,7 +130,7 @@ h1.hero{font-family:'Anton','Impact',sans-serif!important;font-weight:400!import
 .sidebar-overlay{position:fixed;left:0;top:0;bottom:0;width:260px;background:rgba(15,15,25,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:100;padding:20px 16px;overflow-y:auto;animation:slideIn .2s ease-out;border-right:1px solid var(--border)}
 .sidebar-close{position:absolute;top:12px;right:12px;background:transparent;border:none;color:rgba(255,255,255,0.6);font-size:20px;cursor:pointer;padding:4px}
 .sidebar-close:hover{color:#fff}
-.tone-fab{display:none;position:fixed;width:56px;height:56px;border-radius:50%;background:rgba(15,15,25,0.85);border:2px solid rgba(255,255,255,0.25);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font-size:24px;cursor:grab;z-index:60;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,0.45);touch-action:none;user-select:none;-webkit-user-select:none;padding:0;line-height:1}
+.tone-fab{display:none;position:fixed;width:56px;height:56px;border-radius:50%;background:rgba(15,15,25,0.85);border:2px solid rgba(255,255,255,0.25);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font-size:24px;cursor:grab;z-index:60;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,0.45);touch-action:manipulation;user-select:none;-webkit-user-select:none;padding:0;line-height:1}
 .tone-fab:active{cursor:grabbing}
 .tone-fab-scrim{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99}
 .tone-fab-sheet{position:fixed;left:0;right:0;bottom:0;background:rgba(15,15,25,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);border-radius:20px 20px 0 0;padding:14px 16px calc(20px + env(safe-area-inset-bottom)) 16px;z-index:100;animation:fabSheetUp .25s ease-out;max-height:80vh;overflow-y:auto}
@@ -1033,6 +1033,7 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
   const [fabSheetOpen, setFabSheetOpen] = useState(false);
   const [fabPos, setFabPos] = useState(null);
   const fabDragRef = useRef({startX:0,startY:0,offsetX:0,offsetY:0,dragging:false,downAt:0});
+  const fabSuppressClickRef = useRef(false);
   const [dna, setDna] = useState(0);
   const [dialogueComplete, setDialogueComplete] = useState(false);
   const [butterfly, setButterfly] = useState(null);
@@ -1106,7 +1107,6 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
   },[]);
 
   const onFabTouchStart=(e)=>{
-    e.preventDefault();
     const t=e.touches[0]; if(!t) return;
     const cur=fabPos||{x:0,y:0};
     fabDragRef.current={
@@ -1114,6 +1114,7 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
       offsetX:t.clientX-cur.x, offsetY:t.clientY-cur.y,
       dragging:false, downAt:Date.now()
     };
+    fabSuppressClickRef.current=false;
     console.log('[FAB] down:', t.clientX, t.clientY, 'time:', Date.now());
   };
   const onFabTouchMove=(e)=>{
@@ -1138,11 +1139,10 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
     const t=e.changedTouches[0]||{clientX:d.startX,clientY:d.startY};
     const dist=Math.max(Math.abs(t.clientX-d.startX), Math.abs(t.clientY-d.startY));
     const elapsed=Date.now()-d.downAt;
-    const isTap=!d.dragging;
-    console.log('[FAB] up:', t.clientX, t.clientY, 'distance:', dist, 'time elapsed:', elapsed, 'treated as:', isTap?'TAP':'DRAG');
-    if(isTap){
-      setFabSheetOpen(true);
-    } else {
+    console.log('[FAB] up:', t.clientX, t.clientY, 'distance:', dist, 'time elapsed:', elapsed, 'treated as:', d.dragging?'DRAG':'TAP (will fire via click)');
+    if(d.dragging){
+      fabSuppressClickRef.current=true;
+      setTimeout(function(){fabSuppressClickRef.current=false;},500);
       setFabPos(p=>{
         if(p) try{localStorage.setItem('trajectoria_fab_pos_v1',JSON.stringify(p));}catch(err){}
         return p;
@@ -1151,7 +1151,8 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
     fabDragRef.current={startX:0,startY:0,offsetX:0,offsetY:0,dragging:false,downAt:0};
   };
   const onFabClick=()=>{
-    console.log('[FAB] click (desktop fallback)');
+    if(fabSuppressClickRef.current){console.log('[FAB] click suppressed (just dragged)');return;}
+    console.log('[FAB] click → opening sheet');
     setFabSheetOpen(true);
   };
 
