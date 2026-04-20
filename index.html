@@ -310,13 +310,14 @@ html{overflow-x:hidden!important}
 }
 @media(max-width:639px){
 .chat-dna-header{padding:6px 14px!important}
-.dna-bar-wrap{height:6px!important}
+.dna-bar-wrap{height:10px!important}
 .chat-dna-percent-label{display:none!important}
 .chat-dna-timer-time{font-size:20px!important}
 .chat-dna-timer-label{font-size:10px!important}
 .chat-msg .sender{font-size:12px!important}
 .sidebar-toggle{display:none!important}
 .tone-fab{display:flex}
+.chat-main>div:nth-child(2){padding-bottom:calc(120px + env(safe-area-inset-bottom))!important}
 }
 @media(max-width:480px){
 .nav-logo{font-size:16px!important;letter-spacing:3px!important}
@@ -328,7 +329,7 @@ html{overflow-x:hidden!important}
 .summary-name-overlay{padding:12px!important}
 .resp-pad{padding-left:10px!important;padding-right:10px!important;padding-bottom:32px!important}
 .chat-msg{max-width:95%!important;font-size:15px!important;padding:12px 16px!important}
-.chat-main>div:nth-child(2){padding:12px!important}
+.chat-main>div:nth-child(2){padding:12px 12px calc(120px + env(safe-area-inset-bottom)) 12px!important}
 .chat-main>div:last-child{padding:8px 12px!important;gap:6px!important}
 .marquee-inner{font-size:16px!important}
 .marquee-inner span{margin-right:40px!important}
@@ -1032,6 +1033,7 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
   const [fabSheetOpen, setFabSheetOpen] = useState(false);
   const [fabPos, setFabPos] = useState(null);
   const fabDragRef = useRef({startX:0,startY:0,offsetX:0,offsetY:0,dragging:false,downAt:0});
+  const fabSuppressClickRef = useRef(false);
   const [dna, setDna] = useState(0);
   const [dialogueComplete, setDialogueComplete] = useState(false);
   const [butterfly, setButterfly] = useState(null);
@@ -1111,6 +1113,7 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
       offsetX:e.clientX-cur.x, offsetY:e.clientY-cur.y,
       dragging:false, downAt:Date.now()
     };
+    console.log('[FAB] down:', e.clientX, e.clientY, 'time:', Date.now());
     try{e.target.setPointerCapture(e.pointerId);}catch(err){}
   };
   const onFabPointerMove=(e)=>{
@@ -1118,7 +1121,7 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
     if(!d.downAt) return;
     if(!d.dragging){
       const dx=Math.abs(e.clientX-d.startX), dy=Math.abs(e.clientY-d.startY);
-      if(dx>6||dy>6) d.dragging=true;
+      if(dx>10||dy>10) d.dragging=true;
     }
     if(d.dragging){
       const FAB=56, W=window.innerWidth, H=window.innerHeight;
@@ -1130,15 +1133,26 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
   const onFabPointerUp=(e)=>{
     const d=fabDragRef.current;
     if(!d.downAt) return;
-    if(d.dragging){
+    const dist=Math.max(Math.abs(e.clientX-d.startX), Math.abs(e.clientY-d.startY));
+    const elapsed=Date.now()-d.downAt;
+    const isTap = dist<10 || (elapsed<300 && dist<30);
+    console.log('[FAB] up:', e.clientX, e.clientY, 'distance:', dist, 'time elapsed:', elapsed, 'treated as:', isTap?'TAP':'DRAG');
+    if(isTap){
+      setFabSheetOpen(true);
+      fabSuppressClickRef.current=true;
+      setTimeout(()=>{fabSuppressClickRef.current=false;},400);
+    } else {
       setFabPos(p=>{
         if(p) try{localStorage.setItem('trajectoria_fab_pos_v1',JSON.stringify(p));}catch(err){}
         return p;
       });
-    } else {
-      setFabSheetOpen(true);
     }
     fabDragRef.current={startX:0,startY:0,offsetX:0,offsetY:0,dragging:false,downAt:0};
+  };
+  const onFabClick=(e)=>{
+    if(fabSuppressClickRef.current){fabSuppressClickRef.current=false;return;}
+    console.log('[FAB] click fallback fired (pointerup did not handle)');
+    setFabSheetOpen(true);
   };
 
   const toggleMic = useCallback(()=>{
@@ -1420,6 +1434,7 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
         onPointerMove:onFabPointerMove,
         onPointerUp:onFabPointerUp,
         onPointerCancel:onFabPointerUp,
+        onClick:onFabClick,
         'aria-label':'Сменить тон'
       }, TONES.find(t=>t.id===tone)?.icon || '\u26A1'),
       fabSheetOpen && React.createElement('div',{className:'tone-fab-scrim',onClick:()=>setFabSheetOpen(false)}),
