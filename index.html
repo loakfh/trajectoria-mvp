@@ -1033,7 +1033,6 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
   const [fabSheetOpen, setFabSheetOpen] = useState(false);
   const [fabPos, setFabPos] = useState(null);
   const fabDragRef = useRef({startX:0,startY:0,offsetX:0,offsetY:0,dragging:false,downAt:0});
-  const fabSuppressClickRef = useRef(false);
   const [dna, setDna] = useState(0);
   const [dialogueComplete, setDialogueComplete] = useState(false);
   const [butterfly, setButterfly] = useState(null);
@@ -1106,41 +1105,43 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
     return ()=>{window.removeEventListener('resize',onResize);window.removeEventListener('orientationchange',onResize);};
   },[]);
 
-  const onFabPointerDown=(e)=>{
+  const onFabTouchStart=(e)=>{
+    e.preventDefault();
+    const t=e.touches[0]; if(!t) return;
     const cur=fabPos||{x:0,y:0};
     fabDragRef.current={
-      startX:e.clientX, startY:e.clientY,
-      offsetX:e.clientX-cur.x, offsetY:e.clientY-cur.y,
+      startX:t.clientX, startY:t.clientY,
+      offsetX:t.clientX-cur.x, offsetY:t.clientY-cur.y,
       dragging:false, downAt:Date.now()
     };
-    console.log('[FAB] down:', e.clientX, e.clientY, 'time:', Date.now());
-    try{e.target.setPointerCapture(e.pointerId);}catch(err){}
+    console.log('[FAB] down:', t.clientX, t.clientY, 'time:', Date.now());
   };
-  const onFabPointerMove=(e)=>{
+  const onFabTouchMove=(e)=>{
     const d=fabDragRef.current;
     if(!d.downAt) return;
+    const t=e.touches[0]; if(!t) return;
     if(!d.dragging){
-      const dx=Math.abs(e.clientX-d.startX), dy=Math.abs(e.clientY-d.startY);
+      const dx=Math.abs(t.clientX-d.startX), dy=Math.abs(t.clientY-d.startY);
       if(dx>10||dy>10) d.dragging=true;
     }
     if(d.dragging){
+      e.preventDefault();
       const FAB=56, W=window.innerWidth, H=window.innerHeight;
-      const nx=Math.max(0,Math.min(W-FAB, e.clientX-d.offsetX));
-      const ny=Math.max(0,Math.min(H-FAB, e.clientY-d.offsetY));
+      const nx=Math.max(0,Math.min(W-FAB, t.clientX-d.offsetX));
+      const ny=Math.max(0,Math.min(H-FAB, t.clientY-d.offsetY));
       setFabPos({x:nx,y:ny});
     }
   };
-  const onFabPointerUp=(e)=>{
+  const onFabTouchEnd=(e)=>{
     const d=fabDragRef.current;
     if(!d.downAt) return;
-    const dist=Math.max(Math.abs(e.clientX-d.startX), Math.abs(e.clientY-d.startY));
+    const t=e.changedTouches[0]||{clientX:d.startX,clientY:d.startY};
+    const dist=Math.max(Math.abs(t.clientX-d.startX), Math.abs(t.clientY-d.startY));
     const elapsed=Date.now()-d.downAt;
-    const isTap = dist<10 || (elapsed<300 && dist<30);
-    console.log('[FAB] up:', e.clientX, e.clientY, 'distance:', dist, 'time elapsed:', elapsed, 'treated as:', isTap?'TAP':'DRAG');
+    const isTap=!d.dragging;
+    console.log('[FAB] up:', t.clientX, t.clientY, 'distance:', dist, 'time elapsed:', elapsed, 'treated as:', isTap?'TAP':'DRAG');
     if(isTap){
       setFabSheetOpen(true);
-      fabSuppressClickRef.current=true;
-      setTimeout(()=>{fabSuppressClickRef.current=false;},400);
     } else {
       setFabPos(p=>{
         if(p) try{localStorage.setItem('trajectoria_fab_pos_v1',JSON.stringify(p));}catch(err){}
@@ -1149,9 +1150,8 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
     }
     fabDragRef.current={startX:0,startY:0,offsetX:0,offsetY:0,dragging:false,downAt:0};
   };
-  const onFabClick=(e)=>{
-    if(fabSuppressClickRef.current){fabSuppressClickRef.current=false;return;}
-    console.log('[FAB] click fallback fired (pointerup did not handle)');
+  const onFabClick=()=>{
+    console.log('[FAB] click (desktop fallback)');
     setFabSheetOpen(true);
   };
 
@@ -1430,10 +1430,10 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
       fabPos && React.createElement('button',{
         className:'tone-fab',
         style:{left:fabPos.x+'px',top:fabPos.y+'px',color:toneColors[tone],borderColor:toneColors[tone]},
-        onPointerDown:onFabPointerDown,
-        onPointerMove:onFabPointerMove,
-        onPointerUp:onFabPointerUp,
-        onPointerCancel:onFabPointerUp,
+        onTouchStart:onFabTouchStart,
+        onTouchMove:onFabTouchMove,
+        onTouchEnd:onFabTouchEnd,
+        onTouchCancel:onFabTouchEnd,
         onClick:onFabClick,
         'aria-label':'Сменить тон'
       }, TONES.find(t=>t.id===tone)?.icon || '\u26A1'),
@@ -1449,7 +1449,13 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
         },
           React.createElement('div',{className:'tone-name'},t.icon,' ',React.createElement('span',{style:{background:toneGradients[t.id],backgroundClip:'text',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundSize:'200%',animation:'shimmer 3s linear infinite'}},t.name)),
           React.createElement('div',{className:'tone-desc'},t.desc)
-        ))
+        )),
+        React.createElement('div',{style:{height:1,background:'rgba(255,255,255,0.1)',margin:'14px 0'}}),
+        React.createElement('div',{className:'nafig-card',style:{position:'relative',background:'rgba(255,100,100,0.08)',border:'1px solid rgba(255,100,100,0.15)',borderRadius:10,padding:14,overflow:'visible'}},
+          React.createElement('div',{style:{fontSize:22,marginBottom:4}},'🎲'),
+          React.createElement('p',{style:{marginBottom:4}},React.createElement('span',{style:{fontFamily:"'Anton','Impact',sans-serif",fontSize:15,color:'rgba(255,150,100,0.9)'}},'НАФИГ')),
+          React.createElement('p',{style:{fontSize:13,color:'rgba(255,180,120,0.85)',lineHeight:1.4}},'Копилот борщит? Тема слишком личная? Или просто скучно? Кинь кубик — Копилот сам решит что делать.')
+        )
       )
     )
   );
