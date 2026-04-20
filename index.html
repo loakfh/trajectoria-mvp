@@ -1283,12 +1283,14 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
             bridge_timelines:dnaData.bridge_timelines||null,
             opinion:clean.slice(-300),
           };
-          // Save dna_summary to Supabase (explicit fetch for exact status logging)
+          // Save dna_summary to Supabase — all 28 required columns, explicit fetch w/ rich logging
           const dnaSummaryPayload={
             user_id:userId,session_id:sessionId,
             archetype:dnaData.archetype||'',archetype_desc:dnaData.archetype_desc||'',
             superpower:dnaData.superpower||'',fuel:dnaData.fuel||'',
-            reframe_fear:dnaData.core_fear||'',growth_edge:dnaData.growth_edge||'',
+            reframe_fear:dnaData.core_fear||'',
+            core_fear:dnaData.core_fear||'',
+            growth_edge:dnaData.growth_edge||'',
             hidden_insights:Array.isArray(dnaData.hidden_insights)?dnaData.hidden_insights:[],
             copilot_note:dnaData.copilot_note||'',traits:traitsRef.current,
             limiting_beliefs:Array.isArray(dnaData.limiting_beliefs)?dnaData.limiting_beliefs:[],
@@ -1296,23 +1298,35 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
             contradictions:Array.isArray(dnaData.contradictions)?dnaData.contradictions:[],
             clusters_hit:Array.isArray(dnaData.clusters_hit)?dnaData.clusters_hit:[],
             bridge_timelines:dnaData.bridge_timelines||null,
-            final_dna_percent:newDna,dna_percent_final:newDna,
+            final_dna_percent:newDna,
             dialogue_duration_sec:Math.floor((Date.now()-startTime.current)/1000),
             total_messages:msgCountRef.current,tone_used:tone,
             readiness_score:dnaData.readiness_score||null,
-            readiness_factors:dnaData.readiness_factors||[],
+            readiness_factors:Array.isArray(dnaData.readiness_factors)?dnaData.readiness_factors:[],
             barriers_score:dnaData.barriers_score??null,
             agency_score:dnaData.agency_score??null,
             store_headline:dnaData.store_headline||'',
-            value_cards_hints:dnaData.value_cards_hints||[],
+            value_cards_hints:Array.isArray(dnaData.value_cards_hints)?dnaData.value_cards_hints:[],
             suggested_feature:dnaData.suggested_feature||''
           };
+          console.log('[DNA_SUMMARY] Payload keys:', Object.keys(dnaSummaryPayload).sort().join(','));
+          console.log('[DNA_SUMMARY] Payload preview:', JSON.stringify(dnaSummaryPayload).slice(0,600));
           if(sbOk()){
-            fetch(SUPABASE_URL+'/rest/v1/dna_summary',{method:'POST',headers:{...SB_HEADERS,'Prefer':'return=minimal'},body:JSON.stringify(dnaSummaryPayload)})
-              .then(r=>{console.log('[Supabase] POST dna_summary status='+r.status);if(!r.ok)r.text().then(t=>console.error('[Supabase] dna_summary error body:',t));})
-              .catch(e=>console.error('[Supabase] POST dna_summary failed:',e));
+            fetch(SUPABASE_URL+'/rest/v1/dna_summary',{method:'POST',headers:{...SB_HEADERS,'Prefer':'return=representation'},body:JSON.stringify(dnaSummaryPayload)})
+              .then(async r=>{
+                const bodyText=await r.text();
+                console.log('[DNA_SUMMARY] POST status='+r.status);
+                if(r.status===201){
+                  let newId=null;
+                  try{const rows=JSON.parse(bodyText);newId=rows&&rows[0]&&rows[0].id;}catch(e){}
+                  console.log('[DNA_SUMMARY] SAVE OK id='+(newId||'(id not returned)'));
+                } else {
+                  console.error('[DNA_SUMMARY] SAVE FAILED status='+r.status+' body='+bodyText);
+                }
+              })
+              .catch(e=>console.error('[DNA_SUMMARY] SAVE FAILED network error:',e));
           } else {
-            console.warn('[Supabase] POST dna_summary skipped — anon key is placeholder');
+            console.warn('[DNA_SUMMARY] skipped — anon key is placeholder');
           }
           // Auto-navigate to summary after the assistant message renders
           setTimeout(()=>{
