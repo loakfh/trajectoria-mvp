@@ -1100,6 +1100,8 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
       const elapsedMin=Math.floor((Date.now()-startTime.current)/60000);
       if(isStopRequest)apiMessages.push({role:'system',content:'[USER_WANTS_TO_STOP] Юзер хочет завершить диалог. Заверши НЕМЕДЛЕННО: выдай портрет + DNA% + [DIALOGUE_COMPLETE] со всеми расширенными полями json_dna.'});
       if(elapsedMin>=15)apiMessages.push({role:'system',content:'[ВРЕМЯ: '+elapsedMin+' мин] '+(elapsedMin>=20?'НЕМЕДЛЕННО ЗАВЕРШИ БЕЗ ВОПРОСОВ. Портрет + DNA% + [DIALOGUE_COMPLETE].':elapsedMin>=18?'Заверши ОБЯЗАТЕЛЬНО в этом сообщении. Портрет + DNA% + [DIALOGUE_COMPLETE].':'Начни подводить к завершению. Последний вопрос...')});
+      console.log('[GPT] tone=', tone, '| toneName passed to prompt=', typeof buildSystemPrompt === 'function' ? 'see system prompt preview below' : 'N/A');
+      console.log('[GPT] System prompt BLOCK 9 snippet:', sys.content.substring(sys.content.indexOf('BLOCK 9'), sys.content.indexOf('BLOCK 9') + 200));
       const raw=await callGPT(apiMessages, ()=>setRetryMsg('Копилот думает дольше обычного...'));
       setRetryMsg(null);
       console.log('GPT raw (last 500):', raw ? raw.slice(-500) : 'EMPTY');
