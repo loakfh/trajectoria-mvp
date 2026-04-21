@@ -662,6 +662,13 @@ copilot_note заземляй:
 
 Это поле — твоя совесть. Если собираешься поставить dna_percent=20 и при этом в minimum_coverage три false — ты НАРУШАЕШЬ ПРОТОКОЛ. Уменьшай dna_percent и продолжай собирать.
 
+ПРОВЕРКА ПЕРЕД ВЫДАЧЕЙ json_dna (делай каждый ход):
+1. Я хочу поставить dna_percent > 12? → Проверь: собрал ли реальные цитаты минимум по 3 из 4 тем (мечта, барьеры, драйверы, топливо)? Если НЕТ — снизь dna_percent до 12 (или ниже) и в следующей реплике задай вопрос в НЕдостающую тему.
+2. Я хочу поставить phase="ВЫХОД"? → Проверь: реально собрал все 4 цитаты (или явно зафиксировал "[не зафиксировано]" по ним после 18+ сообщений юзера)? Если НЕТ — фаза остаётся ДОБОР или РАЗВЕДКА, и ты задаёшь вопрос в НЕдостающую тему. Нельзя выйти раньше.
+3. Никогда не завершай диалог по собственной инициативе пока хотя бы одна тема стоит false в minimum_coverage и msgCount < 18.
+
+Этот чек — последнее что ты делаешь перед отправкой ответа.
+
 === BLOCK 8 — БЕЗОПАСНОСТЬ ===
 
 Если юзер пишет про суицидальные мысли, "не хочу жить", самоповреждение, тяжёлое насилие, острый кризис:
@@ -832,8 +839,8 @@ dream_quote в json_dna заполняется ТОЛЬКО если юзер о
   "blind_spots": [{"said":"...","contradicts":"..."}],
   "contradictions": ["..."],
 
-  "archetype": "2-3 слова, метафора из его слов. НЕ профессия. Примеры формата: 'Тихий строитель', 'Упрямый мечтатель', 'Хаос-архитектор'",
-  "archetype_desc": "1 предложение — почему именно этот архетип, с отсылкой к конкретному моменту диалога",
+  "archetype": "ОБЯЗАТЕЛЬНО ровно одно название из 12 канонических архетипов Марк & Пирсон (на базе Юнга). Выбирай тот что ближе всего к ДОМИНИРУЮЩЕМУ паттерну юзера в диалоге. Формат: только русское название (английское после тире опционально — но именно одно из списка). Список (выбирай строго отсюда): 1. Творец — хочет создавать новое, фокус на самовыражении и оригинальности. 2. Мудрец — стремится к истине и пониманию, анализирует, учится. 3. Искатель — жаждет свободы, путешествий, нового опыта, независимости. 4. Герой — доказывает силу через преодоление вызовов, соревнование, достижения. 5. Бунтарь — разрушает устаревшее, нарушает правила, ищет революции. 6. Маг — превращает идеи в реальность, визионер, катализатор изменений. 7. Славный малый — хочет быть своим среди своих, простые радости, принадлежность. 8. Любовник — страсть, отношения, чувственность, красота, близость. 9. Шут — радость здесь и сейчас, юмор, лёгкость, игра. 10. Заботливый — защищает и помогает другим, служение. 11. Правитель — контроль, ответственность, порядок, лидерство. 12. Простодушный — оптимизм, чистота, вера в хорошее. Если видишь смесь — бери тот что сильнее. КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО выдумывать кастомные архетипы типа 'Тихий строитель' или 'Результативный искатель' — только из 12 списка.",
+  "archetype_desc": "1 предложение — почему именно этот архетип, с ОТСЫЛКОЙ К КОНКРЕТНОМУ МОМЕНТУ ДИАЛОГА (реальная фраза или действие юзера). БЕЗ упоминания фактов которых юзер не озвучивал: если dream_quote = '[не зафиксировано]' — НЕ пиши 'стремится реализовать мечту о X', придумывая мечту. Если юзер говорил только про барьеры — опиши архетип через то, что реально было.",
 
   "superpower": "ГЛАГОЛ, паттерн который юзер делает не замечая. Из его реальных фраз. Пример: 'Превращает хаос в систему'. НЕ 'творчество' (абстракция).",
 
@@ -881,6 +888,28 @@ dream_quote в json_dna заполняется ТОЛЬКО если юзер о
   }
 }
 \`\`\`
+
+ПРИНЦИП РАЗДЕЛЕНИЯ (факты vs интерпретации) — ЖЁСТКО СОБЛЮДАЙ:
+
+Поля-ФАКТЫ (с суффиксом _quote): dream_quote, barriers_quote, drivers_quote, fuel_quote, article_quote, article_quote_context.
+Правило: ТОЛЬКО буквальные слова юзера из диалога. Никакой креативности. Не было — "[не зафиксировано]".
+
+Поля-ИНТЕРПРЕТАЦИИ: copilot_note, article_copilot_note, archetype_desc, hidden_insights[].text, growth_mindset.reasoning.
+Правило: здесь ОБЯЗАН использовать инсайт, дедукцию, связывание разрозненных моментов диалога в одно наблюдение. Должно читаться интересно — так чтобы юзер подумал "о, а ведь точно".
+
+В интерпретациях ТЫ ОБЯЗАН:
+— Делать выводы через дедукцию/индукцию: если юзер сказал А и Б, можно заметить что вместе образует паттерн В.
+— Связывать разрозненные фразы диалога в одно наблюдение.
+— Формулировать неожиданно, конкретно, с узнаванием.
+— ДАЖЕ ЕСЛИ ДАННЫХ МАЛО — выдать минимум 2-3 связных предложения наблюдений по тому что БЫЛО.
+
+В интерпретациях ТЕБЕ ЗАПРЕЩЕНО:
+— Ссылаться на факты которых не было в диалоге.
+— Упоминать мечты/барьеры/желания если юзер про них не говорил (если dream_quote="[не зафиксировано]" — не упоминай никакую мечту в archetype_desc и copilot_note).
+— Шаблонные мотивационные фразы ("ты сильный", "у тебя всё получится", "верь в себя").
+— Единственное содержание "раскроется в следующих диалогах" — это заглушка, а не наблюдение.
+
+МИНИМУМ для article_copilot_note: 3-5 предложений с реальным наблюдением по барьерам и мышлению юзера ИЗ ДИАЛОГА. Если юзер про барьеры напрямую не говорил — сделай вывод из другой темы и явно отметь: "про барьеры напрямую не говорили, но из [конкретика из диалога] можно предположить [конкретный вывод]". Так ты остаёшься честным и при этом даёшь содержание.
 
 ПРАВИЛО ЧЕСТНОСТИ для всех восьми новых полей (dream_quote, barriers_quote, drivers_quote, fuel_quote, article_quote, article_quote_context, article_copilot_note, growth_mindset):
 Если не собрал реальной инфы — пиши "[не зафиксировано]" или честный plain-text fallback. НИКОГДА не используй шаблонные мотивационные фразы ("ты сильный", "у тебя всё получится"). НИКОГДА не выдумывай цитату которой не было. Честное "данных пока недостаточно" лучше фальшивого красивого текста.
@@ -1963,12 +1992,27 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome, copilotNa
     return parts;
   };
 
+  // FIX 1 — strict mapping to dna_summary fields. No fallback to traits[] or other fields.
+  // Quotes are rendered verbatim, including "[не зафиксировано...]" placeholders.
+  const dreamVal = (typeof d.dream_quote === 'string' && d.dream_quote.trim()) ? d.dream_quote : '[не зафиксировано]';
+  const barriersVal = (typeof d.barriers_quote === 'string' && d.barriers_quote.trim()) ? d.barriers_quote : '[не зафиксировано]';
+  const fuelVal = (typeof d.fuel_quote === 'string' && d.fuel_quote.trim()) ? d.fuel_quote : ((typeof d.fuel === 'string' && d.fuel.trim()) ? d.fuel : '[не зафиксировано]');
+  const superVal = (typeof d.superpower === 'string' && d.superpower.trim()) ? d.superpower : '[не зафиксировано]';
+  const archetypeName = (typeof d.archetype === 'string' && d.archetype.trim()) ? d.archetype : '[не зафиксировано]';
+  const archetypeDesc = (typeof d.archetype_desc === 'string' && d.archetype_desc.trim()) ? d.archetype_desc : '';
+  const archetypeValue = archetypeDesc
+    ? React.createElement(React.Fragment, null,
+        React.createElement('div', {style:{fontFamily:libre,fontSize:18,color:'#fff',lineHeight:1.5}}, archetypeName),
+        React.createElement('div', {style:{fontFamily:libre,fontSize:14,color:'rgba(255,255,255,0.55)',lineHeight:1.5,marginTop:4,fontStyle:'italic'}}, archetypeDesc)
+      )
+    : archetypeName;
+  console.log('[DNA Table] Мечта source=' + dreamVal + ', Барьер source=' + barriersVal + ', Топливо source=' + fuelVal);
   const headerTraits = [
-    {label:'СУПЕРСИЛА', value:d.superpower||'Превращает хаос в систему — и заражает этим других'},
-    {label:'МЕЧТА', value:(d.traits&&d.traits[0]&&d.traits[0].text)||'Создать продукт, который изменит жизнь поколения'},
-    {label:'БАРЬЕР', value:(d.reframe&&d.reframe.fear)||'Страх не оправдать ожидания — но это нетерпение роста'},
-    {label:'ТОПЛИВО', value:d.fuel||'Каждое действие — только если ведёт к мечте. Иначе незачем.'},
-    {label:'АРХЕТИП', value:d.archetype_desc||d.archetype||'Искатель-строитель'}
+    {label:'СУПЕРСИЛА', value:superVal},
+    {label:'МЕЧТА', value:dreamVal},
+    {label:'БАРЬЕР', value:barriersVal},
+    {label:'ТОПЛИВО', value:fuelVal},
+    {label:'АРХЕТИП', value:archetypeValue}
   ];
 
   // --- image helper: raw Cyrillic paths (files are .jpeg!) + onerror fallback ---
@@ -2201,19 +2245,27 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome, copilotNa
           // Gauges row
           React.createElement('div',{className:'dna-gauges-row',style:{display:'flex',justifyContent:'space-evenly',gap:48,flexWrap:'wrap',marginTop:8}},
             ...[
-              {val:d.readiness_score||0,max:10,title:'МОРАЛЬНЫЙ ЗАРЯД',lo:'Разряжен',mid:'Заряжается',hi:'Заряжен',loT:3,hiT:7,invert:false},
-              {val:d.barriers_score??0,max:9,title:'БАРЬЕРЫ',lo:'Путь свободен',mid:'Есть сопротивление',hi:'Сильное давление',loT:2,hiT:6,invert:true},
-              {val:d.agency_score??0,max:9,title:'ОСОЗНАННОСТЬ',lo:'По течению',mid:'Начинает влиять',hi:'Рулит сам',loT:2,hiT:6,invert:false}
+              // FIX 3 — per-range colors + labels. Each gauge declares explicit thresholds for red/blue(lavender)/green zones.
+              // Tier logic: if val is in [redLo, redHi] inclusive → red; if in [greenLo, greenHi] → green; otherwise → lavender/blue (mid).
+              {val:d.readiness_score||0,max:10,title:'МОРАЛЬНЫЙ ЗАРЯД',
+                redLo:0,redHi:4,greenLo:8,greenHi:10,
+                redLabel:'НА НУЛЕ',midLabel:'СРЕДНИЙ',greenLabel:'ЗАРЯЖЕН'},
+              {val:d.barriers_score??0,max:9,title:'БАРЬЕРЫ',
+                redLo:6,redHi:9,greenLo:0,greenHi:2,
+                redLabel:'СИЛЬНОЕ ДАВЛЕНИЕ',midLabel:'ЕСТЬ НАГРУЗКА',greenLabel:'СВОБОДЕН'},
+              {val:d.agency_score??0,max:9,title:'ОСОЗНАННОСТЬ',
+                redLo:0,redHi:3,greenLo:7,greenHi:9,
+                redLabel:'ПЛЫВЁТ',midLabel:'ЧАСТИЧНО РУЛИТ',greenLabel:'РУЛИТ САМ'}
             ].map((g,gi)=>{
-              const isHi=g.invert?(g.val<=g.loT):(g.val>=g.hiT);
-              const isLo=g.invert?(g.val>=g.hiT):(g.val<=g.loT);
-              // Color scheme: 1-3 red↔orange, 4-6 blue↔cyan, 7-10 green↔lime
-              const gc1=isLo?'#ef4444':isHi?'#22c55e':'#2563eb';
-              const gc2=isLo?'#f97316':isHi?'#84cc16':'#06b6d4';
-              const gLabel=isHi?g.hi:isLo?g.lo:g.mid;
-              // Fill: strictly proportional — val/max * 270 degrees
-              const gDeg=Math.round((g.val/g.max)*270);
-              const gShadow=isLo?'0 0 35px rgba(239,68,68,0.3)':isHi?'0 0 40px rgba(34,197,94,0.35)':'0 0 35px rgba(37,99,235,0.3)';
+              const inRed = (g.val >= g.redLo && g.val <= g.redHi);
+              const inGreen = (g.val >= g.greenLo && g.val <= g.greenHi);
+              const tier = inRed ? 'red' : (inGreen ? 'green' : 'mid');
+              // Color palette — reuse existing app accent (#7c5cff lavender) for mid; #ef4444/#f97316 red/orange; #22c55e/#84cc16 green/lime.
+              const gc1 = tier==='red' ? '#ef4444' : tier==='green' ? '#22c55e' : '#7c5cff';
+              const gc2 = tier==='red' ? '#f97316' : tier==='green' ? '#84cc16' : '#c4b5fd';
+              const gLabel = tier==='red' ? g.redLabel : tier==='green' ? g.greenLabel : g.midLabel;
+              const gDeg = Math.round((g.val / g.max) * 270);
+              const gShadow = tier==='red' ? '0 0 35px rgba(239,68,68,0.3)' : tier==='green' ? '0 0 40px rgba(34,197,94,0.35)' : '0 0 35px rgba(124,92,255,0.3)';
               // Shimmer gradient arc: two colors alternate across the filled portion
               const arcBg='conic-gradient('+gc1+' 0deg,'+gc2+' '+Math.round(gDeg*0.5)+'deg,'+gc1+' '+gDeg+'deg,rgba(255,255,255,0.05) '+gDeg+'deg,rgba(255,255,255,0.05) 270deg,transparent 270deg)';
               return React.createElement('div',{key:gi,style:{textAlign:'center',flex:'0 0 220px'}},
@@ -2223,7 +2275,7 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome, copilotNa
                     React.createElement('div',{style:{fontFamily:anton,fontSize:52,color:'#fff',lineHeight:1}},g.val)
                   )
                 ),
-                React.createElement('div',{style:{fontFamily:anton,fontSize:16,letterSpacing:1,color:isLo?'#f87171':isHi?'#4ade80':'#60a5fa',textTransform:'uppercase'}},gLabel)
+                React.createElement('div',{style:{fontFamily:anton,fontSize:16,letterSpacing:1,color:tier==='red'?'#f87171':tier==='green'?'#4ade80':'#c4b5fd',textTransform:'uppercase'}},gLabel)
               );
             })
           )
@@ -2233,7 +2285,12 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome, copilotNa
       // ========== SECTION 2: FRAMED QUOTE ==========
       React.createElement('div',{style:{border:'1px solid rgba(255,255,255,0.15)',borderRadius:0,padding:'60px 20px',margin:'60px 0',marginLeft:'calc(-50vw + 50%)',width:'100vw',textAlign:'center',position:'relative',boxSizing:'border-box'}},
         React.createElement('div',{style:{fontSize:80,color:'rgba(255,255,255,0.08)',lineHeight:1,marginBottom:-16,userSelect:'none'}},'\u275D'),
-        React.createElement('p',{style:{fontFamily:"'Caveat',cursive",fontSize:'clamp(20px,3vw,32px)',color:'rgba(255,255,255,0.85)',lineHeight:1.5,maxWidth:750,margin:'0 auto',padding:'0 20px'}},'\u00ABЕсли помочь подросткам прокачать навыки будущего \u2014 наш мир сможет не только адаптироваться к эре AI, но и занять крутые позиции в этом будущем.\u00BB'),
+        // FIX 2 — render real article_quote from dialogue; no hardcoded mission text. Literal "[цитата пока не найдена]" renders as-is.
+        (function(){
+          var aq = (typeof d.article_quote === 'string' && d.article_quote.trim()) ? d.article_quote : '[цитата пока не найдена]';
+          var isMissing = aq === '[цитата пока не найдена]';
+          return React.createElement('p',{style:{fontFamily:"'Caveat',cursive",fontSize:'clamp(20px,3vw,32px)',color:'rgba(255,255,255,0.85)',lineHeight:1.5,maxWidth:750,margin:'0 auto',padding:'0 20px'}}, isMissing ? aq : ('«' + aq + '»'));
+        })(),
         React.createElement('div',{style:{fontSize:12,textTransform:'uppercase',letterSpacing:3,color:'var(--muted)',marginTop:28}},'\u2014 '+userName.toUpperCase()+' \u00B7 ДИАЛОГ С КОПИЛОТОМ')
       ),
 
