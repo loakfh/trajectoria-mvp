@@ -589,6 +589,16 @@ function buildSystemPrompt(userName, copilotName, tone, msgCount, skipCount) {
 
 СИГНАЛ что нарушил: юзер пишет "ты меня не слушаешь", "я же сказал". Стоп, признай, начни заново без оправданий.
 
+ПРАВИЛО ДВУХ ОТКАЗОВ (жёстко):
+Когда юзер ДВА раза подряд отклонил твою рамку выбора ("нет, всё", "все одинаково важны", "не могу выбрать одно", "всё одинаково") — НЕМЕДЛЕННО снимай требование выбора.
+КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО третий раз спрашивать "но если одно?" / "ну всё-таки что-то одно?" / "если прижать?". Это газлайтинг.
+
+Правильная реакция на ВТОРОЙ отказ:
+"Ок, всё важно — это тоже информация. Значит у тебя широкий фокус. Что из этого ты сейчас делаешь чаще?"
+Или: "Принял. Значит нет иерархии — все в одном весе. Какое из этого забрало бы у тебя всё время, если бы могло?"
+
+Правило одним предложением: юзер отказался от твоей рамки ОДИН раз — уточни один раз. ДВА раза — принимай как есть и ищи информацию через ДЕЙСТВИЕ/ЧАСТОТУ, а не через иерархию важности. Третьего раза не существует.
+
 ВАЖНО: это протокол ТОЛЬКО для коррекции интерпретации. НЕ путать с ситуацией когда юзер высказывает limiting belief — там другая логика (см. BLOCK 7).
 
 === BLOCK 7 — ЗАЗЕМЛЕНИЕ ДНК И СПЕЦ-ПОЛЯ ===
@@ -623,6 +633,34 @@ copilot_note заземляй:
 — Хорошо (конкретика): "про игры говорил уверенно, про родителей съехал на 'нормально'"
 
 В финальной ВЫХОД — НЕ красивые шаблоны. Из реальных фраз диалога. Лучше странный но точный, чем красивый но пустой.
+
+=== BLOCK 7.5 — МИНИМУМ ДЛЯ ЗАВЕРШЕНИЯ (жёстко) ===
+
+Ты НЕ ИМЕЕШЬ ПРАВА перейти в фазу ВЫХОД пока не собрал ПО ОДНОЙ РЕАЛЬНОЙ ЦИТАТЕ юзера на каждое из 4 полей:
+
+1. dream_quote — цитата юзера про его мечту/цель/чего он реально хочет в жизни (только ответ на ПРЯМОЙ вопрос о мечте/желании/цели)
+2. barriers_quote — цитата про то что его сдерживает / боится / не получается
+3. drivers_quote — цитата про то что им движет / что считает важным / его принципы
+4. fuel_quote — цитата про моменты когда летит время / в чём состояние потока / что даёт энергию
+
+ОПРЕДЕЛЕНИЕ цитаты:
+— Близкая к дословной фраза юзера ИЗ ТЕКУЩЕГО ДИАЛОГА.
+— НЕ твой парафраз. НЕ твоя догадка. НЕ обобщение.
+— Если юзер не касался темы или отвечал односложно ("норм", "хз") без личного содержания — эта тема ЕЩЁ НЕ ЗАКРЫТА и ты обязан к ней вернуться лёгким вопросом.
+
+ПРАВИЛА dna_percent (жёстко):
+— Пока из 4 полей НЕ собрано хотя бы 3 реальных цитаты — МАКСИМУМ dna_percent = 12. Не выше. Даже если юзер говорил много про одну тему.
+— Все 4 собраны — можешь расти до 20-25.
+— ВЫХОД запускается ТОЛЬКО при всех 4 собранных ИЛИ при 18+ сообщениях юзера (если юзер молчаливый — сдаёшься и фиксируешь что есть, но в json для несобранных полей пишешь строку "[не зафиксировано — юзер не раскрыл тему за диалог]").
+
+ОБЯЗАТЕЛЬНО в КАЖДЫЙ json_dna в фазах РАЗВЕДКА / ЦЕННОСТЬ / ДОБОР / ВЫХОД добавляй поле:
+"minimum_coverage":{"dream":true|false,"barriers":true|false,"drivers":true|false,"fuel":true|false}
+
+Заполняется СТРОГО по факту:
+— true — есть РЕАЛЬНАЯ цитата юзера из этого диалога по этой теме
+— false — темы не было ИЛИ была поверхностно без личного ответа
+
+Это поле — твоя совесть. Если собираешься поставить dna_percent=20 и при этом в minimum_coverage три false — ты НАРУШАЕШЬ ПРОТОКОЛ. Уменьшай dna_percent и продолжай собирать.
 
 === BLOCK 8 — БЕЗОПАСНОСТЬ ===
 
@@ -705,6 +743,20 @@ Msg 3: органично упомяни "ДНК начинает собират
 В json_dna ОБЯЗАТЕЛЬНО заполни ВСЕ расширенные поля (BLOCK 14).
 
 ВАЖНО во всех фазах: не фиксишь, не рефреймишь, не обещаешь дальнейшую работу. Собираешь.
+
+ПРАВИЛО МЕЧТЫ (жёстко, применимо во ВСЕХ фазах):
+
+Мечта = БУКВАЛЬНО то, что юзер ответил когда ты ПРЯМО спросил "о чём мечтаешь" / "чего ты реально хочешь" / "если бы всё было возможно — что выбрал бы". Ни одно другое его упоминание НЕ является мечтой.
+
+Категорически запрещено:
+— Юзер упомянул спорт в контексте разгрузки / здоровья / хобби → НЕ записывать как мечту. Это fuel или интерес, но не мечта.
+— Юзер упомянул интерес к теме → НЕ записывать как мечту.
+— Юзер упомянул что-то часто → НЕ записывать как мечту. Частота ≠ мечта.
+— Юзер сказал "нравится X" → НЕ мечта. Нравится ≠ мечтает.
+
+dream_quote в json_dna заполняется ТОЛЬКО если юзер ответил на ПРЯМОЙ вопрос о мечте/желании/цели. Иначе dream_quote = "[не зафиксировано — прямого ответа про мечту пока нет]" и minimum_coverage.dream = false.
+
+Если юзер назвал деятельность как "разгружаюсь", "отдыхаю", "хобби", "помогает расслабиться" — это идёт в fuel_quote (источник энергии/состояние), НЕ в dream_quote. Не подменяй.
 
 === BLOCK 11 — СКИП "НАФИГ" (skipCount = ${skipCount}) ===
 
@@ -814,9 +866,24 @@ Msg 3: органично упомяни "ДНК начинает собират
     {"when":"без моста","text":"что может случиться если промолчит — из его контекста"},
     {"when":"с мостом","text":"что может случиться если отправит родителю/другу"}
   ],
-  "suggested_feature": "roadmap|parents|community|case|ai_clone|deeper"
+  "suggested_feature": "roadmap|parents|community|case|ai_clone|deeper",
+
+  "dream_quote": "дословная или близкая цитата юзера о мечте (ТОЛЬКО с прямого ответа — см. ПРАВИЛО МЕЧТЫ в BLOCK 10). Если не было прямого ответа — '[не зафиксировано — прямого ответа про мечту пока нет]'",
+  "barriers_quote": "цитата юзера о барьерах / страхах / что не получается. Fallback если не было: '[не зафиксировано]'",
+  "drivers_quote": "цитата юзера о ценностях / принципах / что движет. Fallback: '[не зафиксировано]'",
+  "fuel_quote": "цитата юзера о flow / моментах когда летит время / что даёт энергию. Fallback: '[не зафиксировано]'",
+  "article_quote": "главная якорная цитата юзера для ПЕРВОЙ СТАТЬИ (о барьерах и мышлении). БУКВАЛЬНО его слова. Может совпадать с одной из 4 цитат выше. Если ни одной яркой цитаты нет — '[цитата пока не найдена]'",
+  "article_quote_context": "одной строкой — когда и о чём это было сказано. Пример: 'когда спросил чем занимается в свободное время'. Если нет цитаты — пустая строка ''",
+  "article_copilot_note": "2-4 предложения мнения копилота именно ПО ПЕРВОЙ СТАТЬЕ (паттерн барьеров и мышления этого юзера). НЕ ДУБЛИРУЙ copilot_note (тот идёт на Summary). Здесь наблюдение конкретно про то, как этот юзер думает и какие у него барьеры. Если данных мало — честно пиши: 'За диалог успел увидеть [X], но про барьеры мышления данных мало — раскроется глубже со следующими диалогами.'",
+  "growth_mindset": {
+    "percent": "число 0-100 — оценка growth mindset юзера. Если данных мало — 50.",
+    "reasoning": "2-3 предложения откуда этот процент вырос. Из реальных паттернов юзера в диалоге. Если данных мало — 'данных пока недостаточно для точной оценки'"
+  }
 }
 \`\`\`
+
+ПРАВИЛО ЧЕСТНОСТИ для всех восьми новых полей (dream_quote, barriers_quote, drivers_quote, fuel_quote, article_quote, article_quote_context, article_copilot_note, growth_mindset):
+Если не собрал реальной инфы — пиши "[не зафиксировано]" или честный plain-text fallback. НИКОГДА не используй шаблонные мотивационные фразы ("ты сильный", "у тебя всё получится"). НИКОГДА не выдумывай цитату которой не было. Честное "данных пока недостаточно" лучше фальшивого красивого текста.
 
 ПРАВИЛО НАД ПРАВИЛАМИ для финала: если юзер прочитает archetype + superpower + fuel — он должен сказать "да, это я", не "красиво но не совсем". Точно я.
 
@@ -1282,6 +1349,14 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
             value_cards_hints:dnaData.value_cards_hints||[],
             bridge_timelines:dnaData.bridge_timelines||null,
             opinion:clean.slice(-300),
+            dream_quote:(typeof dnaData.dream_quote==='string'&&dnaData.dream_quote.trim())?dnaData.dream_quote:'[не зафиксировано]',
+            barriers_quote:(typeof dnaData.barriers_quote==='string'&&dnaData.barriers_quote.trim())?dnaData.barriers_quote:'[не зафиксировано]',
+            drivers_quote:(typeof dnaData.drivers_quote==='string'&&dnaData.drivers_quote.trim())?dnaData.drivers_quote:'[не зафиксировано]',
+            fuel_quote:(typeof dnaData.fuel_quote==='string'&&dnaData.fuel_quote.trim())?dnaData.fuel_quote:'[не зафиксировано]',
+            article_quote:(typeof dnaData.article_quote==='string'&&dnaData.article_quote.trim())?dnaData.article_quote:'[цитата пока не найдена]',
+            article_quote_context:(typeof dnaData.article_quote_context==='string')?dnaData.article_quote_context:'',
+            article_copilot_note:(typeof dnaData.article_copilot_note==='string'&&dnaData.article_copilot_note.trim())?dnaData.article_copilot_note:'',
+            growth_mindset:(dnaData.growth_mindset&&typeof dnaData.growth_mindset==='object')?dnaData.growth_mindset:null,
           };
           // Save dna_summary to Supabase — all 28 required columns, explicit fetch w/ rich logging
           const dnaSummaryPayload={
@@ -1307,7 +1382,15 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
             agency_score:dnaData.agency_score??null,
             store_headline:dnaData.store_headline||'',
             value_cards_hints:Array.isArray(dnaData.value_cards_hints)?dnaData.value_cards_hints:[],
-            suggested_feature:dnaData.suggested_feature||''
+            suggested_feature:dnaData.suggested_feature||'',
+            dream_quote:(typeof dnaData.dream_quote==='string'&&dnaData.dream_quote.trim())?dnaData.dream_quote:'[не зафиксировано]',
+            barriers_quote:(typeof dnaData.barriers_quote==='string'&&dnaData.barriers_quote.trim())?dnaData.barriers_quote:'[не зафиксировано]',
+            drivers_quote:(typeof dnaData.drivers_quote==='string'&&dnaData.drivers_quote.trim())?dnaData.drivers_quote:'[не зафиксировано]',
+            fuel_quote:(typeof dnaData.fuel_quote==='string'&&dnaData.fuel_quote.trim())?dnaData.fuel_quote:'[не зафиксировано]',
+            article_quote:(typeof dnaData.article_quote==='string'&&dnaData.article_quote.trim())?dnaData.article_quote:'[цитата пока не найдена]',
+            article_quote_context:(typeof dnaData.article_quote_context==='string')?dnaData.article_quote_context:'',
+            article_copilot_note:(typeof dnaData.article_copilot_note==='string'&&dnaData.article_copilot_note.trim())?dnaData.article_copilot_note:'',
+            growth_mindset:(dnaData.growth_mindset&&typeof dnaData.growth_mindset==='object')?dnaData.growth_mindset:null
           };
           console.log('[DNA_SUMMARY] Payload keys:', Object.keys(dnaSummaryPayload).sort().join(','));
           console.log('[DNA_SUMMARY] Payload preview:', JSON.stringify(dnaSummaryPayload).slice(0,600));
@@ -1534,7 +1617,15 @@ function mapDnaSummaryRow(row, userName){
     store_headline:row.store_headline||'',
     value_cards_hints:Array.isArray(row.value_cards_hints)?row.value_cards_hints:[],
     bridge_timelines:row.bridge_timelines||null,
-    opinion:''
+    opinion:'',
+    dream_quote:row.dream_quote||'[не зафиксировано]',
+    barriers_quote:row.barriers_quote||'[не зафиксировано]',
+    drivers_quote:row.drivers_quote||'[не зафиксировано]',
+    fuel_quote:row.fuel_quote||'[не зафиксировано]',
+    article_quote:row.article_quote||'[цитата пока не найдена]',
+    article_quote_context:row.article_quote_context||'',
+    article_copilot_note:row.article_copilot_note||'',
+    growth_mindset:(row.growth_mindset&&typeof row.growth_mindset==='object')?row.growth_mindset:null
   };
 }
 
@@ -1902,12 +1993,24 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome, copilotNa
   const libre = "'Libre Baskerville',serif";
   const caveat = "'Caveat',cursive";
 
-  // ===== BLOCK 1: ОТКРЫТИЕ — OPEN, wired to AI hidden_insights + copilot_note =====
-  const insight0 = (d.insights && d.insights[0]) ? d.insights[0] : null;
-  const noteText = d.title || '';
-  const noteParas = noteText
-    ? noteText.split(/(?<=[.!?])\s+(?=[А-ЯA-ZЁ«"])/).map(s=>s.trim()).filter(Boolean)
-    : [];
+  // ===== BLOCK 1: ОТКРЫТИЕ — FIXED STRUCTURE (title + growth_mindset + quote + copilot note) =====
+  // Title is HARDCODED — no AI field feeds into it.
+  // AI fills ONLY: article_quote, article_quote_context, article_copilot_note, growth_mindset.
+  const articleQuote = (typeof d.article_quote === 'string' && d.article_quote.trim()) ? d.article_quote : '[цитата пока не найдена]';
+  const articleQuoteContext = (typeof d.article_quote_context === 'string') ? d.article_quote_context : '';
+  const articleCopilotNote = (typeof d.article_copilot_note === 'string' && d.article_copilot_note.trim())
+    ? d.article_copilot_note
+    : 'За этот диалог мнение по барьерам мышления не сформировалось. Раскроется в следующих взаимодействиях.';
+  const gm = (d.growth_mindset && typeof d.growth_mindset === 'object') ? d.growth_mindset : null;
+  const gmPctRaw = gm ? gm.percent : null;
+  const gmPctNum = (typeof gmPctRaw === 'number') ? gmPctRaw : (typeof gmPctRaw === 'string' ? parseInt(gmPctRaw, 10) : NaN);
+  const gmPctValid = !isNaN(gmPctNum) && isFinite(gmPctNum);
+  const gmPctDisplay = gmPctValid ? Math.max(0, Math.min(100, gmPctNum)) : null;
+  const gmReasoning = (gm && typeof gm.reasoning === 'string' && gm.reasoning.trim())
+    ? gm.reasoning
+    : 'расчёт появится после полноценного диалога';
+  const noteParas = articleCopilotNote
+    .split(/(?<=[.!?])\s+(?=[А-ЯA-ZЁ«"])/).map(s=>s.trim()).filter(Boolean);
   const block1 = React.createElement('div',{key:'b1',style:{position:'relative',overflow:'hidden',borderRadius:16,border:'1px solid rgba(255,255,255,0.08)',minHeight:620,background:'#000',display:'flex'}},
     bgImg('assets/афиша_1.jpeg',0.4),
     React.createElement('div',{style:{position:'absolute',inset:0,background:'linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 100%)'}}),
@@ -1917,28 +2020,36 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome, copilotNa
     ),
     // giant faded number
     React.createElement('div',{style:{position:'absolute',top:20,right:40,fontSize:220,fontFamily:anton,color:'rgba(255,255,255,0.07)',lineHeight:1,zIndex:1}},'01'),
-    // main content area
+    // main content area — FIXED SLOTS (AI fills text, not structure)
     React.createElement('div',{style:{position:'relative',zIndex:2,flex:1,padding:'44px 48px',display:'flex',flexDirection:'column',gap:24}},
-      React.createElement('div',{style:{fontSize:12,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.4)'}},'\u0418\u0417 \u0422\u0412\u041E\u0415\u0413\u041E \u0414\u0418\u0410\u041B\u041E\u0413\u0410'),
-      // pull quote — only if real user quote exists
-      insight0 && insight0.quote ? React.createElement('div',{style:{borderLeft:'4px solid #ff4081',paddingLeft:24,maxWidth:650}},
-        React.createElement('p',{style:{fontFamily:caveat,fontSize:28,fontStyle:'italic',color:'rgba(255,255,255,0.9)',lineHeight:1.4,marginBottom:8}},'\u00AB',insight0.quote,'\u00BB'),
-        insight0.context ? React.createElement('p',{style:{fontFamily:anton,fontSize:11,letterSpacing:2,textTransform:'uppercase',color:'rgba(255,255,255,0.4)'}},'\u2014 ',insight0.context) : null
-      ) : null,
-      // copilot reflective text — only if copilot_note exists
-      noteParas.length ? React.createElement('div',{style:{flex:1,columnCount:noteParas.length>2?2:1,columnGap:32,minWidth:300}},
+      React.createElement('div',{style:{fontSize:12,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.4)'}},'БАРЬЕРЫ И МЫШЛЕНИЕ'),
+
+      // SLOT A: growth_mindset plaque — ALWAYS rendered (uses d.growth_mindset)
+      React.createElement('div',{style:{background:'rgba(124,92,255,0.08)',border:'1px solid rgba(124,92,255,0.2)',borderRadius:12,padding:'16px 20px',maxWidth:520}},
+        React.createElement('div',{style:{display:'flex',alignItems:'baseline',justifyContent:'space-between',gap:16,marginBottom:8}},
+          React.createElement('div',{style:{fontFamily:anton,fontSize:12,letterSpacing:2,textTransform:'uppercase',color:'rgba(255,255,255,0.6)'}},'GROWTH MINDSET'),
+          React.createElement('div',{style:{fontFamily:anton,fontSize:28,color:'#c4b5fd',lineHeight:1}}, gmPctDisplay==null ? '—' : (gmPctDisplay+'%'))
+        ),
+        React.createElement('div',{style:{height:6,background:'rgba(255,255,255,0.08)',borderRadius:3,overflow:'hidden',marginBottom:8}},
+          React.createElement('div',{style:{height:'100%',background:'linear-gradient(90deg,#7c5cff,#c4b5fd)',borderRadius:3,width:(gmPctDisplay==null?0:gmPctDisplay)+'%',transition:'width 0.6s ease'}})
+        ),
+        React.createElement('p',{style:{fontFamily:libre,fontSize:13,color:'rgba(255,255,255,0.55)',lineHeight:1.5,margin:0}},gmReasoning)
+      ),
+
+      // SLOT B: quote block — article_quote + article_quote_context
+      React.createElement('div',{style:{borderLeft:'4px solid #ff4081',paddingLeft:24,maxWidth:650}},
+        React.createElement('p',{style:{fontFamily:caveat,fontSize:28,fontStyle:'italic',color:'rgba(255,255,255,0.9)',lineHeight:1.4,marginBottom:8}}, articleQuote==='[цитата пока не найдена]' ? articleQuote : ('«'+articleQuote+'»')),
+        articleQuoteContext ? React.createElement('p',{style:{fontFamily:libre,fontSize:13,fontStyle:'italic',color:'rgba(255,255,255,0.45)'}}, articleQuoteContext) : null
+      ),
+
+      // SLOT C: copilot note block — article_copilot_note (DIFFERENT source from Summary copilot_note)
+      React.createElement('div',{style:{flex:1,columnCount:noteParas.length>2?2:1,columnGap:32,minWidth:300}},
         noteParas.map(function(line,i){return React.createElement('p',{key:'np'+i,style:{fontFamily:libre,fontSize:15,lineHeight:1.8,color:'rgba(255,255,255,0.8)',marginBottom:14}},line);})
-      ) : null,
-      // bottom callout — only if hidden_insight has a deeper text
-      insight0 && insight0.text ? React.createElement('div',{style:{background:'rgba(255,64,129,0.06)',borderRadius:10,padding:'16px 24px',display:'flex',alignItems:'center',gap:16,marginTop:'auto'}},
-        React.createElement('div',{style:{width:4,height:40,background:'#ff4081',borderRadius:2,flexShrink:0}}),
-        React.createElement('p',{style:{fontFamily:caveat,fontSize:22,color:'rgba(255,255,255,0.85)',fontStyle:'italic',lineHeight:1.3}},insight0.text),
-        insight0.title ? React.createElement('div',{style:{marginLeft:'auto',fontFamily:anton,fontSize:11,letterSpacing:2,color:'rgba(255,255,255,0.3)',whiteSpace:'nowrap',textTransform:'uppercase'}},insight0.title) : null
-      ) : null,
-      React.createElement('div',{style:{fontSize:11,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.3)'}},'\u041D\u0430 \u043E\u0441\u043D\u043E\u0432\u0435 \u0442\u0432\u043E\u0438\u0445 \u0441\u043B\u043E\u0432 \u00B7 ',(d.archetype||'\u0410\u0440\u0445\u0435\u0442\u0438\u043F'),' \u00B7 DNA ',(d.dna||0),'%')
+      ),
+
+      React.createElement('div',{style:{fontSize:11,textTransform:'uppercase',letterSpacing:3,color:'rgba(255,255,255,0.3)'}},'На основе твоих слов · ',(d.archetype||'Архетип'),' · DNA ',(d.dna||0),'%')
     )
   );
-
   // helper: blurred block (or open if fullAccess)
   const blurBlock = (key, imgSrc, color, num, name, headingSize, rotated, contentEls, meta, extraStyle, futureContent, imgPosition) => {
     const hasImg = !!imgSrc;
