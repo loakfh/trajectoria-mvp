@@ -413,12 +413,29 @@ const TONES = [
   {id:'provocative',name:'Дерзко',desc:'Адвокат дьявола, подначивает',color:'#f97316',icon:'🔥'},
   {id:'chill',name:'Чилл',desc:'Минимум давления, друг',color:'#a855f7',icon:'🌊'}
 ];
-const DEMO_SUMMARY = {
+// Demo persona for skip code "траектория39" — polished Бакир-style showcase content for testers/jury.
+// Real dialogues fetch dna_summary from Supabase and never read this object (Summary/DnaPage prefer loadedData).
+const DEMO_DNA_DATA = {
   title:'ты знаешь о себе больше, чем думаешь',
-  archetype:'Искатель-строитель',
-  archetype_desc:'Видит дальше ровесников, строит экосистему для поколения которое ещё не знает что ему предстоит.',
+  archetype:'Маг',
+  archetype_desc:'Видит то, чего ещё нет — и собирает это руками. Превращает идею в систему, систему в волну, и тащит за собой тех, кто рядом. Не ждёт разрешения у мира, чтобы делать своё.',
   superpower:'Превращает хаос в систему — и заражает этим других',
   fuel:'Момент когда сложная задача наконец складывается и ты понимаешь что сделал это сам',
+  dream_quote:'Хочу создавать то, что реально меняет жизнь людей моего возраста.',
+  barriers_quote:'Боюсь что мама скажет: «выбери что-нибудь стабильное» — и я снова промолчу.',
+  drivers_quote:'Мне норм и без денег, главное чтобы было интересно и я делал это сам.',
+  fuel_quote:'Когда сижу над задачей, теряю счёт времени — и в конце вижу что это работает.',
+  article_quote:'Если помочь подросткам прокачать навыки будущего — наш мир сможет не только адаптироваться к эре AI, но и занять крутые позиции в этом будущем.',
+  article_quote_context:'когда говорил, зачем вообще хочется делать что-то своё',
+  article_copilot_note:'Ты говоришь о подростках, а не о себе — и в этом твой главный паттерн. Ты мыслишь поколением, а не карьерой. Барьер у тебя не в навыках и не в идеях — их с избытком. Барьер в том, что ты ещё не разрешил себе считать собственное видение масштабным. Когда обронил «один я не успею всё это сделать» — это не про слабость, это про точный диагноз масштаба.',
+  growth_mindset:{
+    percent:78,
+    reasoning:'Ты трижды переформулировал свою идею в диалоге, не цепляясь за первую версию. Сказал «попробую» чаще чем «не смогу». Видишь свои ошибки как данные, а не приговор — это редкое мышление в твоём возрасте.'
+  },
+  hidden_insights:[
+    {quote:'Мне норм и без денег, главное чтобы было интересно',said_when:'когда отвечал про страхи',title:'Это не про деньги',text:'Большинство в твоём возрасте ставят деньги на первое место. Ты уже отделил средство от цели. Редкая ясность.'},
+    {quote:'Один я не успею всё это сделать',said_when:'когда говорил про мечту',title:'Точный диагноз',text:'Ты видишь масштаб задачи. Люди годами не могут сформулировать чего не хватает. Ты уже знаешь.'}
+  ],
   traits:[
     {name:'Мечта',text:'Создавать продукты, которые меняют жизнь людей',color:'#ff6b35',reason:'Ты трижды вернулся к теме "создавать своё" — это не случайность'},
     {name:'Что цепляет',text:'Моменты когда сложная задача наконец складывается. Чувство что делаешь что-то настоящее.',color:'#f7c948',reason:'Описал состояние потока — это твой естественный драйвер'},
@@ -431,22 +448,22 @@ const DEMO_SUMMARY = {
     {quote:'Мне норм и без денег, главное чтобы было интересно',context:'Ты сказал это вскользь, отвечая про страхи',title:'Это не про деньги. Это про систему ценностей.',text:'Большинство в твоём возрасте ставят деньги на первое место. Ты уже отделил средство от цели. Редкая ясность.'},
     {quote:'Один я не успею всё это сделать',context:'Обронил, когда говорил про мечту',title:'Это не слабость. Это точный диагноз.',text:'Ты видишь масштаб задачи. Люди годами не могут сформулировать чего не хватает. Ты уже знаешь.'}
   ],
-  readiness_score:2,
+  readiness_score:8,
   copilot_note:'Ты знаешь о себе больше чем думаешь. Держи вектор.',
   growth_edge:'Запишись на один бесплатный хакатон в ближайшие 7 дней. Не для победы — чтобы проверить как это ощущается.',
   readiness_factors:['\u0412\u044B\u0441\u043E\u043A\u0430\u044F \u044D\u043D\u0435\u0440\u0433\u0438\u044F \u0432 \u0442\u0435\u043C\u0435 \u0441\u043E\u0437\u0434\u0430\u043D\u0438\u044F','\u0414\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u0440\u043E\u0434\u0438\u0442\u0435\u043B\u0435\u0439 \u0441\u043D\u0438\u0436\u0430\u0435\u0442 \u0437\u0430\u0440\u044F\u0434','\u041D\u0443\u0436\u043D\u0430 \u043A\u043E\u043C\u0430\u043D\u0434\u0430 \u0435\u0434\u0438\u043D\u043E\u043C\u044B\u0448\u043B\u0435\u043D\u043D\u0438\u043A\u043E\u0432'],
-  barriers_score:4,
+  barriers_score:3,
   agency_score:8,
   opinion:'Знаешь что? Ты пришёл сюда не потому что потерялся. А потому что тебе не всё равно. Большинство людей живут на автопилоте. А ты задумался. Это уже не мало.\n\nЯ вижу человека, который хочет жить по-своему, но пока не знает, как сказать об этом миру. Твоя мечта — создать что-то своё. Это не фантазия. Это вектор.\n\nДержи этот вектор. Остальное разберём вместе.',
   suggested_feature:'roadmap',
-  store_headline:'Ты уже сделал первый шаг',
-  value_cards_hints:['понять себя глубже','знать что делать','найти своих'],
+  store_headline:'Тебе ясно что хочешь создавать своё — пока не ясно как объяснить это маме',
+  value_cards_hints:['План на 3 месяца под идею про навыки будущего','Хакатоны и команды по AI и продуктовому делу','Карта роста под архетип Маг'],
   dna: 22,
   bridge_timelines:{
     silent_path:['Мама продолжает думать что \u00ABсоздавать продукты\u00BB \u2014 фантазия','Ты боишься начать разговор, потому что \u00ABскажут выбери что-нибудь стабильное\u00BB','Через год выбираешь по чужому совету. Не по своему.'],
     bridge_path:['Мама читает: \u00ABего зажигает создание продуктов для людей\u00BB \u2014 прямая цитата','Впервые видит не \u00ABхочу быть предпринимателем\u00BB, а почему \u2014 через твои слова','Разговор начинается не с \u00ABты должен\u00BB, а с \u00ABя хочу понять\u00BB'],
     parent_message:'Привет. Я прошёл кое-что \u2014 не тест, а разговор с AI про то, кто я и чего хочу. Оказалось, я хочу создавать продукты которые меняют жизнь людей. Мне важно, чтобы ты это увидел(а).',
-    friend_message:'Эй, глянь штуку \u2014 не тест, реально разговор. Мой архетип \u2014 Искатель-строитель. Превращает хаос в систему. Попробуй:'
+    friend_message:'Эй, глянь штуку \u2014 не тест, реально разговор. Мой архетип \u2014 Маг. Превращает хаос в систему. Попробуй:'
   }
 };
 
@@ -1315,8 +1332,8 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
     const text=input.trim();if(!text||isTyping)return;
     if(text.toLowerCase().replace(/\s/g,'')===SKIP_CODE.replace(/\s/g,'')){
       setInput('');
-      localStorage.setItem('traj_summary',JSON.stringify({...DEMO_SUMMARY,userName}));
-      onFinish({...DEMO_SUMMARY,userName});
+      localStorage.setItem('traj_summary',JSON.stringify({...DEMO_DNA_DATA,userName}));
+      onFinish({...DEMO_DNA_DATA,userName});
       return;
     }
     setInput('');
@@ -1495,7 +1512,7 @@ function Chat({userName, copilotName, userId, sessionId, onFinish, goHome}) {
   },[isTyping,tone,dna,userName,copilotName,userId,sessionId]);
 
   const handleResult=()=>{
-    const data=summaryDataRef.current||{...DEMO_SUMMARY,userName,dna};
+    const data=summaryDataRef.current||{...DEMO_DNA_DATA,userName,dna};
     localStorage.setItem('traj_summary',JSON.stringify(data));
     onFinish(data);
   };
@@ -1680,7 +1697,7 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName
       }
     });
   },[sessionId]);
-  const d = loadedData || data || DEMO_SUMMARY;
+  const d = loadedData || data || DEMO_DNA_DATA;
   const abstractImages = ['assets/дверь_разлом_цветы.png','assets/парень_комп_разлом.png','assets/дверь_размлом.png','assets/дыра_разломы.png','assets/вода_разломы.png'];
   const randomImgRef = useRef(abstractImages[Math.floor(Math.random()*abstractImages.length)]);
   if (d) d.dnaBgImage = CRACK_TO_CLEAN[randomImgRef.current] || 'assets/вода.jpeg';
@@ -1796,7 +1813,7 @@ function Summary({data, onBridge, onRestart, onDna, onStore, goHome, copilotName
 }
 
 function BridgePage({data, onBack, goHome, copilotName, userId}) {
-  const d = data || DEMO_SUMMARY;
+  const d = data || DEMO_DNA_DATA;
   const userName = d.userName || 'Имя';
   const pilot = (copilotName || 'копилот').toUpperCase();
   const [recipient, setRecipient] = useState('parent');
@@ -1961,7 +1978,7 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome, copilotNa
       }
     });
   },[sessionId]);
-  const d = loadedData || data || DEMO_SUMMARY;
+  const d = loadedData || data || DEMO_DNA_DATA;
   const userName = d.userName || 'Имя';
   const nameHalf = Math.ceil(userName.length / 2);
   const namePart1 = userName.slice(0, nameHalf);
@@ -2384,7 +2401,7 @@ function DnaPage({data, fullAccess, onBack, onStore, onBridge, goHome, copilotNa
 }
 
 function StorePage({data, onBack, onBridge, onUnlock, goHome, userId}) {
-  const d = data || DEMO_SUMMARY;
+  const d = data || DEMO_DNA_DATA;
   const [modal, setModal] = useState(false);
   const [modalType, setModalType] = useState('buy');
   const [promoStep, setPromoStep] = useState(false);
